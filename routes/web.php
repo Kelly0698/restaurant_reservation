@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\RestaurantController;
-
+use App\Http\Controllers\RatingController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -86,4 +86,7 @@ Route::get('/reserve/approve', [RestaurantController::class, 'approveResPage'])-
 Route::post('/reject-reservation/{id}',[RestaurantController::class, 'rejectReservation'])->name('reject_reservation');
 Route::get('/reserve/reject', [RestaurantController::class, 'rejectResPage'])->name('reject_page');
 Route::post('/cancel-reservation/{id}', [UserController::class, 'cancelReservation'])->name('cancel_reservation');
+
+//rating
+Route::post('/ratings', [RatingController::class, 'store'])->name('store_rating');
 

@@ -3,58 +3,96 @@
 @section('content')
 <div class="content-wrapper">
     <div class="container-fluid">
-        <div class="row">
-            @foreach($reservations as $reservation)
-            <div class="col-md-4 mb-3"> 
-                <div class="card bg-light d-flex flex-fill">
-                    <div class="card-body pt-0">
-                        <div class="col-12">
-                            <br>
-                            <h2 class="lead"><b>Reservation for: {{$reservation->restaurant->name}}</b></h2><br>
-                            <p>User Name: &nbsp{{ $reservation->user->name }}</p>
-                            <p>Reservation Date: &nbsp{{ $reservation->date }}</p>
-                            <p>Time: &nbsp{{ $reservation->time }}</p>
-                            <p>Party Size: &nbsp{{ $reservation->party_size }}</p>
-                            @if($reservation->remark)
-                                <p>Remark: &nbsp{{ $reservation->remark }}</p>
-                            @else
-                                <p>Remark: &nbspNone</p>
-                            @endif
-                        </div>
-                        <div class="text-right">
-                            @if($reservation->status === 'Approved')
-                                <button class="btn" style="background-color:#36d2a3d7; border-radius: 20px !important;">Approved</button>
-                            @elseif($reservation->status === 'Rejected')
-                                <button class="btn" style="background-color:#ff8274de; border-radius: 20px !important;">Rejected</button>
-                            @else
-                                <button class="btn" style="color:red;">Pending...</button>
-                            @endif
-                        </div>
-                    </div>
+        <div class="row justify-content-center">
+            <div class="col-md-10">
+                <div class="row">
+                    @foreach($reservations as $reservation)
+                    <div class="col-12 mb-3"> 
+                        <div class="card bg-light">
+                            <div class="card-body">
+                                <h2 class="lead"><b>Reservation for: {{$reservation->restaurant->name}}</b></h2>
+                                <p>User Name: &nbsp{{ $reservation->user->name }}</p>
+                                <p>Reservation Date: &nbsp{{ $reservation->date }}</p>
+                                <p>Time: &nbsp{{ $reservation->time }}</p>
+                                <p>Party Size: &nbsp{{ $reservation->party_size }}</p>
+                                @if($reservation->remark)
+                                    <p>Remark: &nbsp{{ $reservation->remark }}</p>
+                                @else
+                                    <p>Remark: &nbspNone</p>
+                                @endif
+                                <p>Status:
+                                    @if($reservation->status === 'Approved')
+                                        <button class="btn btn-sm" style="background-color:#36d2a3d7; border-radius: 20px !important;">Approved</button>
+                                    @elseif($reservation->status === 'Rejected')
+                                        <button class="btn btn-sm" style="background-color:#ff8274de; border-radius: 20px !important;">Rejected</button>
+                                    @else
+                                        <span style="color: red;">Pending...</span>
+                                    @endif
+                                </p>
+                                <div class="text-left">
+                                    @if($reservation->status === 'Approved' && \Carbon\Carbon::parse($reservation->date . ' ' . $reservation->time) < \Carbon\Carbon::now())
+                                        @if(!$reservation->rating)
+                                        <div id="ratingForm_{{ $reservation->id }}" style="display: none;">
+                                            <form class="rating-form" data-reservation-id="{{ $reservation->id }}">
+                                                @csrf
+                                                <input type="hidden" name="reservation_id" value="{{ $reservation->id }}">
+                                                <div class="form-group">
+                                                    <label for="mark">Rating:</label>
+                                                    <select name="mark" class="form-control">
+                                                        <option value="1">1</option>
+                                                        <option value="2">2</option>
+                                                        <option value="3">3</option>
+                                                        <option value="4">4</option>
+                                                        <option value="5">5</option>
+                                                    </select>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="comment">Comment:</label>
+                                                    <textarea name="comment" class="form-control" rows="3"></textarea>
+                                                </div>
+                                                <button type="submit" class="btn yellow">Submit Rating</button>
+                                            </form>
+                                        </div>
+                                        <div class="text-right">
+                                            <button class="btn btn-primary" onclick="toggleRatingForm('{{ $reservation->id }}')" data-reservation-id="{{ $reservation->id }}" style="border-radius: 20px !important;">Rating</button>
+                                        </div>
+                                        @else
+                                        <hr>
+                                        <div class="existing-rating">
+                                            <p><b>Rating:</b> {{ $reservation->rating->mark }}</p>
+                                            <p><b>Comment:</b> {{ $reservation->rating->comment }}</p>
+                                        </div>
+                                        @endif
+                                    @endif
+                                </div>
 
-                    <div class="card-footer">
-                        <div class="text-right">
-                            @if(Auth::guard('restaurant')->check())
-                                <a href="#" class="btn btn-md yellow" onclick="approveReservation('{{ $reservation->id }}', '{{ $reservation->user->name }}')">
-                                    Approve
-                                </a>
-                                <a href="#" class="btn btn-md blue" onclick="rejectReservation('{{ $reservation->id }}', '{{ $reservation->user->name }}')">
-                                    Reject
-                                </a>
-                            @else                     
-                            @if($reservation->status == 'Pending')
-                                <button class="btn" style="background-color:#fd001974; border-radius: 20px !important;" onclick="cancelReservation('{{ $reservation->id }}', '{{ $reservation->user->name }}')">Cancel Reservation</button>
-                            @endif
-                            @endif
+                            </div>
+                            <div class="card-footer">
+                                <div class="text-right">
+                                    @if(Auth::guard('restaurant')->check())
+                                        <a href="#" class="btn btn-md yellow" onclick="approveReservation('{{ $reservation->id }}', '{{ $reservation->user->name }}')">
+                                            Approve
+                                        </a>
+                                        <a href="#" class="btn btn-md blue" onclick="rejectReservation('{{ $reservation->id }}', '{{ $reservation->user->name }}')">
+                                            Reject
+                                        </a>
+                                    @else                     
+                                    @if($reservation->status == 'Pending')
+                                        <button class="btn" style="background-color:#fd001974; border-radius: 20px !important;" onclick="cancelReservation('{{ $reservation->id }}', '{{ $reservation->user->name }}')">Cancel Reservation</button>
+                                    @endif
+                                    @endif
+                                </div>
+                            </div>
                         </div>
                     </div>
+                    @endforeach
                 </div>
             </div>
-            @endforeach
         </div>
     </div>
 </div>
 @endsection
+
 
 @section('scripts')
 <script>
@@ -197,5 +235,56 @@
             }
         });
     }
+</script>
+
+<script>
+    function toggleRatingForm(reservationId) {
+        var ratingForm = document.getElementById('ratingForm_' + reservationId);
+        if (ratingForm.style.display === "none") {
+            ratingForm.style.display = "block";
+        } else {
+            ratingForm.style.display = "none";
+        }
+    }
+</script>
+
+<script>
+    $(document).ready(function() {
+        $('.rating-form').submit(function(e) {
+            e.preventDefault();
+
+            var formData = new FormData(this);
+            var reservationId = $(this).data('reservation-id');
+            $.ajax({
+                type: "POST",
+                url: "/ratings",
+                beforeSend: function() {
+                    loadingModal();
+                },
+                data: formData,
+                contentType: false,
+                processData: false,
+                success: function(response) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Success',
+                        text: 'Successfully commented on the restaurant!'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            window.location.reload();
+                        }
+                    });
+                },
+                error: function(xhr, status, error) {
+                    console.log(xhr.responseText);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'There was an error adding the rate: ' + error
+                    });
+                }
+            });
+        });
+    });
 </script>
 @endsection

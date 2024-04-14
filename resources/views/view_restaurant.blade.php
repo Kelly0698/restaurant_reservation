@@ -29,7 +29,7 @@
 <div class="content-wrapper">
     <div class="container-fluid">
         <div class="row">
-            <div class="col-md-8 col-12 mx-auto">
+            <div class="col-md-11 col-12 mx-auto">
                 <div class="card">
                     <div class="blue text-center lucida-handwriting" style="padding: 0.75rem 1.25rem; margin-bottom: 0; border-bottom: 0 solid rgba(0, 0, 0, 0.125);">
                         <h3 style="font-size: 30px; margin-bottom: 0;">{{ $restaurant->name }}</h3>
@@ -62,7 +62,7 @@
                 </div>
             </div>
 
-            <div class="col-md-8 col-12 mx-auto">
+            <div class="col-md-11 col-12 mx-auto">
                 <div class="card">
                     <div class="blue" style="padding: 0.75rem 1.25rem; margin-bottom: 0; border-bottom: 0 solid rgba(0, 0, 0, 0.125);">
                         <h3 class="card-title">About Restaurant</h3>
@@ -88,7 +88,7 @@
                 </div>
             </div>
 
-            <div class="col-md-8 col-12 mx-auto">
+            <div class="col-md-11 col-12 mx-auto">
                 <div class="card">
                     <div class="yellow" style="padding: 0.75rem 1.25rem; margin-bottom: 0; border-bottom: 0 solid rgba(0, 0, 0, 0.125);">
                         <h3 class="card-title">Make A Reservation</h3>
@@ -185,7 +185,9 @@
 
 
     $(function() {
-        $("#dateInput").datepicker();
+        $("#dateInput").datepicker({
+            dateFormat: 'dd-mm-yy'
+        });
     });
 
     $('#make_reservation').submit(function(e) {
