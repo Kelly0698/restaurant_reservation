@@ -41,4 +41,9 @@ class Restaurant extends Model implements Authenticatable
     {
         return $this->hasMany(Rating::class);
     }
+
+    public function holidays()
+    {
+        return $this->hasMany(Holiday::class);
+    }
 }

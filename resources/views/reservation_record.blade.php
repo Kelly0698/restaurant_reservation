@@ -39,16 +39,16 @@
                                                 <div class="form-group">
                                                     <label for="mark">Rating:</label>
                                                     <select name="mark" class="form-control">
-                                                        <option value="1">1</option>
+                                                        <option value="1">1 (Lowest)</option>
                                                         <option value="2">2</option>
                                                         <option value="3">3</option>
                                                         <option value="4">4</option>
-                                                        <option value="5">5</option>
+                                                        <option value="5">5 (Highest)</option>
                                                     </select>
                                                 </div>
                                                 <div class="form-group">
                                                     <label for="comment">Comment:</label>
-                                                    <textarea name="comment" class="form-control" rows="3"></textarea>
+                                                    <textarea name="comment" class="form-control" rows="3">Any comment...</textarea>
                                                 </div>
                                                 <button type="submit" class="btn yellow">Submit Rating</button>
                                             </form>

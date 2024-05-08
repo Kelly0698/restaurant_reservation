@@ -5,6 +5,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\RestaurantController;
 use App\Http\Controllers\RatingController;
+use App\Http\Controllers\HolidayController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -23,8 +24,6 @@ use App\Http\Controllers\RatingController;
 Route::get('/', function () {
     return view('welcome');
 });
-
-
 
 Route::get('/dashboard',[UserController::class, 'adminDashboard'])->name('dashboard');
 Route::get('/home',[UserController::class, 'userDashboard'])->name('home');
@@ -64,6 +63,7 @@ Route::post('/edit/user/{user}',[UserController::class, 'edit'])->name('edit_use
 Route::post('/update-profile-pic/{user}',[UserController::class, 'updatePic'])->name('update_pic');
 Route::get('/profile-user',[UserController::class, 'user_profile'])->name('user_profile');
 Route::get('/view/restaurant/{id}', [UserController::class, 'viewRestaurant'])->name('view_restaurant');
+Route::get('/get-ratings', [UserController::class, 'getRatings'])->name('get_ratings');
 
 //restaurant
 Route::get('/restaurant',[RestaurantController::class, 'index'])->name('restaurant_list');
@@ -89,4 +89,12 @@ Route::post('/cancel-reservation/{id}', [UserController::class, 'cancelReservati
 
 //rating
 Route::post('/ratings', [RatingController::class, 'store'])->name('store_rating');
+
+
+//holiday
+Route::get('/calendar', [HolidayController::class, 'index'])->name('holiday');
+Route::post('/add-holiday', [HolidayController::class, 'store'])->name('add_holiday');
+Route::get('/holidays', [HolidayController::class, 'show'])->name('show_holiday');
+Route::put('/update/holidays/{id}', [HolidayController::class, 'update'])->name('update_holiday');
+Route::delete('/delete/holidays/{id}', [HolidayController::class, 'delete'])->name('delete_Holidays');
 

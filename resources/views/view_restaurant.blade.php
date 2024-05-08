@@ -3,9 +3,11 @@
 @section('content')
 
 <head>
+    
     <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.9.0/fullcalendar.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
     <style>
         .show-more-btn {
@@ -14,13 +16,44 @@
             color: #052d64;
             font-size: 15px;
         }
-
         .text-end {
             text-align: end !important;
         }
-
         .text-start {
             text-align: start !important;
+        }
+        .fc-bg {
+            background-color: #effdff;
+        }
+        .fc-today {
+            background-color: #ffe79e;
+        }
+        .rating {
+        font-size: 24px; /* Adjust the size of the stars */
+        }
+
+        .rating .fa-star {
+            color: #ffc107; /* Set color for filled stars */
+        }
+
+        .rating .far.fa-star {
+            /* Use the Font Awesome outlined star icon for empty stars */
+            color: transparent; /* Set transparent color for the outlined star */
+            border: 1px solid #ffc107; /* Add border to create an outline */
+            padding: 0 3px; /* Adjust padding to maintain the shape */
+        }
+
+        .rating .fas.fa-star-half-alt {
+            /* Use the Font Awesome half-filled star icon */
+            color: #ffc107; /* Set color for the half-filled star */
+        }
+        .hidden {
+            display: none;
+        }
+        @media (max-width: 767px) {
+            .media-body {
+                margin-left: 0; /* Remove left margin on smaller screens */
+            }
         }
 
     </style>
@@ -29,7 +62,7 @@
 <div class="content-wrapper">
     <div class="container-fluid">
         <div class="row">
-            <div class="col-md-11 col-12 mx-auto">
+            <div class="col-md-9 col-12 mx-auto">
                 <div class="card">
                     <div class="blue text-center lucida-handwriting" style="padding: 0.75rem 1.25rem; margin-bottom: 0; border-bottom: 0 solid rgba(0, 0, 0, 0.125);">
                         <h3 style="font-size: 30px; margin-bottom: 0;">{{ $restaurant->name }}</h3>
@@ -58,37 +91,171 @@
                         </div>
                         @endif
                     </div>
-
                 </div>
-            </div>
-
-            <div class="col-md-11 col-12 mx-auto">
                 <div class="card">
                     <div class="blue" style="padding: 0.75rem 1.25rem; margin-bottom: 0; border-bottom: 0 solid rgba(0, 0, 0, 0.125);">
                         <h3 class="card-title">About Restaurant</h3>
                     </div>
-                    <!-- /.card-header -->
                     <div class="card-body">
                         <strong><i class="fas fa-map-marker-alt mr-1"></i>Address</strong>
                         <p class="text-muted">{{ $restaurant->address }}</p>
                         <hr>
-
                         <strong><i class="fas fa-phone mr-1"></i>Contact</strong>
                         <p class="text-muted">{{ $restaurant->phone_num }}</p>
                         <hr>
-
                         <strong><i class="fas fa-clock mr-1"></i>Operation Time</strong>
                         <p class="text-muted">{{ $restaurant->operation_time }}</p>
                         <hr>
-
                         <strong><i class="fas fa-info-circle mr-1"></i>Description</strong>
                         <p class="text-muted">{{ $restaurant->description }}</p>
                         <hr> 
+                        <strong><i class="fas fa-info-circle mr-1"></i>Holiday(Restaurant Close)</strong>
+                        <div class="col-md-8 offset-md-2"> 
+                            <div class="card">              
+                                <div id='calendar'></div>        
+                            </div>
+                        </div>
+
                     </div>
                 </div>
-            </div>
+                <div class="card" id="commentsContainer">
+                    <div class="blue" style="padding: 0.75rem 1.25rem; margin-bottom: 0; border-bottom: 0 solid rgba(0, 0, 0, 0.125);">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <!-- Display the count of ratings for the restaurant -->
+                            <h3 class="card-title mb-0">Rating ({{ $restaurant->ratings->count() }} ratings)</h3>
+                            <!-- Display average rating stars -->
+                            <div class="rating">
+                                @php
+                                    // Retrieve ratings for the current restaurant
+                                    $ratings = $restaurant->ratings;
+                                    
+                                    // Calculate average rating
+                                    $totalRating = 0;
+                                    $count = count($ratings);
+                                    foreach ($ratings as $rating) {
+                                        $totalRating += $rating->mark;
+                                    }
+                                    $averageRating = $count > 0 ? $totalRating / $count : 0;
 
-            <div class="col-md-11 col-12 mx-auto">
+                                    // Determine the number of filled stars
+                                    $filledStars = floor($averageRating);
+                                    // Determine if there should be a half-filled star
+                                    $halfStar = $averageRating - $filledStars >= 0.5;
+                                @endphp
+
+                                <!-- Display filled stars -->
+                                @for ($i = 0; $i < $filledStars; $i++)
+                                    <span class="fa fa-star"></span>
+                                @endfor
+
+                                <!-- Display half-filled star if needed -->
+                                @if ($halfStar)
+                                    <span class="fa fa-star-half-o"></span>
+                                @endif
+
+                                <!-- Display empty stars -->
+                                @for ($i = $filledStars + ($halfStar ? 1 : 0); $i < 5; $i++)
+                                    <span class="fa fa-star-o"></span>
+                                @endfor
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        @php $commentCount = 0; @endphp
+                        @php $displayedComments = 0; @endphp
+                        @if ($restaurant->ratings && $restaurant->ratings->isNotEmpty())
+                            @foreach ($restaurant->ratings as $rating)
+                                @if ($rating->comment)
+                                    @php
+                                        $user = App\Models\User::find($rating->user_id);
+                                    @endphp
+                                    @if ($user)
+                                        @if ($commentCount >= $displayedComments && $displayedComments < 4)
+                                            <div class="media mb-3 align-items-center">
+                                                <!-- User Image -->
+                                                <div class="col-md-1 col-1">
+                                                    <img src="{{ $user->profile_pic ? asset('storage/' . $user->profile_pic) : asset('assets/dist/img/defaultPic.png') }}" class="rounded-circle" alt="User Image" style="width: 50px; height: 50px;">
+                                                </div>
+                                                <!-- Rating Stars -->
+                                                <div class="col-md-11 col-11">
+                                                    <div class="rating d-inline-block">
+                                                        @php
+                                                            $filledStars = floor($rating->mark);
+                                                            $halfStar = $rating->mark - $filledStars >= 0.5;
+                                                        @endphp
+
+                                                        <!-- Display filled stars -->
+                                                        @for ($i = 0; $i < $filledStars; $i++)
+                                                            <span class="fa fa-star" style="font-size: 16px;"></span>
+                                                        @endfor
+
+                                                        <!-- Display half-filled star if needed -->
+                                                        @if ($halfStar)
+                                                            <span class="fa fa-star-half-o" style="font-size: 16px;"></span>
+                                                        @endif
+
+                                                        <!-- Display empty stars -->
+                                                        @for ($i = $filledStars + ($halfStar ? 1 : 0); $i < 5; $i++)
+                                                            <span class="fa fa-star-o" style="font-size: 16px;"></span>
+                                                        @endfor
+                                                    </div>
+                                                    <div class="media-body ml-2 ml-0">
+                                                        <p>{{ $rating->comment }}</p>
+                                                    </div>
+                                                    <hr>
+                                                </div>
+                                            </div>
+                                            @php $displayedComments++; @endphp
+                                        @else
+                                            <div class="media mb-3 align-items-center d-none">
+                                                <!-- User Image -->
+                                                <div class="col-md-1 col-1">
+                                                    <img src="{{ $user->profile_pic ? asset('storage/' . $user->profile_pic) : asset('assets/dist/img/defaultPic.png') }}" class="rounded-circle" alt="User Image" style="width: 50px; height: 50px;">
+                                                </div>
+                                                <!-- Rating Stars -->
+                                                <div class="col-md-11 col-11">
+                                                    <div class="rating d-inline-block">
+                                                        @php
+                                                            $filledStars = floor($rating->mark);
+                                                            $halfStar = $rating->mark - $filledStars >= 0.5;
+                                                        @endphp
+
+                                                        <!-- Display filled stars -->
+                                                        @for ($i = 0; $i < $filledStars; $i++)
+                                                            <span class="fa fa-star" style="font-size: 16px;"></span>
+                                                        @endfor
+
+                                                        <!-- Display half-filled star if needed -->
+                                                        @if ($halfStar)
+                                                            <span class="fa fa-star-half-o" style="font-size: 16px;"></span>
+                                                        @endif
+
+                                                        <!-- Display empty stars -->
+                                                        @for ($i = $filledStars + ($halfStar ? 1 : 0); $i < 5; $i++)
+                                                            <span class="fa fa-star-o" style="font-size: 16px;"></span>
+                                                        @endfor
+                                                    </div>
+                                                    <div class="media-body ml-md-2 ml-0">
+                                                        <p>{{ $rating->comment }}</p>
+                                                    </div>
+                                                    <hr>
+                                                </div>
+                                            </div>
+                                        @endif
+                                        @php $commentCount++; @endphp
+                                    @endif
+                                @endif
+                            @endforeach
+                            @if ($commentCount > 4)
+                                <hr>
+                                <button id="viewMoreBtn" class="btn blue mt-3" onclick="showMore()" style="border-radius: 5px; display: block; margin: 0 auto;">View More</button>
+                            @endif
+                        @else
+                            <p>No comments available.</p>
+                        @endif
+                    </div>
+                </div>
+
                 <div class="card">
                     <div class="yellow" style="padding: 0.75rem 1.25rem; margin-bottom: 0; border-bottom: 0 solid rgba(0, 0, 0, 0.125);">
                         <h3 class="card-title">Make A Reservation</h3>
@@ -99,7 +266,7 @@
                             @csrf
                             <div class="form-group">
                                 <label for="date">Date</label>
-                                <input type="text" name="date" class="form-control" id="dateInput" placeholder="Select date">
+                                <input type="text" name="date" class="form-control" id="dateInput" placeholder="Select date" readonly>
                             </div>
                             <div class="form-group">
                                 <label for="time">Time</label>
@@ -127,6 +294,11 @@
 @endsection
 
 @section('scripts')
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.9.0/fullcalendar.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 <script>
     var startIndex = 3; // Start index for the next batch of images
 
@@ -183,12 +355,53 @@
         }
     }
 
+    $.ajax({
+    url: "/holidays", // replace with the URL that returns the list of holidays
+    type: "GET",
+    dataType: "json",
+    success: function(response) {
+        var holidays = response; // store the list of holidays
 
-    $(function() {
-        $("#dateInput").datepicker({
-            dateFormat: 'dd-mm-yy'
+        // initialize the datepicker with a beforeShowDay function
+        $('#dateInput').datepicker({
+            dateFormat: 'yy-mm-dd',
+            beforeShowDay: function(date) {
+                var dateString = $.datepicker.formatDate('yy-mm-dd', date);
+
+                // check if the date is a holiday for the current restaurant
+                var isHoliday = holidays.some(function(holiday) {
+                    return holiday.restaurant_id == {{ $restaurant->id }} && dateString >= holiday.start && dateString < holiday.end;
+                });
+
+                if (isHoliday) {
+                    return [false, 'holiday', 'This date is a holiday'];
+                } else {
+                    return [true, ''];
+                }
+            },
+            onSelect: function(dateText) {
+                var selectedDate = $(this).val();
+                var isHoliday = holidays.some(function(holiday) {
+                    return holiday.restaurant_id == {{ $restaurant->id }} && selectedDate >= holiday.start && selectedDate < holiday.end;
+                });
+
+                if (isHoliday) {
+                    $(this).val('');
+                    alert('You cannot select a holiday date');
+                }
+            }
         });
-    });
+
+        // set default date to today's date
+        $('#log_date').datepicker('setDate', new Date());
+    },
+    error: function(xhr) {
+        console.log("Error loading holidays: " + xhr.responseText);
+    }
+});
+
+
+
 
     $('#make_reservation').submit(function(e) {
         e.preventDefault();
@@ -227,20 +440,58 @@
     });
 
 </script>
+<script>
+$(document).ready(function() {
+    $('#calendar').fullCalendar({
+        header: {
+            left: 'prev,next today',
+            right: 'title',
+        },
+        events: @json($events), // Pass the events data from the controller
+        height: 'auto', // Allow the calendar to adjust its height dynamically
+        eventBorderColor: '#ff8274de', // Set event border color (optional)
+        eventTextColor: '#ffffff', // Set event text color (optional)
+        eventRender: function(event, element) {
+            // Set custom background color for each event
+            element.css('#ff8274de', event.backgroundColor);
+        }
+    });
+});
+</script>
+<script>
+    function showMore() {
+        // Show the next 4 comments
+        var comments = document.querySelectorAll('.media');
+        for (var i = 4; i < comments.length; i++) {
+            if (comments[i].classList.contains('d-none')) {
+                comments[i].classList.remove('d-none');
+            }
+        }
+
+        // Hide the "View More" button if there are no more hidden comments
+        var hiddenComments = document.querySelectorAll('.media.d-none');
+        if (hiddenComments.length === 0) {
+            document.getElementById('viewMoreBtn').style.display = 'none';
+        }
+    }
+</script>
+
+<script>
+    function showMore() {
+        // Show the next 4 comments
+        var comments = document.querySelectorAll('.media.d-none');
+        for (var i = 0; i < 4; i++) {
+            if (comments[i]) {
+                comments[i].classList.remove('d-none');
+            }
+        }
+
+        // Hide the "View More" button if there are no more hidden comments
+        var hiddenComments = document.querySelectorAll('.media.d-none');
+        if (hiddenComments.length === 0) {
+            document.getElementById('viewMoreBtn').style.display = 'none';
+        }
+    }
+</script>
 @endsection
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-            
+          

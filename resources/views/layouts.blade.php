@@ -262,6 +262,14 @@
                           </p>
                       </a>
                   </li>
+                  <li class="nav-item">
+                      <a href="{{ route('holiday') }}" class="nav-link">
+                          <i style="font-size: 15px" class="nav-icon fas fa-clipboard-list"></i>
+                          <p style="font-size: 15px">
+                              Restaurant Holiday
+                          </p>
+                      </a>
+                  </li>
               </ul>
           </li>
           <li class="nav-item">

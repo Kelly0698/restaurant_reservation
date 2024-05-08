@@ -13,14 +13,14 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('ratings', function (Blueprint $table) {
+        Schema::create('holidays', function (Blueprint $table) {
             $table->id();
-            $table->string('reservation_id');
-            $table->string('user_id');
-            $table->string('restaurant_id');
-            $table->string('mark');
-            $table->string('comment')->nullable();  
+            $table->string('restaurant_id');  
+            $table->string('holiday_name');
+            $table->date('start_date');
+            $table->date('end_date');
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 
@@ -31,6 +31,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('ratings');
+        Schema::dropIfExists('holidays');
     }
 };

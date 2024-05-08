@@ -5,8 +5,10 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 use App\Models\Role;
 use App\Models\Attachment;
+use App\Models\Rating;
 use App\Models\Reservation;
 use App\Models\Restaurant;
+use App\Models\Holiday;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Mail;
@@ -41,8 +43,39 @@ class UserController extends Controller
         $restaurant = Restaurant::findOrFail($id);
         $attachments = Attachment::where('restaurant_id', $id)->get();
         
-        return view('view_restaurant', compact('restaurant', 'attachments')); 
+        // Fetch holiday data for the restaurant
+        $holidays = Holiday::where('restaurant_id', $id)->get();
+        
+        // Format the holiday data for FullCalendar
+        $events = [];
+        foreach ($holidays as $holiday) {
+            $events[] = [
+                'title' => $holiday->holiday_name,
+                'start' => $holiday->start_date,
+                'end' => $holiday->end_date,
+                'allDay' => true,
+                'color' => '#6c757d' // Red color for holidays
+            ];
+        }
+        
+        return view('view_restaurant', compact('restaurant', 'attachments', 'events'));
     }
+
+// Controller method to fetch comments with user details
+public function getRatings(Request $request)
+{
+    $start = $request->input('start', 0);
+    $limit = 4; // Number of comments to fetch at a time
+
+    // Fetch ratings with user details and pagination
+    $ratings = Rating::with(['user' => function ($query) {
+        $query->with('profile_pic');
+    }])->skip($start)->take($limit)->get();
+
+    return response()->json($ratings);
+}
+
+
 
     public function index()
     {
