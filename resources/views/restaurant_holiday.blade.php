@@ -24,12 +24,13 @@
 <script>
 $(document).ready(function() {
     var SITEURL = "{{ url('/') }}";
+    var restaurantId = {{ Auth::guard('restaurant')->user()->id ?? 'null' }}; 
     var isEditable = {{ Auth::guard('restaurant')->check() && Auth::guard('restaurant')->user()->id ? 'true' : 'false' }};
 
     var calendar = $('#calendar').fullCalendar({
         editable: isEditable,
         selectable: true,
-        events: SITEURL + "/holidays",
+        events: SITEURL + "/holidays?restaurant_id=" + restaurantId,
         select: function(start, end) {
             var holidayName = prompt("Enter holiday name:");
             if (holidayName) {

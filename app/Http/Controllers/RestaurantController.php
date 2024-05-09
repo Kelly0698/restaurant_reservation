@@ -15,6 +15,8 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\File;
 use App\Mail\RestaurantCreated;
+use App\Mail\RestaurantRegistrationSuccess;
+use App\Mail\RestaurantRegistrationRejected;
 
 class RestaurantController extends Controller
 {
@@ -47,8 +49,16 @@ class RestaurantController extends Controller
 
         // Attempt authentication using the 'restaurant' guard
         if (Auth::guard('restaurant')->attempt($credentials)) {
-            // If authentication succeeds, retrieve restaurant data
+            // Retrieve authenticated restaurant user
             $restaurant = Auth::guard('restaurant')->user();
+            
+            // Check if the restaurant's status is pending
+            if ($restaurant->status === 'Pending') {
+                // If status is pending, redirect back with a status message
+                return redirect('/your-restaurant')->with('status', 'pending');
+            }
+
+            // If authentication succeeds, retrieve restaurant data
             $name = $restaurant->name;
             $id = $restaurant->id;
             $email = $restaurant->email;
@@ -65,6 +75,7 @@ class RestaurantController extends Controller
         // If authentication fails, redirect back with a status message
         return redirect('/your-restaurant')->with('status', 'failed');
     }
+
 
     public function logout(Request $request){
         $request->session()->flush();
@@ -92,8 +103,10 @@ class RestaurantController extends Controller
         // Save the restaurant to the database
         $restaurant->save();
 
-        // Send email with generated password
-        Mail::to($restaurant->email)->send(new RestaurantCreated($restaurant, $generatedPassword));
+        // Send email only if status is Approved
+        if ($restaurant->status === 'Approved') {
+            Mail::to($restaurant->email)->send(new RestaurantCreated($restaurant, $generatedPassword));
+        }
 
         // Response
         $response = [
@@ -156,12 +169,26 @@ class RestaurantController extends Controller
     public function updateStatus(Request $request, $id) {
         $restaurant = Restaurant::findOrFail($id);
         
+        // Store the old status for comparison later
+        $oldStatus = $restaurant->status;
+    
         // Update the status
         $restaurant->status = $request->status;
         $restaurant->save();
+    
+        // Check if the status has changed to 'Approved' or 'Rejected' from 'Pending'
+        if ($oldStatus === 'Pending' && ($request->status === 'Approved' || $request->status === 'Rejected')) {
+            // Determine which email to send based on the new status
+            $mailClass = ($request->status === 'Approved') ? RestaurantRegistrationSuccess::class : RestaurantRegistrationRejected::class;
+    
+            // Send email to inform restaurant about the status change
+            Mail::to($restaurant->email)->send(new $mailClass($restaurant));
+        }
         
         return response()->json(['message' => 'Status updated successfully']);
     }
+    
+    
 
     public function edit(Restaurant $restaurant, Request $req)
     {
@@ -175,7 +202,7 @@ class RestaurantController extends Controller
             $file->storeAs('public/license_pdf', $filename);
             $restaurant->license_pdf = $filename;
         }
-        $restaurant->status = "Approved";
+        $restaurant->status = $req->status;
         $restaurant->operation_time = $req->operation_time;
         $restaurant->availability = $req->availability;
         $restaurant->description = $req->description;

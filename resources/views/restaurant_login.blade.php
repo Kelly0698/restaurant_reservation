@@ -101,7 +101,17 @@
   <script>                    
   Swal.fire({
         title: 'Error!',
-        text: 'Login failed, please try again!',
+        text: 'Authentication failed. Please check your email and password.',
+        icon: 'error',
+    });
+  </script>
+  @endif
+
+  @if(session('status')=="pending")
+  <script>                    
+  Swal.fire({
+        title: 'Error!',
+        text: 'Your registration request hasn\'t been approved yet. Please wait for approval.',
         icon: 'error',
     });
   </script>

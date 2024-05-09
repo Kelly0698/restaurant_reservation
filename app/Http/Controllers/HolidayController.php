@@ -14,9 +14,12 @@ class HolidayController extends Controller
      */
     public function index()
     {
-        return view('restaurant_holiday');
+        $restaurantId = auth()->guard('restaurant')->user()->id;
+        $holidays = Holiday::where('restaurant_id', $restaurantId)->get();
+        
+        return view('restaurant_holiday', compact('holidays'));
     }
-
+    
     /**
      * Show the form for creating a new resource.
      *
@@ -53,7 +56,9 @@ class HolidayController extends Controller
      */
     public function show()
     {
-        $holidays = Holiday::all()->map(function ($holiday) {
+        $restaurantId = auth()->guard('restaurant')->user()->id;
+    
+        $holidays = Holiday::where('restaurant_id', $restaurantId)->get()->map(function ($holiday) {
             return [
                 'id' => $holiday->id,
                 'restaurant_id' => $holiday->restaurant_id,
@@ -66,6 +71,7 @@ class HolidayController extends Controller
     
         return response()->json($holidays);
     }
+    
 
     /**
      * Show the form for editing the specified resource.

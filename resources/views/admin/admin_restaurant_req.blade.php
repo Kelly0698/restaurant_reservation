@@ -45,7 +45,7 @@
                     <a href="#" class="btn btn-sm yellow" onclick="approveRestaurant('{{ $item->id }}', '{{ $item->name }}')">
                         Approve
                     </a>
-                    <a href="#" class="btn btn-sm blue">
+                    <a href="#" class="btn btn-sm blue" onclick="rejectRestaurant('{{ $item->id }}', '{{ $item->name }}')">
                         Reject
                     </a>
                     </div>
@@ -119,5 +119,64 @@
         });
     }
 </script>
-
+<script>
+    function rejectRestaurant(restaurantId, restaurantName) {
+        // Show confirmation dialog
+        Swal.fire({
+            title: 'Are you sure?',
+            html: 'Please enter <strong>approve</strong> below to reject the registration for restaurant '+ restaurantName + '?',
+            input: 'text',
+            inputPlaceholder: 'reject',
+            inputAttributes: {
+                autocapitalize: 'off'
+            },
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, the registeration is rejected!',
+            preConfirm: (value) => {
+                if (value.trim().toLowerCase() === 'reject') {
+                    return Promise.resolve();
+                } else {
+                    Swal.showValidationMessage('Incorrect input. Please enter "reject" to confirm.');
+                    return Promise.reject();
+                }
+            },
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Send an AJAX request to update the status
+                $.ajax({
+                    url: '/update-status/' + restaurantId,
+                    type: 'POST',
+                    data: {
+                        _token: '{{ csrf_token() }}',
+                        status: 'Rejected'
+                    },
+                    success: function(response) {
+                        // Show success message
+                        Swal.fire({
+                            title: 'Rejected!',
+                            text: 'The registration for restaurant ' + restaurantName + ' has been rejected.',
+                            icon: 'success',
+                            confirmButtonText: 'OK'
+                        }).then((result) => {
+                            window.location.href = "{{ route('restaurant_req_list') }}";
+                        });
+                    },
+                    error: function(xhr, status, error) {
+                        // Handle errors if any
+                        Swal.fire({
+                            title: 'Error!',
+                            text: 'Rejected failed',
+                            icon: 'error',
+                            confirmButtonText: 'OK'
+                        });
+                        console.error(xhr.responseText);
+                        console.log(error);
+                    }
+                });
+            }
+        });
+    }
+</script>
 @endsection

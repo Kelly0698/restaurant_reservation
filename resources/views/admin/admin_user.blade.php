@@ -197,8 +197,7 @@
             url: "/add/user",
             beforeSend: function() {
                 loadingModal();
-            },
-            
+            }, 
             data: formData,
             contentType: false,
             processData: false,

@@ -215,6 +215,7 @@
       <!-- Sidebar Menu -->
       <nav class="mt-2">
         <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+          @if((auth()->check() && auth()->user()->role_id != '5') || Auth::guard('restaurant')->check())
           <li class="nav-item">
             <a href="{{ route('dashboard') }}" class="nav-link">
               <i class="nav-icon fas fa-tachometer-alt"></i>
@@ -223,6 +224,8 @@
               </p>
             </a>
           </li>
+          @endif
+          @if(auth()->check() && auth()->user()->role_id == '4')
           <li class="nav-item">
             <a href="{{ route('role_list') }}" class="nav-link">
               <i class="nav-icon fas fa-users"></i>
@@ -237,6 +240,8 @@
               <p>User</p>
             </a>
           </li>
+          @endif
+          @if(auth()->check() && auth()->user()->role_id == '4')
           <li class="nav-item menu-open">
               <a href="#" class="nav-link">
                   <i class="nav-icon fas fa-utensils"></i>
@@ -262,28 +267,26 @@
                           </p>
                       </a>
                   </li>
-                  <li class="nav-item">
-                      <a href="{{ route('holiday') }}" class="nav-link">
-                          <i style="font-size: 15px" class="nav-icon fas fa-clipboard-list"></i>
-                          <p style="font-size: 15px">
-                              Restaurant Holiday
-                          </p>
-                      </a>
-                  </li>
               </ul>
           </li>
+          @endif
+          @if(auth()->check() && auth()->user()->role_id == '5')
           <li class="nav-item">
             <a href="{{ route('home') }}" class="nav-link">
               <i class="nav-icon fas fa-tachometer-alt"></i>
               <p>Home</p>
             </a>
           </li>
+          @endif
+          @if(Auth::guard('restaurant')->check() || auth()->check() && auth()->user()->role_id == '5')
+          <li class="nav-header" style="color: white !important;">RESERVATION</li>
           <li class="nav-item">
             <a href="{{ route('reservation_record') }}" class="nav-link">
                 <i class="nav-icon fas fa-clipboard-list"></i>
                 <p>Reservation Request</p>
             </a>
           </li>
+          @endif
         @if(Auth::guard('restaurant')->check())
           <li class="nav-item">
             <a href="{{ route('approve_page') }}" class="nav-link">
@@ -296,6 +299,13 @@
                 <i class="nav-icon fas fa-times-circle"></i>
                 <p>Rejected Reservation</p>
             </a>
+          </li>
+          <li class="nav-header" style="color: white !important;">HOLIDAY</li>
+          <li class="nav-item">
+              <a href="{{ route('holiday') }}" class="nav-link">
+                <i class="nav-icon fas fa-times-circle"></i>
+                  <p>Restaurant Holiday</p>
+              </a>
           </li>
         @endif
 
@@ -349,7 +359,7 @@
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@10/dist/sweetalert2.min.css">
 
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <!-- Include bs-custom-file-input JavaScript -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bs-custom-file-input/1.3.4/bs-custom-file-input.min.js"></script> 
