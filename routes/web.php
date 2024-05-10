@@ -86,7 +86,7 @@ Route::get('/reserve/approve', [RestaurantController::class, 'approveResPage'])-
 Route::post('/reject-reservation/{id}',[RestaurantController::class, 'rejectReservation'])->name('reject_reservation');
 Route::get('/reserve/reject', [RestaurantController::class, 'rejectResPage'])->name('reject_page');
 Route::post('/cancel-reservation/{id}', [UserController::class, 'cancelReservation'])->name('cancel_reservation');
-
+Route::get('/pending/reservation', [UserController::class, 'pendingReservation'])->name('pending_reservation');
 //rating
 Route::post('/ratings', [RatingController::class, 'store'])->name('store_rating');
 
@@ -97,4 +97,4 @@ Route::post('/add-holiday', [HolidayController::class, 'store'])->name('add_holi
 Route::get('/holidays', [HolidayController::class, 'show'])->name('show_holiday');
 Route::put('/update/holidays/{id}', [HolidayController::class, 'update'])->name('update_holiday');
 Route::delete('/delete/holidays/{id}', [HolidayController::class, 'delete'])->name('delete_Holidays');
-
+Route::get('/get-holidays', [HolidayController::class, 'getHoliday'])->name('get_holiday');

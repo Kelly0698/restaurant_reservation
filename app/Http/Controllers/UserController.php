@@ -386,5 +386,20 @@ public function getRatings(Request $request)
         return redirect()->back()->with('success', 'Reservation canceled successfully');
     }
 
+    public function pendingReservation()
+    {
+        // Retrieve the authenticated user's ID
+        $userId = auth()->user()->id;
     
+        // Query pending reservations for the authenticated user
+        $pendingReservations = Reservation::where('user_id', $userId)
+            ->where('status', 'pending')
+            ->get();
+    
+        // Return the pending reservations to the user_reservation_req view
+        return view('user_reservation_req', compact('pendingReservations'));
+    }
+    
+     
+
 }

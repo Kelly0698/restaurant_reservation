@@ -356,52 +356,49 @@
     }
 
     $.ajax({
-    url: "/holidays", // replace with the URL that returns the list of holidays
-    type: "GET",
-    dataType: "json",
-    success: function(response) {
-        var holidays = response; // store the list of holidays
+        url: "/get-holidays", // replace with the URL that returns the list of holidays
+        type: "GET",
+        dataType: "json",
+        success: function(response) {
+            var holidays = response; // store the list of holidays
 
-        // initialize the datepicker with a beforeShowDay function
-        $('#dateInput').datepicker({
-            dateFormat: 'yy-mm-dd',
-            beforeShowDay: function(date) {
-                var dateString = $.datepicker.formatDate('yy-mm-dd', date);
+            // initialize the datepicker with a beforeShowDay function
+            $('#dateInput').datepicker({
+                dateFormat: 'yy-mm-dd',
+                beforeShowDay: function(date) {
+                    var dateString = $.datepicker.formatDate('yy-mm-dd', date);
 
-                // check if the date is a holiday for the current restaurant
-                var isHoliday = holidays.some(function(holiday) {
-                    return holiday.restaurant_id == {{ $restaurant->id }} && dateString >= holiday.start && dateString < holiday.end;
-                });
+                    // check if the date is a holiday for the current restaurant
+                    var isHoliday = holidays.some(function(holiday) {
+                        return holiday.restaurant_id == {{ $restaurant->id }} && dateString >= holiday.start && dateString < holiday.end;
+                    });
 
-                if (isHoliday) {
-                    return [false, 'holiday', 'This date is a holiday'];
-                } else {
-                    return [true, ''];
+                    if (isHoliday) {
+                        return [false, 'holiday', 'This date is a holiday'];
+                    } else {
+                        return [true, ''];
+                    }
+                },
+                onSelect: function(dateText) {
+                    var selectedDate = $(this).val();
+                    var isHoliday = holidays.some(function(holiday) {
+                        return holiday.restaurant_id == {{ $restaurant->id }} && selectedDate >= holiday.start && selectedDate < holiday.end;
+                    });
+
+                    if (isHoliday) {
+                        $(this).val('');
+                        alert('You cannot select a holiday date');
+                    }
                 }
-            },
-            onSelect: function(dateText) {
-                var selectedDate = $(this).val();
-                var isHoliday = holidays.some(function(holiday) {
-                    return holiday.restaurant_id == {{ $restaurant->id }} && selectedDate >= holiday.start && selectedDate < holiday.end;
-                });
+            });
 
-                if (isHoliday) {
-                    $(this).val('');
-                    alert('You cannot select a holiday date');
-                }
-            }
-        });
-
-        // set default date to today's date
-        $('#log_date').datepicker('setDate', new Date());
-    },
-    error: function(xhr) {
-        console.log("Error loading holidays: " + xhr.responseText);
-    }
-});
-
-
-
+            // set default date to today's date
+            $('#log_date').datepicker('setDate', new Date());
+        },
+        error: function(xhr) {
+            console.log("Error loading holidays: " + xhr.responseText);
+        }
+    });
 
     $('#make_reservation').submit(function(e) {
         e.preventDefault();

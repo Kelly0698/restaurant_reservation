@@ -72,7 +72,23 @@ class HolidayController extends Controller
         return response()->json($holidays);
     }
     
-
+    public function getHoliday()
+    {
+        $holidays = Holiday::all()->map(function ($holiday) {
+            return [
+                'id' => $holiday->id,
+                'restaurant_id' => $holiday->restaurant_id,
+                'title' => $holiday->holiday_name,
+                'start' => $holiday->start_date,
+                'end' => $holiday->end_date,
+                'allDay' => true,
+            ];
+        });
+    
+        return response()->json($holidays);
+    }
+    
+    
     /**
      * Show the form for editing the specified resource.
      *

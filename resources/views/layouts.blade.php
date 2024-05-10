@@ -278,7 +278,7 @@
             </a>
           </li>
           @endif
-          @if(Auth::guard('restaurant')->check() || auth()->check() && auth()->user()->role_id == '5')
+          @if(Auth::guard('restaurant')->check())
           <li class="nav-header" style="color: white !important;">RESERVATION</li>
           <li class="nav-item">
             <a href="{{ route('reservation_record') }}" class="nav-link">
@@ -287,7 +287,24 @@
             </a>
           </li>
           @endif
-        @if(Auth::guard('restaurant')->check())
+          @if(auth()->check() && auth()->user()->role_id == '5')
+          <li class="nav-header" style="color: white !important;">RESERVATION</li>
+          <li class="nav-item">
+            <a href="{{ route('reservation_record') }}" class="nav-link">
+                <i class="nav-icon fas fa-clipboard-list"></i>
+                <p>Reservation Record</p>
+            </a>
+          </li>
+          @endif
+          @if(auth()->check() && auth()->user()->role_id == '5')
+          <li class="nav-item">
+              <a href="{{ route('pending_reservation') }}" class="nav-link">
+                  <i class="nav-icon fas fa-clock"></i>
+                  <p>Pending Reservation</p>
+              </a>
+          </li>
+          @endif
+          @if(Auth::guard('restaurant')->check())
           <li class="nav-item">
             <a href="{{ route('approve_page') }}" class="nav-link">
                 <i class="nav-icon fas fa-check-circle"></i>
@@ -303,11 +320,11 @@
           <li class="nav-header" style="color: white !important;">HOLIDAY</li>
           <li class="nav-item">
               <a href="{{ route('holiday') }}" class="nav-link">
-                <i class="nav-icon fas fa-times-circle"></i>
+                  <i class="nav-icon fas fa-calendar-alt"></i>
                   <p>Restaurant Holiday</p>
               </a>
           </li>
-        @endif
+          @endif
 
       </nav>
       <!-- /.sidebar-menu -->
