@@ -94,6 +94,12 @@
     .lucida-handwriting {
         font-family: 'Lucida Handwriting', cursive;
     }
+    .container-fluid{
+          background-color: #fcffec;
+      }
+      .content-wrapper {
+          background-color: #fcffec;
+      }
 </style>
 
 </head>

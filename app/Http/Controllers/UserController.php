@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 use App\Models\Role;
@@ -18,9 +19,68 @@ use App\Mail\UserCreated;
 class UserController extends Controller
 {
 
+    // public function adminDashboard()
+    // {
+    //     // Get the authenticated restaurant's ID
+    //     $restaurantId = Auth::guard('restaurant')->user()->id;
+    
+    //     // Count total users, approved restaurants, and pending requests
+    //     $totalUsers = User::count();
+    //     $approvedRestaurants = Restaurant::where('status', 'Approved')->count();
+    //     $pendingRequests = Restaurant::where('status', 'Pending')->count();
+        
+    //     // Count reservation requests for the authenticated restaurant
+    //     $reservationRequests = Reservation::where('status', 'Pending')
+    //         ->where('restaurant_id', $restaurantId)
+    //         ->count();
+    
+    //     // Count today's approved reservations for the authenticated restaurant
+    //     $today = Carbon::today();
+    //     $todaysApprovedReservationsCount = Reservation::whereDate('date', $today)
+    //         ->where('status', 'Approved')
+    //         ->where('restaurant_id', $restaurantId)
+    //         ->count();
+    
+    //     return view('dashboard', compact('totalUsers', 'approvedRestaurants', 'pendingRequests', 'reservationRequests', 'todaysApprovedReservationsCount'));
+    // }
+
     public function adminDashboard()
     {
-        return view('dashboard'); 
+        // Get the authenticated restaurant's ID
+        $restaurantId = auth()->guard('restaurant')->user()->id;
+    
+        // Get all reservations for today for the authenticated restaurant
+        $reservations = Reservation::where('restaurant_id', $restaurantId)
+            ->whereDate('date', Carbon::today())
+            ->where('status', 'Approved')
+            ->get();
+    
+        // Initialize an array to store counts for each hour
+        $reservationCounts = array_fill(0, 24, 0);
+    
+        // Loop through reservations and count reservations for each hour
+        foreach ($reservations as $reservation) {
+            $hour = Carbon::parse($reservation->time)->hour;
+            $reservationCounts[$hour]++;
+        }
+    
+        // Count total users, approved restaurants, and pending requests
+        $totalUsers = User::count();
+        $approvedRestaurants = Restaurant::where('status', 'Approved')->count();
+        $pendingRequests = Restaurant::where('status', 'Pending')->count();
+        
+        // Count reservation requests for the authenticated restaurant
+        $reservationRequests = Reservation::where('status', 'Pending')
+            ->where('restaurant_id', $restaurantId)
+            ->count();
+    
+        // Count today's approved reservations for the authenticated restaurant
+        $todaysApprovedReservationsCount = Reservation::whereDate('date', Carbon::today())
+            ->where('status', 'Approved')
+            ->where('restaurant_id', $restaurantId)
+            ->count();
+    
+        return view('dashboard', compact('totalUsers', 'approvedRestaurants', 'pendingRequests', 'reservationRequests', 'todaysApprovedReservationsCount', 'reservationCounts'));
     }
 
     public function userDashboard()
@@ -37,6 +97,21 @@ class UserController extends Controller
             'attachments' => $attachments,
         ]);
     }
+
+    // public function userDashboard()
+    // {
+    //     $roles = Role::all();
+    //     $users = User::all();
+    //     $restaurants = Restaurant::where('status', 'approved')->get();
+    //     $attachments = Attachment::all();
+    
+    //     return view('user_dashboard', [
+    //         'roles' => $roles,
+    //         'users' => $users,
+    //         'restaurants' => $restaurants,
+    //         'attachments' => $attachments,
+    //     ]);
+    // }
 
     public function viewRestaurant($id)
     {
@@ -61,21 +136,18 @@ class UserController extends Controller
         return view('view_restaurant', compact('restaurant', 'attachments', 'events'));
     }
 
-// Controller method to fetch comments with user details
-public function getRatings(Request $request)
-{
-    $start = $request->input('start', 0);
-    $limit = 4; // Number of comments to fetch at a time
+    public function getRatings(Request $request)
+    {
+        $start = $request->input('start', 0);
+        $limit = 4; // Number of comments to fetch at a time
 
-    // Fetch ratings with user details and pagination
-    $ratings = Rating::with(['user' => function ($query) {
-        $query->with('profile_pic');
-    }])->skip($start)->take($limit)->get();
+        // Fetch ratings with user details and pagination
+        $ratings = Rating::with(['user' => function ($query) {
+            $query->with('profile_pic');
+        }])->skip($start)->take($limit)->get();
 
-    return response()->json($ratings);
-}
-
-
+        return response()->json($ratings);
+    }
 
     public function index()
     {
@@ -184,17 +256,16 @@ public function getRatings(Request $request)
 
         if(Auth::attempt($credentials))
         {
-            $user=Auth::user();
-            $name = $user->name;
-            $id = $user->id;
-            $email = $user->email;
+            $user = Auth::user();
             $role = $user->role_id;
-            session(['name'=>$name]);
-            session(['email'=>$email]);
-            session(['id'=>$id]);
-            session(['role'=>$role]);
-            return redirect('dashboard');
+
+            if ($role == 4) {
+                return redirect()->route('dashboard');
+            } elseif ($role == 5) {
+                return redirect()->route('home');
+            }
         }
+        
         return redirect('/login')->with('status', 'failed');
     }
 

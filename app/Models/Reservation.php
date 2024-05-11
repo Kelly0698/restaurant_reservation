@@ -17,6 +17,7 @@ class Reservation extends Model
         'time',
         'party_size',
         'remark',
+        'status',
     ];
 
     //relationship with User model

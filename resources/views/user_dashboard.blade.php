@@ -32,6 +32,11 @@
             display: block;
             text-align: center;
         }
+        
+        .restaurant-card:last-child {
+            margin-right: 0;
+            border: 0px solid #ccc;
+        }
 
         .restaurant-img {
             display: flex;
@@ -174,14 +179,26 @@
 
     function showPage(page) {
         var start = (page - 1) * 4;
-        var end = start + 4;
+        var end = Math.min(start + 4, {{ count($restaurants) }});
         var cards = document.querySelectorAll('.restaurant-card');
+        var count = 0;
         for (var i = 0; i < cards.length; i++) {
             if (i >= start && i < end) {
                 cards[i].style.display = 'flex';
+                count++;
             } else {
                 cards[i].style.display = 'none';
             }
+        }
+
+        // Add placeholder elements if there are fewer than 4 cards
+        var remaining = 4 - count;
+        if (remaining > 0) {
+            var placeholderHtml = '';
+            for (var j = 0; j < remaining; j++) {
+                placeholderHtml += '<div class="col-md-4 restaurant-card"></div>';
+            }
+            document.getElementById('restaurants-container').insertAdjacentHTML('beforeend', placeholderHtml);
         }
 
         if (currentPage < totalPages) {
@@ -214,4 +231,6 @@
     // Initially show the first page
     showPage(currentPage);
 </script>
+
+
 @endsection

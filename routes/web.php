@@ -6,6 +6,7 @@ use App\Http\Controllers\RoleController;
 use App\Http\Controllers\RestaurantController;
 use App\Http\Controllers\RatingController;
 use App\Http\Controllers\HolidayController;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -98,3 +99,4 @@ Route::get('/holidays', [HolidayController::class, 'show'])->name('show_holiday'
 Route::put('/update/holidays/{id}', [HolidayController::class, 'update'])->name('update_holiday');
 Route::delete('/delete/holidays/{id}', [HolidayController::class, 'delete'])->name('delete_Holidays');
 Route::get('/get-holidays', [HolidayController::class, 'getHoliday'])->name('get_holiday');
+
