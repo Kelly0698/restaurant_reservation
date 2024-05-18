@@ -1,55 +1,17 @@
 @extends('layouts')
-@section('title','Dashboard')
-@section('content')
-@if(auth()->check() && auth()->user()->role_id == '4')
-<div class="content-wrapper">
-    <br><br><br><br><br>
-    <div class="row justify-content-center align-items-center">
-        <div class="col-12 col-sm-6 col-md-4">
-            <div class="info-box">
-                <span class="info-box-icon bg-info elevation-1" style="font-size: 3rem;"><i class="fas fa-users"></i></span>
-                <div class="info-box-content d-flex flex-column align-items-center">
-                    <span class="info-box-text" style="font-size: 1.2rem;">Total Users</span>
-                    <span class="info-box-number mb-0 text-center" style="font-size: 2rem;">{{ $totalUsers }}</span>
-                </div>
-            </div>
-        </div>
-        &nbsp&nbsp&nbsp
-        <div class="col-12 col-sm-6 col-md-4">
-            <div class="info-box">
-                <span class="info-box-icon bg-success elevation-1" style="font-size: 3rem;"><i class="fas fa-check"></i></span>
-                <div class="info-box-content d-flex flex-column align-items-center">
-                    <span class="info-box-text" style="font-size: 1.2rem;">Approved Restaurants</span>
-                    <span class="info-box-number mb-0 text-center" style="font-size: 2rem;">{{ $approvedRestaurants }}</span>
-                </div>
-            </div>
-        </div>
-    </div>
-    <br>
-    <div class="row justify-content-center align-items-center">
-        <div class="col-12 col-sm-6 col-md-4">
-            <div class="info-box">
-                <span class="info-box-icon bg-warning elevation-1" style="font-size: 3rem;"><i class="fas fa-clock"></i></span>
-                <div class="info-box-content d-flex flex-column align-items-center">
-                    <span class="info-box-text" style="font-size: 1.2rem;">Restaurant Registration Requests</span>
-                    <span class="info-box-number mb-0 text-center" style="font-size: 2rem;">{{ $pendingRequests }}</span>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-@endif
 
-@if(Auth::guard('restaurant')->check())
+@section('title','Dashboard')
+
+@section('content')
+@if(isset($restaurantData))
 <div class="content-wrapper">
-    <br>
     <div class="row justify-content-center align-items-center">
         <div class="col-12 col-sm-6 col-md-4">
             <div class="info-box">
                 <span class="info-box-icon bg-info elevation-1" style="font-size: 3rem;"><i class="fas fa-users"></i></span>
                 <div class="info-box-content d-flex flex-column align-items-center">
                     <span class="info-box-text" style="font-size: 1.2rem;">Reservation Request</span>
-                    <span class="info-box-number mb-0 text-center" style="font-size: 2rem;">{{ $reservationRequests }}</span>
+                    <span class="info-box-number mb-0 text-center" style="font-size: 2rem;">{{ $restaurantData['reservationRequests'] }}</span>
                 </div>
             </div>
         </div>
@@ -59,7 +21,7 @@
                 <span class="info-box-icon bg-success elevation-1" style="font-size: 3rem;"><i class="fas fa-check"></i></span>
                 <div class="info-box-content d-flex flex-column align-items-center">
                     <span class="info-box-text" style="font-size: 1.2rem;">Today's Approved Reservation</span>
-                    <span class="info-box-number mb-0 text-center" style="font-size: 2rem;">{{ $todaysApprovedReservationsCount }}</span>
+                    <span class="info-box-number mb-0 text-center" style="font-size: 2rem;">{{ $restaurantData['todaysApprovedReservationsCount'] }}</span>
                 </div>
             </div>
         </div>
@@ -71,7 +33,46 @@
             </div>
         </div>
     </div>
+</div>
+@endif
 
+@if(isset($userData))
+<br><br><br><br><br><br>
+<div class="content-wrapper">
+    <br>
+    <div class="row justify-content-center align-items-center">
+        <div class="col-12 col-sm-6 col-md-4">
+            <div class="info-box">
+                <span class="info-box-icon bg-info elevation-1" style="font-size: 3rem;"><i class="fas fa-users"></i></span>
+                <div class="info-box-content d-flex flex-column align-items-center">
+                    <span class="info-box-text" style="font-size: 1.2rem;">Total Users</span>
+                    <span class="info-box-number mb-0 text-center" style="font-size: 2rem;">{{ $userData['totalUsers'] }}</span>
+                </div>
+            </div>
+        </div>
+        &nbsp&nbsp&nbsp
+        <div class="col-12 col-sm-6 col-md-4">
+            <div class="info-box">
+                <span class="info-box-icon bg-success elevation-1" style="font-size: 3rem;"><i class="fas fa-check"></i></span>
+                <div class="info-box-content d-flex flex-column align-items-center">
+                    <span class="info-box-text" style="font-size: 1.2rem;">Approved Restaurants</span>
+                    <span class="info-box-number mb-0 text-center" style="font-size: 2rem;">{{ $userData['approvedRestaurants'] }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <br>
+    <div class="row justify-content-center align-items-center">
+        <div class="col-12 col-sm-6 col-md-4">
+            <div class="info-box">
+                <span class="info-box-icon bg-warning elevation-1" style="font-size: 3rem;"><i class="fas fa-clock"></i></span>
+                <div class="info-box-content d-flex flex-column align-items-center">
+                    <span class="info-box-text" style="font-size: 1.2rem;">Restaurant Registration Requests</span>
+                    <span class="info-box-number mb-0 text-center" style="font-size: 2rem;">{{ $userData['pendingRequests'] }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 @endif
 @endsection
@@ -81,8 +82,8 @@
 <script>
     var ctx = document.getElementById('areaChart').getContext('2d');
 
-    var reservationCounts = <?php echo json_encode($reservationCounts); ?>;
-
+    @if(isset($restaurantData))
+    var reservationCounts = <?php echo json_encode($restaurantData['reservationCounts']); ?>;
     var hours = Object.keys(reservationCounts);
     var counts = Object.values(reservationCounts);
 
@@ -118,6 +119,6 @@
             }
         }
     });
+    @endif
 </script>
-
 @endsection

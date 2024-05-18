@@ -15,73 +15,67 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Http\Request;
 use App\Mail\UserCreated;
+use App\Mail\ForgotPassword;
+use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
 
-    // public function adminDashboard()
-    // {
-    //     // Get the authenticated restaurant's ID
-    //     $restaurantId = Auth::guard('restaurant')->user()->id;
-    
-    //     // Count total users, approved restaurants, and pending requests
-    //     $totalUsers = User::count();
-    //     $approvedRestaurants = Restaurant::where('status', 'Approved')->count();
-    //     $pendingRequests = Restaurant::where('status', 'Pending')->count();
-        
-    //     // Count reservation requests for the authenticated restaurant
-    //     $reservationRequests = Reservation::where('status', 'Pending')
-    //         ->where('restaurant_id', $restaurantId)
-    //         ->count();
-    
-    //     // Count today's approved reservations for the authenticated restaurant
-    //     $today = Carbon::today();
-    //     $todaysApprovedReservationsCount = Reservation::whereDate('date', $today)
-    //         ->where('status', 'Approved')
-    //         ->where('restaurant_id', $restaurantId)
-    //         ->count();
-    
-    //     return view('dashboard', compact('totalUsers', 'approvedRestaurants', 'pendingRequests', 'reservationRequests', 'todaysApprovedReservationsCount'));
-    // }
-
     public function adminDashboard()
     {
-        // Get the authenticated restaurant's ID
-        $restaurantId = auth()->guard('restaurant')->user()->id;
-    
-        // Get all reservations for today for the authenticated restaurant
-        $reservations = Reservation::where('restaurant_id', $restaurantId)
-            ->whereDate('date', Carbon::today())
-            ->where('status', 'Approved')
-            ->get();
-    
-        // Initialize an array to store counts for each hour
-        $reservationCounts = array_fill(0, 24, 0);
-    
-        // Loop through reservations and count reservations for each hour
-        foreach ($reservations as $reservation) {
-            $hour = Carbon::parse($reservation->time)->hour;
-            $reservationCounts[$hour]++;
+        if (auth()->guard('restaurant')->check()) {
+            // Get the authenticated restaurant's ID
+            $restaurantId = auth()->guard('restaurant')->user()->id;
+
+            // Get all reservations for today for the authenticated restaurant
+            $reservations = Reservation::where('restaurant_id', $restaurantId)
+                ->whereDate('date', Carbon::today())
+                ->where('status', 'Approved')
+                ->get();
+
+            // Initialize an array to store counts for each hour
+            $reservationCounts = array_fill(0, 24, 0);
+
+            // Loop through reservations and count reservations for each hour
+            foreach ($reservations as $reservation) {
+                $hour = Carbon::parse($reservation->time)->hour;
+                $reservationCounts[$hour]++;
+            }
+
+            // Count reservation requests for the authenticated restaurant
+            $reservationRequests = Reservation::where('status', 'Pending')
+                ->where('restaurant_id', $restaurantId)
+                ->count();
+
+            // Count today's approved reservations for the authenticated restaurant
+            $todaysApprovedReservationsCount = Reservation::whereDate('date', Carbon::today())
+                ->where('status', 'Approved')
+                ->where('restaurant_id', $restaurantId)
+                ->count();
+
+            // Get restaurant-specific data
+            $restaurantData = compact('reservationCounts', 'reservationRequests', 'todaysApprovedReservationsCount');
+            
+            // Return both restaurant and user data
+            return view('dashboard', compact('restaurantData'));
+        } elseif (Auth::check() && auth()->user()->role_id == '4') {
+            // For regular users with role ID 4
+            $totalUsers = User::count();
+            $approvedRestaurants = Restaurant::where('status', 'Approved')->count();
+            $pendingRequests = Restaurant::where('status', 'Pending')->count();
+
+            // Get user-specific data
+            $userData = compact('totalUsers', 'approvedRestaurants', 'pendingRequests');
+
+            // Return both restaurant and user data
+            return view('dashboard', compact('userData'));
+        } else {
+            // If neither restaurant nor regular user is authenticated
+            abort(403, 'Unauthorized access');
         }
-    
-        // Count total users, approved restaurants, and pending requests
-        $totalUsers = User::count();
-        $approvedRestaurants = Restaurant::where('status', 'Approved')->count();
-        $pendingRequests = Restaurant::where('status', 'Pending')->count();
-        
-        // Count reservation requests for the authenticated restaurant
-        $reservationRequests = Reservation::where('status', 'Pending')
-            ->where('restaurant_id', $restaurantId)
-            ->count();
-    
-        // Count today's approved reservations for the authenticated restaurant
-        $todaysApprovedReservationsCount = Reservation::whereDate('date', Carbon::today())
-            ->where('status', 'Approved')
-            ->where('restaurant_id', $restaurantId)
-            ->count();
-    
-        return view('dashboard', compact('totalUsers', 'approvedRestaurants', 'pendingRequests', 'reservationRequests', 'todaysApprovedReservationsCount', 'reservationCounts'));
     }
+
+    
 
     public function userDashboard()
     {
@@ -279,6 +273,41 @@ class UserController extends Controller
         return view('forgot_password');
     }
 
+    public function ForgetPasswordStore(Request $request)
+    {
+        // Validate the email input
+        $request->validate([
+            'email' => 'required|email',
+        ]);
+    
+        // Check if the user exists
+        $user = User::where('email', $request->email)->first();
+    
+        if (!$user) {
+            return back()->withErrors(['email' => 'Email not found.']);
+        }
+    
+        // Generate a new password
+        $newPassword = Str::random(8); // Generate an 8-character random password
+    
+        // Update the user's password
+        $user->password = Hash::make($newPassword);
+        $user->save();
+    
+        // Send the new password to the user via email
+        $sent = Mail::to($request->email)->send(new ForgotPassword($newPassword));
+    
+        // Check if the email sending failed
+        if (!$sent) {
+            // Email sending failed
+            return back()->withErrors(['email' => 'Failed to send the new password.']);
+        }
+    
+        // Email sent successfully
+        // Redirect to the login page and display a SweetAlert notification
+        return redirect('/login')->with('status', 'success');
+    }
+
     public function validateUserForm(Request $request)
     {
         // Get the User name from the request
@@ -329,15 +358,21 @@ class UserController extends Controller
     
     public function edit(Request $req, User $user)
     {
+        $loggedInUserRole = auth()->user()->role_id;
+    
         $user->name = $req->input('name');
-        $user->role_id = $req->input('role_id');
         $user->email = $req->input('email');
         $user->phone_num = $req->input('phone_num');
-        $role = Role::where('id', $user->role_id)->first();
-        if($role)
-        {
-            
-            $user->role_id = $role->id;
+    
+        if ($loggedInUserRole == 4) {
+            $user->role_id = $req->input('role_id');
+        } elseif ($loggedInUserRole == 5) {
+            $user->role_id = 5;
+        }
+    
+        $role = Role::find($user->role_id);
+    
+        if ($role) {
             $user->save();
     
             $response = [
@@ -346,9 +381,7 @@ class UserController extends Controller
             ];
     
             return response()->json($response, 200);
-        }
-        else
-        {
+        } else {
             $response = [
                 'status' => 'error',
                 'message' => 'Role not found'
@@ -357,6 +390,7 @@ class UserController extends Controller
             return response()->json($response, 404);
         }
     }
+    
 
     public function updatePic(Request $req, User $user)
     {
@@ -408,6 +442,7 @@ class UserController extends Controller
         $reservation->party_size = $request->input('party_size');
         $reservation->remark = $request->input('remark');
         $reservation->status = "Pending";
+        $reservation->completeness = "Pending";
         
         $reservation->save();
 

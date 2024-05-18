@@ -44,6 +44,7 @@ Route::post('/login',[UserController::class, 'login']);
 Route::get('/user/register',[UserController::class, 'userRegister'])->name('register_page');
 Route::get('/logout',[UserController::class, 'logout'])->name('logout');
 Route::get('/forget-password', [UserController::class, 'forgotPassword'])->name('forgot_password_page');
+Route::post('/forgot-password', [UserController::class, 'ForgetPasswordStore'])->name('ForgetPasswordPost');
 
 //restaurant_auth
 Route::get('/res-tau-rant/logout',[RestaurantController::class, 'logout'])->name('res_logout');
@@ -84,6 +85,8 @@ Route::post('/reservation-make',[UserController::class, 'makeReservation'])->nam
 Route::get('/record', [UserController::class, 'reservationRecord'])->name('reservation_record');
 Route::post('/approve-reservation/{id}',[RestaurantController::class, 'approveReservation'])->name('approve_reservation');
 Route::get('/reserve/approve', [RestaurantController::class, 'approveResPage'])->name('approve_page');
+Route::post('/update-completeness/{id}', [RestaurantController::class, 'updateCompleteness'])->name('update_completeness');
+Route::get('/done-reservations', [RestaurantController::class, 'showDoneReservations'])->name('done_reservations');
 Route::post('/reject-reservation/{id}',[RestaurantController::class, 'rejectReservation'])->name('reject_reservation');
 Route::get('/reserve/reject', [RestaurantController::class, 'rejectResPage'])->name('reject_page');
 Route::post('/cancel-reservation/{id}', [UserController::class, 'cancelReservation'])->name('cancel_reservation');

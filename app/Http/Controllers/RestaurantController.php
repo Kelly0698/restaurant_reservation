@@ -188,7 +188,14 @@ class RestaurantController extends Controller
         return response()->json(['message' => 'Status updated successfully']);
     }
     
-    
+    public function updateCompleteness($id)
+    {
+        $reservation = Reservation::findOrFail($id);
+        $reservation->completeness = 'Done';
+        $reservation->save();
+
+        return redirect()->back()->with('success', 'Reservation marked as complete.');
+    }
 
     public function edit(Restaurant $restaurant, Request $req)
     {
@@ -324,14 +331,22 @@ class RestaurantController extends Controller
         // Get the authenticated restaurant
         $restaurant = Auth::guard('restaurant')->user();
 
-        // Retrieve approved reservations for the current restaurant
-        $approvedReservations = Reservation::where([
-            ['status', 'Approved'],
-            ['restaurant_id', $restaurant->id]
-        ])->get();
-        
-        // Pass the approved reservation records to the view
+        // Fetch reservations with completeness 'Pending' and 'No_Show'
+        $approvedReservations = Reservation::where('status', 'Approved')
+                                           ->whereIn('completeness', ['Pending', 'No_Show'])
+                                           ->get();
+
         return view('approved_reservation', compact('approvedReservations'));
+    }
+
+    public function showDoneReservations()
+    {
+        // Fetch reservations with completeness 'Done'
+        $doneReservations = Reservation::where('status', 'Approved')
+                                       ->where('completeness', 'Done')
+                                       ->get();
+
+        return view('complete_reservation', compact('doneReservations'));
     }
 
     public function rejectReservation($id)

@@ -22,6 +22,7 @@ return new class extends Migration
             $table->string('party_size'); 
             $table->string('remark')->nullable();
             $table->string('status');
+            $table->string('completeness');
             $table->timestamps();
         });
     }

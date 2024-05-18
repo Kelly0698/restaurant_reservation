@@ -114,12 +114,12 @@
       <li class="nav-item">
         <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
       </li>
-      <li class="nav-item d-none d-sm-inline-block">
+      <!-- <li class="nav-item d-none d-sm-inline-block">
         <a href="index3.html" class="nav-link">Home</a>
       </li>
       <li class="nav-item d-none d-sm-inline-block">
         <a href="#" class="nav-link">Contact</a>
-      </li>
+      </li> -->
     </ul>
 
     <!-- Right navbar links -->
@@ -296,18 +296,18 @@
           @if(auth()->check() && auth()->user()->role_id == '5')
           <li class="nav-header" style="color: white !important;">RESERVATION</li>
           <li class="nav-item">
-            <a href="{{ route('reservation_record') }}" class="nav-link">
-                <i class="nav-icon fas fa-clipboard-list"></i>
-                <p>Reservation Record</p>
-            </a>
-          </li>
-          @endif
-          @if(auth()->check() && auth()->user()->role_id == '5')
-          <li class="nav-item">
               <a href="{{ route('pending_reservation') }}" class="nav-link">
                   <i class="nav-icon fas fa-clock"></i>
                   <p>Pending Reservation</p>
               </a>
+          </li>
+          @endif
+          @if(auth()->check() && auth()->user()->role_id == '5')
+          <li class="nav-item">
+            <a href="{{ route('reservation_record') }}" class="nav-link">
+                <i class="nav-icon fas fa-clipboard-list"></i>
+                <p>Reservation Record</p>
+            </a>
           </li>
           @endif
           @if(Auth::guard('restaurant')->check())
@@ -322,6 +322,12 @@
                 <i class="nav-icon fas fa-times-circle"></i>
                 <p>Rejected Reservation</p>
             </a>
+          </li>
+          <li class="nav-item">
+              <a href="{{ route('done_reservations') }}" class="nav-link">
+                  <i class="nav-icon fas fa-thumbs-up"></i>
+                  <p>Completed Reservation</p>
+              </a>
           </li>
           <li class="nav-header" style="color: white !important;">HOLIDAY</li>
           <li class="nav-item">

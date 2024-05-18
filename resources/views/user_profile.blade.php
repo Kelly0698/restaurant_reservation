@@ -37,20 +37,6 @@
                         </div>
 
                         <div class="form-group">
-                            <label for="role" class="col-form-label">Role Position</label>
-                            <p id="role-text" style="display:block">&nbsp{{ Auth::user()->role->role_name }}</p>
-                            <select class="form-control" name="role_id" id="role-input" style="display:none">
-                                <option value="{{ Auth::user()->role_id }}">{{ Auth::user()->role->role_name }}</option>
-                                <optgroup label="-------------------------------------------------------------------------------------------------------------------------------------"></optgroup>
-                                @foreach($role as $roles)
-                                    <option value="{{ $roles->id }}" {{ Auth::user()->roles_id == $roles->id ? 'selected' : '' }} style="border-bottom: 1px solid #ccc">
-                                        {{ $roles->role_name }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
-
-                        <div class="form-group">
                             <label for="email" style="font-size: 1em;">Email</label>
                             <p id="email-text" style="display:block">&nbsp{{ Auth::user()->email }}</p>
                             <input style="display:none" type="email" class="form-control" name="email" id="email-input" value="{{ Auth::user()->email }}" >
@@ -138,12 +124,12 @@ $(function(){
     $('#edit-btn').on('click', function() {
         // Show input fields and hide text fields
         document.getElementById('name-text').style.display = "none";
-        document.getElementById('role-text').style.display = "none";
+
         document.getElementById('email-text').style.display = "none";
         document.getElementById('phone-num-text').style.display = "none";
 
         document.getElementById('name-input').style.display = "block";
-        document.getElementById('role-input').style.display = "block";
+
         document.getElementById('email-input').style.display = "block";
         document.getElementById('phone-num-input').style.display = "block";
         document.getElementById('profile_pic-input').style.display = "block";

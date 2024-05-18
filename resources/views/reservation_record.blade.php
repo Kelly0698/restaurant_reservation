@@ -31,7 +31,7 @@
                                     @endif
                                 </p>
                                 <div class="text-left">
-                                    @if($reservation->status === 'Approved' && \Carbon\Carbon::parse($reservation->date . ' ' . $reservation->time) < \Carbon\Carbon::now())
+                                @if($reservation->status === 'Approved' && \Carbon\Carbon::parse($reservation->date . ' ' . $reservation->time) < \Carbon\Carbon::now() && $reservation->completeness === 'Done')
                                         @if(!$reservation->rating)
                                         <div id="ratingForm_{{ $reservation->id }}" style="display: none;">
                                             <form class="rating-form" data-reservation-id="{{ $reservation->id }}">

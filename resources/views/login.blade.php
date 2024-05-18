@@ -79,7 +79,7 @@
    
                 <div class="form-group">
                     <input id="password" name="password" type="password" class="form-control" placeholder="Password" value="" style="border-radius: 15px;">
-                    <a href="/forget-password" class="text-right d-block small" style="color: #002dce;">Forget Password?</a>
+                    <a href="/forget-password" class="text-right d-block small" style="color: #002dce;">Forgot Password?</a>
                 </div>
                 <br>
                 <div class="text-center">
@@ -107,11 +107,11 @@
   </script>
   @endif
 
-  @if(session('status')=="Pass")
+  @if(session('status')=="success")
   <script>                    
   Swal.fire({
         title: 'Success',
-        text: 'We have emailed your password reset link!',
+        text: 'We have emailed the new password! Check your inbox to login again.',
         icon: 'Success',
     });
   </script>
@@ -126,5 +126,6 @@
     });
   </script>
   @endif
+
 </body>
 </html>
