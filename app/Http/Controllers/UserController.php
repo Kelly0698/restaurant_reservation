@@ -81,9 +81,18 @@ class UserController extends Controller
     {
         $roles = Role::all();
         $users = User::all();
-        $restaurants = Restaurant::all();
+    
+        $restaurants = Restaurant::with('ratings')
+            ->where('status', 'Approved') // Filter restaurants by status
+            ->get()
+            ->map(function ($restaurant) {
+                $restaurant->averageRating = $restaurant->ratings->avg('mark') ?? 0;
+                return $restaurant;
+            })
+            ->sortByDesc('averageRating');
+    
         $attachments = Attachment::all();
-
+    
         return view('user_dashboard', [
             'roles' => $roles,
             'users' => $users,
@@ -91,22 +100,7 @@ class UserController extends Controller
             'attachments' => $attachments,
         ]);
     }
-
-    // public function userDashboard()
-    // {
-    //     $roles = Role::all();
-    //     $users = User::all();
-    //     $restaurants = Restaurant::where('status', 'approved')->get();
-    //     $attachments = Attachment::all();
     
-    //     return view('user_dashboard', [
-    //         'roles' => $roles,
-    //         'users' => $users,
-    //         'restaurants' => $restaurants,
-    //         'attachments' => $attachments,
-    //     ]);
-    // }
-
     public function viewRestaurant($id)
     {
         $restaurant = Restaurant::findOrFail($id);

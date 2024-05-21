@@ -165,12 +165,31 @@
         });
     };
 
-    function checkData2(){ 
-        var check = $('#email').val();
+    function checkData2(input){ 
+        var check = $(input).val();
         var formData = new FormData();
-        formData.append("email", check);
+        var id = $(input).attr('id');
+
+        if (id === 'email') {
+            var emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+            if (!emailPattern.test(check)) {
+                document.getElementById("email_name_error").innerHTML ="*Invalid Email Format!";
+                return;
+            }
+            document.getElementById("email_name_error").innerHTML ="";
+            formData.append("email", check);
+        } else if (id === 'phone_num') {
+            var phonePattern = /^\+?[1-9]\d{1,14}$/;
+            if (!phonePattern.test(check)) {
+                document.getElementById("phone_num_error").innerHTML ="*Invalid Phone Number Format!";
+                return;
+            }
+            document.getElementById("phone_num_error").innerHTML ="";
+            formData.append("phone_num", check);
+        }
+
         formData.append("_token", "{{csrf_token()}}");
-        console.log(check);
+
         //submit to backend
         $.ajax({
             type: "post",
@@ -180,10 +199,18 @@
             contentType: false,
             success: function (response) {
                 console.log("success");
-                document.getElementById("email_name_error").innerHTML ="";
+                if (id === 'email') {
+                    document.getElementById("email_name_error").innerHTML ="";
+                } else if (id === 'phone_num') {
+                    document.getElementById("phone_num_error").innerHTML ="";
+                }
             },
             error: function (error) {
-            document.getElementById("email_name_error").innerHTML ="*This Email Is Exist!";
+                if (id === 'email') {
+                    document.getElementById("email_name_error").innerHTML ="*This Email Is Exist!";
+                } else if (id === 'phone_num') {
+                    document.getElementById("phone_num_error").innerHTML ="*Invalid Phone Number Format!";
+                }
             }
         });
     };
@@ -192,39 +219,70 @@
         e.preventDefault();
 
         var formData = new FormData(this);
+
+        // Validate email format
+        var email = $('#email').val();
+        var emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+        if (!emailPattern.test(email)) {
+            document.getElementById("email_name_error").innerHTML ="*Invalid Email Format!";
+            return;
+        }
+
+        // Validate phone number format
+        var phoneNum = $('#phone_num').val();
+        var phonePattern = /^\+?[1-9]\d{1,14}$/;
+        if (!phonePattern.test(phoneNum)) {
+            document.getElementById("phone_num_error").innerHTML ="*Invalid Phone Number Format!";
+            return;
+        }
+
+        // Check for duplicate email
         $.ajax({
             type: "POST",
-            url: "/add/user",
-            beforeSend: function() {
-                loadingModal();
-            }, 
-            data: formData,
-            contentType: false,
-            processData: false,
-            success: function(response) {
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Success',
-                    text: 'User added successfully!'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        window.location.href = "{{ route('user_list') }}";
-                    }
-                });
+            url: "/check/user",
+            data: { email: email, _token: "{{ csrf_token() }}" },
+            success: function (response) {
+                if (response.exists) {
+                    document.getElementById("email_name_error").innerHTML = "*This Email Is Exist!";
+                } else {
+                    $.ajax({
+                        type: "POST",
+                        url: "/add/user",
+                        beforeSend: function() {
+                            loadingModal();
+                        }, 
+                        data: formData,
+                        contentType: false,
+                        processData: false,
+                        success: function(response) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Success',
+                                text: 'User added successfully!'
+                            }).then((result) => {
+                                if (result.isConfirmed) {
+                                    window.location.href = "{{ route('user_list') }}";
+                                }
+                            });
+                        },
+                        error: function(xhr, status, error) {
+                            console.log(xhr.responseText);
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: 'There was an error adding the user: ' + error
+                            });
+                        }
+                    });
+                }
             },
-            error: function(xhr, status, error) {
-                console.log(xhr.responseText);
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: 'There was an error adding the user: ' + error
-                });
+            error: function (error) {
+                console.log(error);
+                document.getElementById("email_name_error").innerHTML = "*Error checking email!";
             }
         });
     });
-</script>
 
-<script>
     $('.delete-btn').click(function (e) {
         e.preventDefault(); // avoid executing the actual submit of the form.
         var id = $(this).data('id');
@@ -280,3 +338,4 @@
     });
 </script>
 @endsection
+

@@ -85,13 +85,13 @@
                 <div class="form-group">
                 <label for="name" class="col-form-label">Role:</label>
                 <span class="text-danger">*</span>
-                <input type="text" class="form-control" id="role_name" onchange="checkDataAdd(this)" name="role_name" required>
+                <input type="text" class="form-control" id="role_name" name="role_name" required>
                 <div id="role_name_error" class="text-danger" style="font-size:12px"></div>
                 </div>
                 <div class="form-group">
                 <label for="level" class="col-form-label">Level:</label>
                 <span class="text-danger">*</span>
-                <input type="text" class="form-control" id="level" name="level" required>
+                <input type="number" class="form-control" id="level" name="level" required>
                 <div class="text-muted" style="font-size: 12px;">Level 1 is the lowest level (integer only)</div>
                 </div>
                 <div class="form-group">
@@ -141,7 +141,7 @@
                 <div class="form-group">
                     <label for="level" class="col-form-label">Level:</label>
                     <p id="level-text" style="display:block">&nbsp{{ $item->level }}</p>
-                    <input type="text" class="form-control" name="level" id="level-input" value="{{ $item->level }}" style="display: none;">
+                    <input type="number" class="form-control" name="level" id="level-input" value="{{ $item->level }}" style="display: none;">
                 </div>
 
                 <div class="form-group">
@@ -169,21 +169,19 @@
 
 @section('scripts')
 <script>
-    function checkDataAdd() {
-        var check = $('#role_name').val();
+    function checkDataAdd(inputElement) {
+        var check = inputElement.value;
         var formData = new FormData();
         formData.append("role_name", check);
         formData.append("_token", "{{csrf_token()}}");
-        console.log(check);
-        // Submit to backend
+        
         $.ajax({
-            type: "post",
+            type: "POST",
             url: "/check/role",
             data: formData,
             processData: false,
             contentType: false,
             success: function (response) {
-                console.log("success");
                 document.getElementById("role_name_error").innerHTML = "";
             },
             error: function (error) {
@@ -191,13 +189,14 @@
             }
         });
     }
-</script>
 
-<script>
+    $('#role_name').on('input', function() {
+        checkDataAdd(this);
+    });
+
     $('#add_role').submit(function(e) {
         e.preventDefault();
         
-        // Convert role name to uppercase
         var roleNameInput = $('#role_name');
         roleNameInput.val(roleNameInput.val().toUpperCase());
         
@@ -226,10 +225,7 @@
             }
         });
     });
-</script>
 
-
-<script>
     $('.delete-btn').click(function (e) {
         e.preventDefault(); // avoid executing the actual submit of the form.
         var id = $(this).data('id');
@@ -283,9 +279,7 @@
             }
         });
     });
-</script>
 
-<script>
     $(document).ready(function() {
         var roleIdToShow; // Variable to store the role ID when show role button is clicked
 

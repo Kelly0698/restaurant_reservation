@@ -58,19 +58,14 @@ class RoleController extends Controller
 
     public function validateRoleForm(Request $request)
     {
-        // Get the project name from the request
-        $role_name = $request->input('role_name');
-    
-        // Check if the project name already exists in the database
-        $duplicateRole = Role::where('role_name', $role_name)->first();
- 
-        if ($duplicateRole) {
-            // Project name already exists, return error response
-            return response()->json(['status' => 'error', 'message' => 'This role name is already exist!'], 500);
-        } else {
-            // Project name does not exist, return success response
-            return response()->json(['status' => 'success', 'message' => 'Role name is unique'], 200);
+        $roleName = $request->input('role_name');
+        $exists = Role::where('role_name', $roleName)->exists();
+
+        if ($exists) {
+            return response()->json(['message' => 'Role name already exists'], 400);
         }
+
+        return response()->json(['message' => 'Role name is available'], 200);
     }
 
     public function edit(Request $req, Role $role)

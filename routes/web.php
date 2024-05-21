@@ -79,6 +79,7 @@ Route::get('/your-profile',[RestaurantController::class, 'restaurant_profile'])-
 Route::post('/logo-pic/update/{restaurant}',[RestaurantController::class, 'updateLogo'])->name('update_logo');
 Route::post('/upload-picture', [RestaurantController::class, 'uploadPicture'])->name('upload_picture');
 Route::delete('/pic-delete/{id}',[RestaurantController::class, 'deleteAttachment'])->name('pic_delete');
+Route::post('/check/restaurant/email', [RestaurantController::class, 'checkEmail'])->name('check.email');
 
 //reservation
 Route::post('/reservation-make',[UserController::class, 'makeReservation'])->name('make_reservation');

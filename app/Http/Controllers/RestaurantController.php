@@ -375,4 +375,12 @@ class RestaurantController extends Controller
         // Pass the approved reservation records to the view
         return view('rejected_reservation', compact('rejectedReservations'));
     }
+
+    public function checkEmail(Request $request)
+    {
+        $email = $request->input('email');
+        $exists = Restaurant::where('email', $email)->exists();
+
+        return response()->json(['exists' => $exists]);
+    }
 }

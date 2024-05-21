@@ -117,11 +117,10 @@
                 <div class="form-group">
                     <label for="name" class="col-form-label">Name:</label>
                     <input type="text" class="form-control" id="name" name="name" required>
-                    <div id="user_name_error" style="font-size:12px" class="text-danger"></div>
                 </div>
                 <div class="form-group">
                     <label for="email" class="col-form-label">Email:</label>
-                    <input type="email" class="form-control" id="email" name="email" required>
+                    <input type="email" class="form-control" id="email" name="email" onchange="checkEmail(this)" required>
                     <div id="email_name_error" style="font-size:12px" class="text-danger"></div>
                 </div>
                 <div class="form-group">
@@ -153,7 +152,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn blue" data-dismiss="modal">Close</button>
-                    <button type="submit" class="btn yellow" >Add</button>
+                    <button type="submit" class="btn yellow">Add</button>
                 </div>
             </form>
             </div>
@@ -165,8 +164,48 @@
 
 @section('scripts')
 <script>
+    function checkEmail(input) {
+        var email = input.value;
+        var formData = new FormData();
+        formData.append("email", email);
+        formData.append("_token", "{{ csrf_token() }}");
+
+        $.ajax({
+            type: "POST",
+            url: "{{ route('check.email') }}",
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function(response) {
+                if (response.exists) {
+                    document.getElementById("email_name_error").innerHTML = "*This Email Is Exist!";
+                } else {
+                    document.getElementById("email_name_error").innerHTML = "";
+                }
+            },
+            error: function(xhr) {
+                document.getElementById("email_name_error").innerHTML = "*Error checking email!";
+            }
+        });
+    }
+
     $('#restaurant_add').submit(function(e) {
         e.preventDefault();
+
+        var emailError = document.getElementById("email_name_error").innerHTML;
+        if (emailError !== "") {
+            return;
+        }
+
+        var phone_num = $('#phone_num').val();
+        var phonePattern = /^[\d\s()+-]+$/;
+
+        if (!phonePattern.test(phone_num)) {
+            document.getElementById("phone_num_error").innerHTML = "*Invalid phone number format!";
+            return;
+        } else {
+            document.getElementById("phone_num_error").innerHTML = "";
+        }
 
         var formData = new FormData(this);
         $.ajax({
@@ -199,8 +238,7 @@
             }
         });
     });
-</script>
-<script>
+
     $('.delete-btn').click(function (e) {
         e.preventDefault(); // avoid executing the actual submit of the form.
         var id = $(this).data('id');

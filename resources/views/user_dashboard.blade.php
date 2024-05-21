@@ -2,49 +2,41 @@
 @section('title','home')
 @section('content')
 <head>
-    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-
     <style>
         .recommended-restaurants {
             overflow-x: auto;
         }
-
         .restaurants-container {
             display: flex;
             flex-wrap: nowrap;
             justify-content: space-between;
-            padding-bottom: 20px; /* Adjust as needed */
+            padding-bottom: 20px;
         }
-
         .restaurant-card {
-            flex: 0 0 20%; /* Each card occupies approximately 30% of the container width */
+            flex: 0 0 20%;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            padding: 10px; /* Add padding to the cards */
-            margin: 0 5px; /* Add margin to the cards */
-            border: 1px solid #ccc; /* Add outline to the card */
-            border-radius: 8px; /* Optional: Add border radius for a rounded look */
+            padding: 10px;
+            margin: 0 5px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
         }
-
         .restaurant-card a {
             display: block;
             text-align: center;
         }
-        
         .restaurant-card:last-child {
             margin-right: 0;
             border: 0px solid #ccc;
         }
-
         .restaurant-img {
             display: flex;
             justify-content: center;
             margin-bottom: 20px;
             margin-top: 20px;
         }
-
         .restaurant-img img {
             border-radius: 50%;
             overflow: hidden;
@@ -52,11 +44,9 @@
             width: 170px;
             height: 170px;
         }
-
         .restaurant-name {
             text-align: center;
         }
-
         .show-more-btn {
             margin: 10px auto;
             cursor: pointer;
@@ -64,31 +54,40 @@
             color: #052d64;
             font-size: 20px;
         }
-
         .rating {
-        font-size: 24px; /* Adjust the size of the stars */
+            font-size: 24px;
         }
-
-        .rating .fa-star {
-            color: #ffc107; /* Set color for filled stars */
-            
+        .rating .fa-star,
+        .rating .fa-star-half-o,
+        .rating .fa-star-o {
+            position: relative;
+            color: #ffc107;
+            border: 1px solid transparent;
         }
-
-        .rating .far.fa-star {
-            /* Use the Font Awesome outlined star icon for empty stars */
-            color: transparent; /* Set transparent color for the outlined star */
-            border: 1px solid yellow !important; /* Add border to create an outline */
-            padding: 0 3px; /* Adjust padding to maintain the shape */
+        .rating .fa-star-o::before,
+        .rating .fa-star-half-o::before {
+            content: '\f005';
+            position: relative;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            color: transparent;
+            -webkit-text-stroke: 1px #ffc107;
         }
-
-        .rating .fas.fa-star-half-alt {
-            /* Use the Font Awesome half-filled star icon */
-            color: #ffc107; /* Set color for the half-filled star */
+        .rating .fa-star-half-o::after {
+            content: '\f089';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 50%;
+            height: 100%;
+            overflow: hidden;
+            color: #ffc107;
+            -webkit-text-stroke: 0;
         }
     </style>
-
 </head>
-
 <div class="content-wrapper">
     <div class="container-fluid">
         <br><br><br><br>
@@ -121,39 +120,21 @@
                                     <img src="{{ asset('assets/dist/img/defaultPic.png') }}" alt="Default">
                                 @endif
                             </div>
-                            <p class="lucida-handwriting" style="font-size: 20px; color: #052d64; ">{{ $restaurant->name }}</p>
+                            <p class="lucida-handwriting" style="font-size: 20px; color: #052d64;">{{ $restaurant->name }}</p>
                         </a>
                         <div class="d-flex justify-content-center">
                             <div class="rating">
                                 @php
-                                    // Retrieve ratings for the current restaurant
-                                    $ratings = $restaurant->ratings;
-                                    
-                                    // Calculate average rating
-                                    $totalRating = 0;
-                                    $count = count($ratings);
-                                    foreach ($ratings as $rating) {
-                                        $totalRating += $rating->mark;
-                                    }
-                                    $averageRating = $count > 0 ? $totalRating / $count : 0;
-
-                                    // Determine the number of filled stars
+                                    $averageRating = $restaurant->averageRating;
                                     $filledStars = floor($averageRating);
-                                    // Determine if there should be a half-filled star
                                     $halfStar = $averageRating - $filledStars >= 0.5;
                                 @endphp
-
-                                <!-- Display filled stars -->
                                 @for ($i = 0; $i < $filledStars; $i++)
                                     <span class="fa fa-star"></span>
                                 @endfor
-
-                                <!-- Display half-filled star if needed -->
                                 @if ($halfStar)
                                     <span class="fa fa-star-half-o"></span>
                                 @endif
-
-                                <!-- Display empty stars -->
                                 @for ($i = $filledStars + ($halfStar ? 1 : 0); $i < 5; $i++)
                                     <span class="fa fa-star-o"></span>
                                 @endfor
@@ -191,15 +172,23 @@
             }
         }
 
-        // Add placeholder elements if there are fewer than 4 cards
-        var remaining = 4 - count;
-        if (remaining > 0) {
-            var placeholderHtml = '';
-            for (var j = 0; j < remaining; j++) {
-                placeholderHtml += '<div class="col-md-4 restaurant-card"></div>';
-            }
-            document.getElementById('restaurants-container').insertAdjacentHTML('beforeend', placeholderHtml);
+        // Add placeholder elements if there are fewer than 4 cards or no cards at all
+        var remaining = Math.max(4 - count, 0);
+        var placeholderHtml = '';
+        for (var j = 0; j < remaining; j++) {
+            placeholderHtml += '<div class="col-md-4 restaurant-card"></div>';
         }
+        document.getElementById('restaurants-container').innerHTML += placeholderHtml;
+
+        // Apply border style only to cards representing actual restaurants, not placeholders
+        var allCards = document.querySelectorAll('.restaurant-card');
+        allCards.forEach(function(card) {
+            if (card.querySelector('*')) { // Check if card contains any child element
+                card.style.border = '1px solid #ccc';
+            } else {
+                card.style.border = 'none'; // Remove border from empty placeholders
+            }
+        });
 
         if (currentPage < totalPages) {
             document.getElementById('next-btn').style.display = 'block';
@@ -231,6 +220,4 @@
     // Initially show the first page
     showPage(currentPage);
 </script>
-
-
 @endsection
