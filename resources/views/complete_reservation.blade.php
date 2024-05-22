@@ -4,6 +4,25 @@
 <div class="content-wrapper">
     <div class="container-fluid">
         <div class="row">
+            <div class="col-12">
+                <div class="search-bar">
+                    <form action="{{ route('done_reservations') }}" method="GET">
+                        <div class="input-group mb-3">
+                            <input type="text" class="form-control rounded-pill" placeholder="Search Record (User Name, Time, Party Size, Remark)" name="query" style="width: 50%;" value="{{ request('query') }}">
+                            <input type="date" class="form-control rounded-pill" name="date" style="width: 20%;" value="{{ request('date') }}">
+                            <select class="form-control rounded-pill" name="sort_order">
+                                <option value="asc" {{ request('sort_order') == 'asc' ? 'selected' : '' }}>Asc</option>
+                                <option value="desc" {{ request('sort_order') == 'desc' ? 'selected' : '' }}>Desc</option>
+                            </select>
+                            <div class="input-group-append">
+                                <button class="btn btn-outline-secondary yellow rounded-pill" type="submit">Search</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="row">
             @foreach($doneReservations as $reservation)
             <div class="col-md-4 mb-3"> 
                 <div class="card bg-light d-flex flex-fill">

@@ -94,14 +94,14 @@
         <!-- Search Bar -->
         <div class="text-center" style="max-width: 800px; margin: 0 auto;">
             <div class="search-bar">
-                <form action="" method="GET">
-                    <div class="input-group mb-3">
-                        <input type="text" class="form-control rounded-pill" placeholder="Search for restaurants" name="query" style="width: 70%;">
-                        <div class="input-group-append">
-                            <button class="btn btn-outline-secondary yellow rounded-pill" type="submit" style="width: 100%;">Search</button>
-                        </div>
+            <form action="{{ route('search_restaurants') }}" method="GET">
+                <div class="input-group mb-3">
+                    <input type="text" class="form-control rounded-pill" placeholder="Search for restaurants" name="query" style="width: 70%;">
+                    <div class="input-group-append">
+                        <button class="btn btn-outline-secondary yellow rounded-pill" type="submit" style="width: 100%;">Search</button>
                     </div>
-                </form>
+                </div>
+            </form>
             </div>
         </div>
         <br><br><br><br>

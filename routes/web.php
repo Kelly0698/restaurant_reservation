@@ -66,6 +66,7 @@ Route::post('/update-profile-pic/{user}',[UserController::class, 'updatePic'])->
 Route::get('/profile-user',[UserController::class, 'user_profile'])->name('user_profile');
 Route::get('/view/restaurant/{id}', [UserController::class, 'viewRestaurant'])->name('view_restaurant');
 Route::get('/get-ratings', [UserController::class, 'getRatings'])->name('get_ratings');
+Route::get('/search-restaurants', [UserController::class, 'search'])->name('search_restaurants');
 
 //restaurant
 Route::get('/restaurant',[RestaurantController::class, 'index'])->name('restaurant_list');
@@ -84,7 +85,7 @@ Route::post('/check/restaurant/email', [RestaurantController::class, 'checkEmail
 //reservation
 Route::post('/reservation-make',[UserController::class, 'makeReservation'])->name('make_reservation');
 Route::get('/record', [UserController::class, 'reservationRecord'])->name('reservation_record');
-Route::post('/approve-reservation/{id}',[RestaurantController::class, 'approveReservation'])->name('approve_reservation');
+Route::get('/approve-reservations', [RestaurantController::class, 'approveResPage'])->name('approve_reservation');
 Route::get('/reserve/approve', [RestaurantController::class, 'approveResPage'])->name('approve_page');
 Route::post('/update-completeness/{id}', [RestaurantController::class, 'updateCompleteness'])->name('update_completeness');
 Route::get('/done-reservations', [RestaurantController::class, 'showDoneReservations'])->name('done_reservations');

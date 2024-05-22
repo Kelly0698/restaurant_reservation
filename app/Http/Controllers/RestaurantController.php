@@ -326,28 +326,116 @@ class RestaurantController extends Controller
         return redirect()->back()->with('success', 'Reservation request approved successfully.');
     }
 
-    public function approveResPage()
+    // public function approveResPage()
+    // {
+    //     // Get the authenticated restaurant
+    //     $restaurant = Auth::guard('restaurant')->user();
+
+    //     // Fetch reservations with completeness 'Pending' and 'No_Show'
+    //     $approvedReservations = Reservation::where('status', 'Approved')
+    //                                        ->whereIn('completeness', ['Pending', 'No_Show'])
+    //                                        ->get();
+
+    //     return view('approved_reservation', compact('approvedReservations'));
+    // }
+
+    public function approveResPage(Request $request)
     {
         // Get the authenticated restaurant
         $restaurant = Auth::guard('restaurant')->user();
-
-        // Fetch reservations with completeness 'Pending' and 'No_Show'
-        $approvedReservations = Reservation::where('status', 'Approved')
-                                           ->whereIn('completeness', ['Pending', 'No_Show'])
-                                           ->get();
-
+    
+        // Get query parameters
+        $query = $request->input('query');
+        $date = $request->input('date');
+        $sort = $request->input('sort', 'asc'); // Default sort order is ascending
+    
+        // Build the query
+        $reservationsQuery = Reservation::where('status', 'Approved')
+                                        ->whereIn('completeness', ['Pending', 'No_Show']);
+    
+        // Apply search filter if query is provided
+        if ($query) {
+            $reservationsQuery->where(function ($q) use ($query) {
+                $q->whereHas('user', function ($userQuery) use ($query) {
+                    $userQuery->where('name', 'LIKE', "%{$query}%");
+                })
+                ->orWhereHas('restaurant', function ($restaurantQuery) use ($query) {
+                    $restaurantQuery->where('name', 'LIKE', "%{$query}%");
+                })
+                ->orWhere('time', 'LIKE', "%{$query}%")
+                ->orWhere('remark', 'LIKE', "%{$query}%")
+                ->orWhere('party_size', 'LIKE', "%{$query}%");
+            });
+        }
+    
+        // Apply date filter if date is provided
+        if ($date) {
+            $reservationsQuery->whereDate('date', $date);
+        }
+    
+        // Apply sorting
+        $reservationsQuery->orderBy('date', $sort);
+    
+        // Get the filtered, sorted reservations
+        $approvedReservations = $reservationsQuery->get();
+    
+        // Check if the request expects a JSON response (AJAX request)
+        if ($request->expectsJson()) {
+            return response()->json($approvedReservations);
+        }
+    
+        // For regular HTTP requests, return the view with data
         return view('approved_reservation', compact('approvedReservations'));
     }
 
-    public function showDoneReservations()
+    public function showDoneReservations(Request $request)
     {
-        // Fetch reservations with completeness 'Done'
-        $doneReservations = Reservation::where('status', 'Approved')
-                                       ->where('completeness', 'Done')
-                                       ->get();
-
+        // Define the base query to fetch completed reservations
+        $doneReservationsQuery = Reservation::where('status', 'Approved')
+                                            ->where('completeness', 'Done');
+    
+        // Retrieve request parameters for sorting
+        $sortField = $request->input('sort_by', 'date');
+        $sortOrder = $request->input('sort_order', 'asc');
+    
+        // Retrieve the search query parameter
+        $searchQuery = $request->input('query');
+    
+        // Retrieve the date query parameter
+        $dateQuery = $request->input('date');
+    
+        // Apply search filter if a query is provided
+        if ($searchQuery) {
+            $doneReservationsQuery->where(function ($query) use ($searchQuery) {
+                $query->whereHas('user', function ($userQuery) use ($searchQuery) {
+                    $userQuery->where('name', 'LIKE', '%' . $searchQuery . '%');
+                })
+                ->orWhereHas('restaurant', function ($restaurantQuery) use ($searchQuery) {
+                    $restaurantQuery->where('name', 'LIKE', '%' . $searchQuery . '%');
+                })
+                ->orWhere('time', 'LIKE', '%' . $searchQuery . '%')
+                ->orWhere('party_size', 'LIKE', '%' . $searchQuery . '%')
+                ->orWhere('remark', 'LIKE', '%' . $searchQuery . '%');
+            });
+        }
+    
+        // Apply date filter if a date is provided
+        if ($dateQuery) {
+            $doneReservationsQuery->whereDate('date', $dateQuery);
+        }
+    
+        // Apply sorting
+        $doneReservationsQuery->orderBy($sortField, $sortOrder);
+    
+        // Get the filtered and sorted reservations
+        $doneReservations = $doneReservationsQuery->get();
+    
+        // Pass the reservations to the view
         return view('complete_reservation', compact('doneReservations'));
     }
+    
+
+    
 
     public function rejectReservation($id)
     {
@@ -361,20 +449,48 @@ class RestaurantController extends Controller
         return redirect()->back()->with('success', 'Reservation request rejected');
     }
 
-    public function rejectResPage()
+    public function rejectResPage(Request $request)
     {
         // Get the authenticated restaurant
         $restaurant = Auth::guard('restaurant')->user();
-
-        // Retrieve approved reservations for the current restaurant
-        $rejectedReservations = Reservation::where([
+    
+        // Retrieve rejected reservations for the current restaurant
+        $query = $request->input('query');
+        $date = $request->input('date');
+        $sort = $request->input('sort', 'asc');
+    
+        $rejectedReservationsQuery = Reservation::where([
             ['status', 'Rejected'],
             ['restaurant_id', $restaurant->id]
-        ])->get();
-        
-        // Pass the approved reservation records to the view
+        ]);
+    
+        // Apply search filter if query is provided
+        if ($query) {
+            $rejectedReservationsQuery->where(function ($q) use ($query) {
+                $q->whereHas('user', function ($userQuery) use ($query) {
+                    $userQuery->where('name', 'LIKE', "%{$query}%");
+                })
+                ->orWhere('time', 'LIKE', "%{$query}%")
+                ->orWhere('party_size', 'LIKE', "%{$query}%")
+                ->orWhere('remark', 'LIKE', "%{$query}%");
+            });
+        }
+    
+        // Apply date filter if date is provided
+        if ($date) {
+            $rejectedReservationsQuery->whereDate('date', $date);
+        }
+    
+        // Apply sorting
+        $rejectedReservationsQuery->orderBy('date', $sort);
+    
+        $rejectedReservations = $rejectedReservationsQuery->get();
+    
+        // Pass the rejected reservation records to the view
         return view('rejected_reservation', compact('rejectedReservations'));
     }
+    
+    
 
     public function checkEmail(Request $request)
     {

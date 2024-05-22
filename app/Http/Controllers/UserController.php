@@ -75,7 +75,6 @@ class UserController extends Controller
         }
     }
 
-    
 
     public function userDashboard()
     {
@@ -98,6 +97,26 @@ class UserController extends Controller
             'users' => $users,
             'restaurants' => $restaurants,
             'attachments' => $attachments,
+        ]);
+    }
+
+    public function search(Request $request)
+    {
+        $query = $request->input('query');
+        $restaurants = Restaurant::where('name', 'LIKE', "%{$query}%")
+            ->orWhere('description', 'LIKE', "%{$query}%")
+            ->with('ratings')
+            ->where('status', 'Approved')
+            ->get()
+            ->map(function ($restaurant) {
+                $restaurant->averageRating = $restaurant->ratings->avg('mark') ?? 0;
+                return $restaurant;
+            })
+            ->sortByDesc('averageRating');
+
+        return view('search_restaurant_results', [
+            'restaurants' => $restaurants,
+            'query' => $query,
         ]);
     }
     
