@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\File;
 use App\Mail\RestaurantCreated;
 use App\Mail\RestaurantRegistrationSuccess;
 use App\Mail\RestaurantRegistrationRejected;
+use App\Mail\ReservationApprovalNotification;
 
 class RestaurantController extends Controller
 {
@@ -313,32 +314,6 @@ class RestaurantController extends Controller
         return response()->json(['status' => 'success'], 200);
     }
 
-    public function approveReservation($id)
-    {
-        // Find the reservation by ID
-        $reservation = Reservation::findOrFail($id);
-        
-        // Update the status to "Approved"
-        $reservation->status = 'Approved';
-        $reservation->save();
-        
-        // Redirect back with a success message
-        return redirect()->back()->with('success', 'Reservation request approved successfully.');
-    }
-
-    // public function approveResPage()
-    // {
-    //     // Get the authenticated restaurant
-    //     $restaurant = Auth::guard('restaurant')->user();
-
-    //     // Fetch reservations with completeness 'Pending' and 'No_Show'
-    //     $approvedReservations = Reservation::where('status', 'Approved')
-    //                                        ->whereIn('completeness', ['Pending', 'No_Show'])
-    //                                        ->get();
-
-    //     return view('approved_reservation', compact('approvedReservations'));
-    // }
-
     public function approveResPage(Request $request)
     {
         // Get the authenticated restaurant
@@ -433,19 +408,58 @@ class RestaurantController extends Controller
         // Pass the reservations to the view
         return view('complete_reservation', compact('doneReservations'));
     }
-    
 
+    public function approveReservation($id)
+    {
+        // Find the reservation by ID
+        $reservation = Reservation::findOrFail($id);
+        
+        // Update the status to "Approved"
+        $reservation->status = 'Approved';
+        $reservation->save();
+        
+        // Read the message types from the user
+        $messageTypes = ["WhatsApp", "Email"]; // Placeholder for user input
+        
+        // // Check if "WhatsApp" is selected
+        // if (in_array("WhatsApp", $messageTypes)) {
+        //     $restaurantName = $reservation->restaurant->name;
+        //     $clickedUser = $reservation->user;
+        //     $this->sendWhatsAppMessage($restaurantName, $clickedUser);
+        // } 
+        
+        // Check if "Email" is selected
+        if (in_array("Email", $messageTypes)) {
+            Mail::to($reservation->user->email)->send(new ReservationApprovalNotification($reservation, 'Approved'));
+        }
+        
+        return redirect()->back()->with('success', 'Reservation request approved successfully.');
+    }
     
-
     public function rejectReservation($id)
     {
         // Find the reservation by ID
         $reservation = Reservation::findOrFail($id);
         
+        // Update the status to "Rejected"
         $reservation->status = 'Rejected';
         $reservation->save();
         
-        // Redirect back with a success message
+        // Read the message types from the user
+        $messageTypes = ["WhatsApp", "Email"]; // Placeholder for user input
+        
+        // // Check if "WhatsApp" is selected
+        // if (in_array("WhatsApp", $messageTypes)) {
+        //     $restaurantName = $reservation->restaurant->name;
+        //     $clickedUser = $reservation->user;
+        //     $this->sendWhatsAppMessage($restaurantName, $clickedUser);
+        // } 
+        
+        // Check if "Email" is selected
+        if (in_array("Email", $messageTypes)) {
+            Mail::to($reservation->user->email)->send(new ReservationApprovalNotification($reservation, 'Rejected'));
+        }
+        
         return redirect()->back()->with('success', 'Reservation request rejected');
     }
 
@@ -490,8 +504,6 @@ class RestaurantController extends Controller
         return view('rejected_reservation', compact('rejectedReservations'));
     }
     
-    
-
     public function checkEmail(Request $request)
     {
         $email = $request->input('email');
@@ -499,4 +511,30 @@ class RestaurantController extends Controller
 
         return response()->json(['exists' => $exists]);
     }
+
+    
+    // public function approveReservation($id)
+    // {
+    //     // Find the reservation by ID
+    //     $reservation = Reservation::findOrFail($id);
+        
+    //     // Update the status to "Approved"
+    //     $reservation->status = 'Approved';
+    //     $reservation->save();
+        
+    //     // Redirect back with a success message
+    //     return redirect()->back()->with('success', 'Reservation request approved successfully.');
+    // }
+
+        // public function rejectReservation($id)
+    // {
+    //     // Find the reservation by ID
+    //     $reservation = Reservation::findOrFail($id);
+        
+    //     $reservation->status = 'Rejected';
+    //     $reservation->save();
+        
+    //     // Redirect back with a success message
+    //     return redirect()->back()->with('success', 'Reservation request rejected');
+    // }
 }

@@ -13,6 +13,7 @@
                             <div class="card-body">
                                 <h2 class="lead"><b>Reservation for: {{$reservation->restaurant->name}}</b></h2>
                                 <p>User Name: &nbsp{{ $reservation->user->name }}</p>
+                                <p>Phone Number: &nbsp{{$reservation->user->phone_num}}</p>
                                 <p>Reservation Date: &nbsp{{ $reservation->date }}</p>
                                 <p>Time: &nbsp{{ $reservation->time }}</p>
                                 <p>Party Size: &nbsp{{ $reservation->party_size }}</p>
@@ -81,6 +82,7 @@
                             <div class="card-body">
                                 <h2 class="lead"><b>Reservation for: {{$reservation->restaurant->name}}</b></h2>
                                 <p>User Name: &nbsp{{ $reservation->user->name }}</p>
+                                <p>Phone Number: &nbsp{{$reservation->user->phone_num}}</p>
                                 <p>Reservation Date: &nbsp{{ $reservation->date }}</p>
                                 <p>Time: &nbsp{{ $reservation->time }}</p>
                                 <p>Party Size: &nbsp{{ $reservation->party_size }}</p>
@@ -98,50 +100,14 @@
                                         <span style="color: red;">Pending...</span>
                                     @endif
                                 </p>
-                                <div class="text-left">
-                                    @if($reservation->status === 'Approved' && \Carbon\Carbon::parse($reservation->date . ' ' . $reservation->time) < \Carbon\Carbon::now())
-                                        @if(!$reservation->rating)
-                                        <div id="ratingForm_{{ $reservation->id }}" style="display: none;">
-                                            <form class="rating-form" data-reservation-id="{{ $reservation->id }}">
-                                                @csrf
-                                                <input type="hidden" name="reservation_id" value="{{ $reservation->id }}">
-                                                <div class="form-group">
-                                                    <label for="mark">Rating:</label>
-                                                    <select name="mark" class="form-control">
-                                                        <option value="1">1 (Lowest)</option>
-                                                        <option value="2">2</option>
-                                                        <option value="3">3</option>
-                                                        <option value="4">4</option>
-                                                        <option value="5">5 (Highest)</option>
-                                                    </select>
-                                                </div>
-                                                <div class="form-group">
-                                                    <label for="comment">Comment:</label>
-                                                    <textarea name="comment" class="form-control" rows="3">Any comment...</textarea>
-                                                </div>
-                                                <button type="submit" class="btn yellow">Submit Rating</button>
-                                            </form>
-                                        </div>
-                                        <div class="text-right">
-                                            <button class="btn btn-primary" onclick="toggleRatingForm('{{ $reservation->id }}')" data-reservation-id="{{ $reservation->id }}" style="border-radius: 20px !important;">Rating</button>
-                                        </div>
-                                        @else
-                                        <hr>
-                                        <div class="existing-rating">
-                                            <p><b>Rating:</b> {{ $reservation->rating->mark }}</p>
-                                            <p><b>Comment:</b> {{ $reservation->rating->comment }}</p>
-                                        </div>
-                                        @endif
-                                    @endif
-                                </div>
                             </div>
                             <div class="card-footer">
                                 <div class="text-right">
                                     @if(Auth::guard('restaurant')->check())
-                                        <a href="#" class="btn btn-md yellow" onclick="approveReservation('{{ $reservation->id }}', '{{ $reservation->user->name }}')">
+                                        <a href="#" class="btn btn-md yellow" onclick="approveReservation('{{ $reservation->id }}', '{{ $reservation->user->name }}', '{{ $reservation->user->phone_num }}', '{{ $reservation->user->message_type }}', '{{ $reservation->restaurant->name }}', '{{ $reservation->time }}', '{{ $reservation->date }}')">
                                             Approve
                                         </a>
-                                        <a href="#" class="btn btn-md blue" onclick="rejectReservation('{{ $reservation->id }}', '{{ $reservation->user->name }}')">
+                                        <a href="#" class="btn btn-md blue" onclick="rejectReservation('{{ $reservation->id }}', '{{ $reservation->user->name }}', '{{ $reservation->user->phone_num }}', '{{ $reservation->user->message_type }}', '{{ $reservation->restaurant->name }}', '{{ $reservation->time }}', '{{ $reservation->date }}')">
                                             Reject
                                         </a>
                                     @endif
@@ -161,99 +127,117 @@
 
 @section('scripts')
 <script>
-    function approveReservation(reservationId, userName) {
-        // Show confirmation dialog
-        Swal.fire({
-            title: 'Are you sure?',
-            text: 'Do you want to approve the reservation for user ' + userName + '?',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
-            confirmButtonText: 'Yes, approve it!'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                // Send an AJAX request to update the status
-                $.ajax({
-                    url: '/approve-reservation/' + reservationId,
-                    type: 'POST',
-                    data: {
-                        _token: '{{ csrf_token() }}',
-                        status: 'Approved'
-                    },
-                    success: function(response) {
-                        // Show success message
-                        Swal.fire({
-                            title: 'Approved!',
-                            text: 'The reservation for user ' + userName + ' has been approved.',
-                            icon: 'success',
-                            confirmButtonText: 'OK'
-                        }).then((result) => {
+function approveReservation(reservationId, userName, userPhone, messageType, restaurantName, reservationTime, reservationDate) {
+    // Show confirmation dialog
+    Swal.fire({
+        title: 'Are you sure?',
+        text: 'Do you want to approve the reservation for user ' + userName + '?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, approve it!'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Send an AJAX request to update the status
+            $.ajax({
+                url: '/approve-reservation/' + reservationId,
+                beforeSend: function() {
+                    loadingModal();
+                },
+                type: 'POST',
+                data: {
+                    _token: '{{ csrf_token() }}',
+                    status: 'Approved'
+                },
+                success: function(response) {
+                    // Show success message
+                    Swal.fire({
+                        title: 'Approved!',
+                        text: 'The reservation for user ' + userName + ' has been approved.',
+                        icon: 'success',
+                        confirmButtonText: 'OK'
+                    }).then((result) => {
+                        if (messageType === '["WhatsApp","Email"]' || messageType === '["WhatsApp"]') {
+                            let message = `Hi, ${userName}, your reservation at ${restaurantName} has been approved. Details: ${reservationTime}, ${reservationDate}.`;
+                            window.open(`https://web.whatsapp.com/send?phone=${userPhone}&text=${encodeURIComponent(message)}`);
+                            window.location.reload();
+                        } else {
                             window.location.reload(); // Reload the page to reflect the changes
-                        });
-                    },
-                    error: function(xhr, status, error) {
-                        // Handle errors if any
-                        Swal.fire({
-                            title: 'Error!',
-                            text: 'Approval failed',
-                            icon: 'error',
-                            confirmButtonText: 'OK'
-                        });
-                        console.error(xhr.responseText);
-                        console.log(error);
-                    }
-                });
-            }
-        });
-    }
+                        }
+                    });
+                },
+                error: function(xhr, status, error) {
+                    // Handle errors if any
+                    Swal.fire({
+                        title: 'Error!',
+                        text: 'Approval failed',
+                        icon: 'error',
+                        confirmButtonText: 'OK'
+                    });
+                    console.error(xhr.responseText);
+                    console.log(error);
+                }
+            });
+        }
+    });
+}
 
-    function rejectReservation(reservationId, userName) {
-        // Show confirmation dialog
-        Swal.fire({
-            title: 'Are you sure?',
-            text: 'Do you want to reject the reservation for user ' + userName + '?',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
-            confirmButtonText: 'Yes, reject it!'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                // Send an AJAX request to update the status
-                $.ajax({
-                    url: '/reject-reservation/' + reservationId,
-                    type: 'POST',
-                    data: {
-                        _token: '{{ csrf_token() }}',
-                        status: 'Rejected'
-                    },
-                    success: function(response) {
-                        // Show success message
-                        Swal.fire({
-                            title: 'Rejected!',
-                            text: 'The reservation for user ' + userName + ' has been rejected.',
-                            icon: 'success',
-                            confirmButtonText: 'OK'
-                        }).then((result) => {
+function rejectReservation(reservationId, userName, userPhone, messageType, restaurantName, reservationTime, reservationDate) {
+    // Show confirmation dialog
+    Swal.fire({
+        title: 'Are you sure?',
+        text: 'Do you want to reject the reservation for user ' + userName + '?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, reject it!'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Send an AJAX request to update the status
+            $.ajax({
+                url: '/reject-reservation/' + reservationId,
+                beforeSend: function() {
+                    loadingModal();
+                },
+                type: 'POST',
+                data: {
+                    _token: '{{ csrf_token() }}',
+                    status: 'Rejected'
+                },
+                success: function(response) {
+                    // Show success message
+                    Swal.fire({
+                        title: 'Rejected!',
+                        text: 'The reservation for user ' + userName + ' has been rejected.',
+                        icon: 'success',
+                        confirmButtonText: 'OK'
+                    }).then((result) => {
+                        if (messageType === '["WhatsApp","Email"]' || messageType === '["WhatsApp"]') {
+                            let message = `Hi, ${userName}, your reservation at ${restaurantName} has been rejected. Date and Time will be: ${reservationDate}, ${reservationTime}.`;
+                            window.open(`https://web.whatsapp.com/send?phone=${userPhone}&text=${encodeURIComponent(message)}`);
+                            window.location.reload();
+                        } else {
                             window.location.reload(); // Reload the page to reflect the changes
-                        });
-                    },
-                    error: function(xhr, status, error) {
-                        // Handle errors if any
-                        Swal.fire({
-                            title: 'Error!',
-                            text: 'Rejected failed',
-                            icon: 'error',
-                            confirmButtonText: 'OK'
-                        });
-                        console.error(xhr.responseText);
-                        console.log(error);
-                    }
-                });
-            }
-        });
-    }
+                        }
+                    });
+                },
+                error: function(xhr, status, error) {
+                    // Handle errors if any
+                    Swal.fire({
+                        title: 'Error!',
+                        text: 'Rejection failed',
+                        icon: 'error',
+                        confirmButtonText: 'OK'
+                    });
+                    console.error(xhr.responseText);
+                    console.log(error);
+                }
+            });
+        }
+    });
+}
 </script>
 
 <script>

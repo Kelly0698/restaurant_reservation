@@ -21,6 +21,7 @@ return new class extends Migration
             $table->string('phone_num');
             $table->string('password');
             $table->string('profile_pic')->nullable();
+            $table->string('message_type');
             $table->rememberToken();
             $table->timestamps();
         });

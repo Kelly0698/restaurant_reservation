@@ -24,7 +24,7 @@
         <div class="row">
             <div class="col-12">
                 <div class="search-bar">
-                    <form action="{{ route('approve_reservation') }}" method="GET">
+                    <form action="{{ route('approve_page') }}" method="GET">
                         <div class="input-group mb-3">
                             <input type="text" class="form-control rounded-pill" placeholder="Search Record (User Name, Time, Party Size, Remark)" name="query" style="width: 50%;" value="{{ request('query') }}">
                             <input type="date" class="form-control rounded-pill" name="date" style="width: 20%;" value="{{ request('date') }}">

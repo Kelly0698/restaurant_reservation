@@ -81,7 +81,7 @@
                 <div class="form-group">
                     <input type="email" class="form-control" id="email" onchange="checkData2(this)" placeholder="Email" name="email" required>
                     <div id="email_name_error" style="font-size:12px" class="text-danger"></div>
-                </div>   
+                </div>
                 <div class="form-group">
                     <div class="input-group">
                         <input type="password" class="form-control" id="password" name="password" placeholder="Enter password">
@@ -105,7 +105,19 @@
                 <div class="form-group">
                     <input type="text" class="form-control" id="phone_num" onchange="checkData2(this)" placeholder="Phone Number" name="phone_num" required>
                     <div id="phone_num_error" style="font-size:12px" class="text-danger"></div>
-                </div>    
+                </div>
+                <!-- New Checkbox Group -->
+                <div class="form-group">
+                    <label>Preferred Message Type:</label><br>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="checkbox" id="message_type_whatsapp" name="message_type[]" value="WhatsApp">
+                        <label class="form-check-label" for="message_type_whatsapp">WhatsApp</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="checkbox" id="message_type_email" name="message_type[]" value="Email">
+                        <label class="form-check-label" for="message_type_email">Email</label>
+                    </div>
+                </div>
                 <br>
                 <div class="text-center">
                     <button type="submit" class="btn" style="width: 50%; border-radius: 20px; background-color:#ffde59;">Register Account</button> 
@@ -121,7 +133,6 @@
         </div>
     </div>
 </div>
-
 
 
 @if(session('status')=="failed")

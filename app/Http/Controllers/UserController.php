@@ -233,6 +233,10 @@ class UserController extends Controller
             $data->profile_pic = 'public\assets\dist\img\defaultPic';
         }
     
+        // Handle the preferred message type
+        $messageType = $req->input('message_type');
+        $data->message_type = json_encode($messageType);
+    
         // Save the user
         $data->save();
     
@@ -243,6 +247,7 @@ class UserController extends Controller
     
         return response()->json($response, 200);
     }
+    
     
 
     public function userRegister()
