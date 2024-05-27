@@ -3,6 +3,12 @@
 namespace App\Http\Controllers;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Role;
 use App\Models\Attachment;
@@ -10,13 +16,8 @@ use App\Models\Rating;
 use App\Models\Reservation;
 use App\Models\Restaurant;
 use App\Models\Holiday;
-use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Mail;
-use Illuminate\Http\Request;
 use App\Mail\UserCreated;
 use App\Mail\ForgotPassword;
-use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
@@ -75,7 +76,6 @@ class UserController extends Controller
         }
     }
 
-
     public function userDashboard()
     {
         $roles = Role::all();
@@ -92,7 +92,7 @@ class UserController extends Controller
     
         $attachments = Attachment::all();
     
-        return view('user_dashboard', [
+        return view('user.user_dashboard', [
             'roles' => $roles,
             'users' => $users,
             'restaurants' => $restaurants,
@@ -114,7 +114,7 @@ class UserController extends Controller
             })
             ->sortByDesc('averageRating');
 
-        return view('search_restaurant_results', [
+        return view('user.search_restaurant_results', [
             'restaurants' => $restaurants,
             'query' => $query,
         ]);
@@ -140,7 +140,7 @@ class UserController extends Controller
             ];
         }
         
-        return view('view_restaurant', compact('restaurant', 'attachments', 'events'));
+        return view('user.view_restaurant', compact('restaurant', 'attachments', 'events'));
     }
 
     public function getRatings(Request $request)
@@ -248,13 +248,11 @@ class UserController extends Controller
         return response()->json($response, 200);
     }
     
-    
-
     public function userRegister()
     {
         $role = Role::all();
         $user = User::all();
-        return view('user_register', compact('role','user')); 
+        return view('user.user_register', compact('role','user')); 
     }
 
     public function login(Request $request)
@@ -288,7 +286,7 @@ class UserController extends Controller
 
     public function forgotPassword()
     {
-        return view('forgot_password');
+        return view('user.forgot_password');
     }
 
     public function ForgetPasswordStore(Request $request)
@@ -378,6 +376,20 @@ class UserController extends Controller
     {
         $loggedInUserRole = auth()->user()->role_id;
     
+        // Define validation rules
+        $validator = Validator::make($req->all(), [
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|max:255|unique:users,email,' . $user->id,
+            'phone_num' => 'required|string|max:20',
+            'role_id' => 'sometimes|required|integer|exists:roles,id',
+        ]);
+    
+        // Check if validation fails
+        if ($validator->fails()) {
+            return response()->json(['status' => 'error', 'errors' => $validator->errors()], 422);
+        }
+    
+        // Update user details
         $user->name = $req->input('name');
         $user->email = $req->input('email');
         $user->phone_num = $req->input('phone_num');
@@ -440,17 +452,31 @@ class UserController extends Controller
     {
         $role = Role::all();
         $user = User::all();
-        return view('user_profile', compact('role','user')); 
+        return view('user.user_profile', compact('role','user')); 
     }
 
     public function makeReservation(Request $request)
     {
+        // Define validation rules
+        $validator = Validator::make($request->all(), [
+            'restaurant_id' => 'required|exists:restaurants,id',
+            'date' => 'required|date|after_or_equal:today',
+            'time' => 'required|date_format:H:i',
+            'party_size' => 'required|integer|min:1',
+            'remark' => 'nullable|string|max:255',
+        ]);
+    
+        // Check if validation fails
+        if ($validator->fails()) {
+            return response()->json(['status' => 'error', 'errors' => $validator->errors()], 422);
+        }
+    
         // Get the authenticated user's ID
         $userId = Auth::id();
-
-        // Get the restaurant ID from the request or any other means
+    
+        // Get the restaurant ID from the request
         $restaurantId = $request->input('restaurant_id');
-
+    
         // Create a new reservation instance
         $reservation = new Reservation;
         $reservation->user_id = $userId;
@@ -461,15 +487,14 @@ class UserController extends Controller
         $reservation->remark = $request->input('remark');
         $reservation->status = "Pending";
         $reservation->completeness = "Pending";
-        
+    
+        // Save the reservation
         $reservation->save();
-
-        // // Send email to user
+    
+        // Optionally send emails to user and restaurant
         // Mail::to($reservation->user->email)->send(new ReservationMade($reservation, 'user'));
-
-        // // Send email to restaurant
         // Mail::to($reservation->restaurant->email)->send(new ReservationMade($reservation, 'restaurant'));
-
+    
         return response()->json(['status' => 'success', 'message' => 'Reservation successfully made'], 200);
     }
 
@@ -521,9 +546,37 @@ class UserController extends Controller
             ->get();
     
         // Return the pending reservations to the user_reservation_req view
-        return view('user_reservation_req', compact('pendingReservations'));
+        return view('user.user_reservation_req', compact('pendingReservations'));
     }
     
-     
+    public function showUserResetForm()
+    {
+        return view('user.reset_password');
+    }
+    
+    public function resetUserPassword(Request $request)
+    {
+        // Validate the input
+        $request->validate([
+            'email' => 'required|email',
+            'password' => 'required|confirmed|min:6',
+        ]);
+    
+        // Get the authenticated user
+        $user = Auth::user();
+    
+        // Check if the email matches the logged-in user
+        if (!$user || $user->email !== $request->email) {
+            return redirect('/user/password/reset')->withErrors(['email' => 'Email does not match the logged-in user.']);
+        }
+    
+        // Update the user's password
+        $user->password = Hash::make($request->password);
+        $user->save();
+    
+        // Redirect with success message
+        return redirect('/login')->with('status', 'Change');
+    }
+    
 
 }

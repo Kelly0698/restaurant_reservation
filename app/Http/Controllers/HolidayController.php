@@ -17,7 +17,7 @@ class HolidayController extends Controller
         $restaurantId = auth()->guard('restaurant')->user()->id;
         $holidays = Holiday::where('restaurant_id', $restaurantId)->get();
         
-        return view('restaurant_holiday', compact('holidays'));
+        return view('restaurant.restaurant_holiday', compact('holidays'));
     }
     
     /**

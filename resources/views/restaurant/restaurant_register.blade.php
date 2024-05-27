@@ -216,10 +216,16 @@ jQuery(document).ready(function($) {
             },
             error: function(xhr, status, error) {
                 console.log(xhr.responseText);
+                var errorMessage = '';
+                if(xhr.responseJSON && xhr.responseJSON.message) {
+                    errorMessage = xhr.responseJSON.message;
+                } else {
+                    errorMessage = error;
+                }
                 Swal.fire({
                     icon: 'error',
                     title: 'Error',
-                    text: 'There was an error adding the user: ' + error
+                    text: errorMessage
                 });
             }
         });

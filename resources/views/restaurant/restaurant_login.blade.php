@@ -78,8 +78,15 @@
                 </div>
    
                 <div class="form-group">
-                    <input id="password" name="password" type="password" class="form-control" placeholder="Password" value="" style="border-radius: 15px;">
-                    <a href="/forget-password" class="text-right d-block small" style="color: #002dce;">Forget Password?</a>
+                    <div class="input-group">
+                        <input id="password" name="password" type="password" class="form-control" placeholder="Password" value="" style="border-radius: 15px;">
+                        <div class="input-group-append">
+                            <span class="input-group-text" onclick="togglePasswordVisibility('password', this)">
+                                <i class="fas fa-eye"></i>
+                            </span>
+                        </div>
+                    </div>
+                    <a href="/restaurant-forget-password" class="text-right d-block small" style="color: #002dce;">Forget Password?</a>
                 </div>
                 <br>
                 <div class="text-center">
@@ -117,6 +124,16 @@
   </script>
   @endif
 
+  @if(session('status')=="success")
+  <script>                    
+  Swal.fire({
+        title: 'Success',
+        text: 'We have emailed the new password! Check your inbox to login again.',
+        icon: 'Success',
+    });
+  </script>
+  @endif
+  
   @if(session('status')=="Pass")
   <script>                    
   Swal.fire({
@@ -136,5 +153,17 @@
     });
   </script>
   @endif
+  <script>
+      function togglePasswordVisibility(fieldId, icon) {
+          const field = document.getElementById(fieldId);
+          if (field.type === "password") {
+              field.type = "text";
+              icon.innerHTML = '<i class="fas fa-eye-slash"></i>';
+          } else {
+              field.type = "password";
+              icon.innerHTML = '<i class="fas fa-eye"></i>';
+          }
+      }
+  </script>
 </body>
 </html>

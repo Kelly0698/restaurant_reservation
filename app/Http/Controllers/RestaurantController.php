@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
 use App\Models\Restaurant;
 use Illuminate\Http\Request;
 use App\Models\User;
@@ -18,6 +19,7 @@ use App\Mail\RestaurantCreated;
 use App\Mail\RestaurantRegistrationSuccess;
 use App\Mail\RestaurantRegistrationRejected;
 use App\Mail\ReservationApprovalNotification;
+use App\Mail\ForgotPassword;
 
 class RestaurantController extends Controller
 {
@@ -120,13 +122,25 @@ class RestaurantController extends Controller
 
     public function create(Request $req)
     {
-        // Create a new Restaurant instance
+        // Check if the email already exists
+        $existingRestaurant = Restaurant::where('email', $req->email)->first();
+        if ($existingRestaurant) {
+            // If the email already exists, return an error response
+            $response = [
+                'status' => 'error',
+                'message' => 'Email is already registered.'
+            ];
+            return response()->json($response, 400); // 400 status code for bad request
+        }
+    
+        // If the email is unique, proceed with creating the restaurant
         $restaurant = new Restaurant();
         $restaurant->name = $req->name;
         $restaurant->email = $req->email;
         $restaurant->phone_num = $req->phone_num;
         $restaurant->password = bcrypt($req->password);
-
+    
+        // Handle logo picture upload
         if ($req->hasFile('logo_pic')) {
             $imagePath = $req->file('logo_pic')->store('res_first_img', 'public');
             $restaurant->logo_pic = $imagePath;
@@ -134,33 +148,30 @@ class RestaurantController extends Controller
             // Set default profile picture path if no file is uploaded
             $restaurant->logo_pic = 'public\assets\dist\img\defaultPic';
         }
-
+    
+        // Other restaurant details
         $restaurant->address = $req->address;
         $file = $req->file('license_pdf');
         $filename = time() . '_' . $file->getClientOriginalName(); // Generate a unique filename
         $file->storeAs('public/license_pdf', $filename); // Store the file with the generated filename in the public/storage/license_pdf directory
         $restaurant->license_pdf = $filename; // Store the filename in the database
-        
         $restaurant->status = "Pending";
         $restaurant->operation_time = "9:00 AM - 9:00 PM";
         $restaurant->availability = "Yes";
         $restaurant->description = "Restaurant Description";
-
+    
         // Save the restaurant to the database
         $restaurant->save();
     
-        // Send email with generated password
-        // Mail::to($restaurant->email)->send(new RestaurantCreated($restaurant, $generatedPassword));
-    
-        // Response
+        // Response for successful creation
         $response = [
             'status' => 'success',
             'data' => $restaurant
         ];
     
-        return response()->json($response, 200);
+        return response()->json($response, 200); // 200 status code for OK
     }
-
+    
     public function show($id)
     {
         $restaurant = Restaurant::find($id);
@@ -200,31 +211,52 @@ class RestaurantController extends Controller
 
     public function edit(Restaurant $restaurant, Request $req)
     {
+        // Define validation rules
+        $validator = Validator::make($req->all(), [
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|max:255',
+            'phone_num' => 'required|string|max:20',
+            'address' => 'required|string|max:255',
+            'license_pdf' => 'nullable|file|mimes:pdf|max:2048',
+            'operation_time' => 'required|string|max:255',
+            'availability' => 'required|string|max:255',
+            'description' => 'nullable|string',
+        ]);
+    
+        // Check if validation fails
+        if ($validator->fails()) {
+            return response()->json(['status' => 'error', 'errors' => $validator->errors()], 422);
+        }
+    
+        // Update restaurant details
         $restaurant->name = $req->name;
         $restaurant->email = $req->email;  
         $restaurant->phone_num = $req->phone_num; 
         $restaurant->address = $req->address;
+    
+        // Handle file upload if present
         if ($req->hasFile('license_pdf')) {
             $file = $req->file('license_pdf');
             $filename = time() . '_' . $file->getClientOriginalName();
             $file->storeAs('public/license_pdf', $filename);
             $restaurant->license_pdf = $filename;
         }
-        $restaurant->status = $req->status;
+    
+        $restaurant->status = "Approved";
         $restaurant->operation_time = $req->operation_time;
         $restaurant->availability = $req->availability;
         $restaurant->description = $req->description;
+    
         // Save changes to the restaurant
         $restaurant->save();
-
+    
         return response()->json(['status' => 'success'], 200);
     }
-
 
     public function restaurantRegister()
     {
         $restaurant = Restaurant::all();
-        return view('restaurant_register', compact('restaurant'));
+        return view('restaurant.restaurant_register', compact('restaurant'));
     }
    
     public function update(Request $request, Restaurant $restaurant)
@@ -241,9 +273,8 @@ class RestaurantController extends Controller
     public function restaurant_profile()
     {
         $restaurant = Restaurant::with('attachments')->find(Auth::guard('restaurant')->user()->id);
-        return view('restaurant_profile', compact('restaurant'));
+        return view('restaurant.restaurant_profile', compact('restaurant'));
     }
-    
 
     public function updateLogo(Request $req, Restaurant $restaurant)
     {
@@ -360,7 +391,7 @@ class RestaurantController extends Controller
         }
     
         // For regular HTTP requests, return the view with data
-        return view('approved_reservation', compact('approvedReservations'));
+        return view('restaurant.approved_reservation', compact('approvedReservations'));
     }
 
     public function showDoneReservations(Request $request)
@@ -406,7 +437,7 @@ class RestaurantController extends Controller
         $doneReservations = $doneReservationsQuery->get();
     
         // Pass the reservations to the view
-        return view('complete_reservation', compact('doneReservations'));
+        return view('restaurant.complete_reservation', compact('doneReservations'));
     }
 
     public function approveReservation($id)
@@ -420,13 +451,6 @@ class RestaurantController extends Controller
         
         // Read the message types from the user
         $messageTypes = ["WhatsApp", "Email"]; // Placeholder for user input
-        
-        // // Check if "WhatsApp" is selected
-        // if (in_array("WhatsApp", $messageTypes)) {
-        //     $restaurantName = $reservation->restaurant->name;
-        //     $clickedUser = $reservation->user;
-        //     $this->sendWhatsAppMessage($restaurantName, $clickedUser);
-        // } 
         
         // Check if "Email" is selected
         if (in_array("Email", $messageTypes)) {
@@ -447,13 +471,6 @@ class RestaurantController extends Controller
         
         // Read the message types from the user
         $messageTypes = ["WhatsApp", "Email"]; // Placeholder for user input
-        
-        // // Check if "WhatsApp" is selected
-        // if (in_array("WhatsApp", $messageTypes)) {
-        //     $restaurantName = $reservation->restaurant->name;
-        //     $clickedUser = $reservation->user;
-        //     $this->sendWhatsAppMessage($restaurantName, $clickedUser);
-        // } 
         
         // Check if "Email" is selected
         if (in_array("Email", $messageTypes)) {
@@ -501,7 +518,7 @@ class RestaurantController extends Controller
         $rejectedReservations = $rejectedReservationsQuery->get();
     
         // Pass the rejected reservation records to the view
-        return view('rejected_reservation', compact('rejectedReservations'));
+        return view('restaurant.rejected_reservation', compact('rejectedReservations'));
     }
     
     public function checkEmail(Request $request)
@@ -512,29 +529,71 @@ class RestaurantController extends Controller
         return response()->json(['exists' => $exists]);
     }
 
-    
-    // public function approveReservation($id)
-    // {
-    //     // Find the reservation by ID
-    //     $reservation = Reservation::findOrFail($id);
-        
-    //     // Update the status to "Approved"
-    //     $reservation->status = 'Approved';
-    //     $reservation->save();
-        
-    //     // Redirect back with a success message
-    //     return redirect()->back()->with('success', 'Reservation request approved successfully.');
-    // }
+    public function forgotPassword()
+    {
+        return view('restaurant.restaurant_forgot_password');
+    }
 
-        // public function rejectReservation($id)
-    // {
-    //     // Find the reservation by ID
-    //     $reservation = Reservation::findOrFail($id);
-        
-    //     $reservation->status = 'Rejected';
-    //     $reservation->save();
-        
-    //     // Redirect back with a success message
-    //     return redirect()->back()->with('success', 'Reservation request rejected');
-    // }
+    public function ForgetPasswordStore(Request $request)
+    {
+        // Validate the email input
+        $request->validate([
+            'email' => 'required|email',
+        ]);
+    
+        // Find the restaurant user by email
+        $restaurant = Restaurant::where('email', $request->email)->first();
+    
+        // Check if the restaurant exists
+        if (!$restaurant) {
+            return back()->withErrors(['email' => 'Restaurant not found.']);
+        }
+    
+        // Generate a new password
+        $newPassword = Str::random(8); // Generate an 8-character random password
+    
+        // Update the restaurant's password
+        $restaurant->password = Hash::make($newPassword);
+        $restaurant->save();
+    
+        // Send the new password to the restaurant via email
+        try {
+            Mail::to($restaurant->email)->send(new ForgotPassword($newPassword));
+        } catch (\Exception $e) {
+            // Email sending failed
+            return back()->withErrors(['email' => 'Failed to send the new password.']);
+        }
+    
+        // Redirect to the restaurant's login page with a success message
+        return redirect('/your-restaurant')->with('status', 'success');
+    }
+
+    public function showResetForm()
+    {
+        return view('restaurant.restaurant_reset_password');
+    }
+
+    public function resetPassword(Request $request)
+    {
+        // Validate the input
+        $request->validate([
+            'email' => 'required|email',
+            'password' => 'required|confirmed|min:6',
+        ]);
+
+        // Get the authenticated restaurant user
+        $restaurant = Auth::guard('restaurant')->user();
+
+        // Check if the email matches the logged-in restaurant user
+        if (!$restaurant || $restaurant->email !== $request->email) {
+            return redirect('/restaurant/password/reset')->withErrors(['email' => 'Email does not match the logged-in user.']);
+        }
+
+        // Update the restaurant's password
+        $restaurant->password = Hash::make($request->password);
+        $restaurant->save();
+
+        // Redirect with success message
+        return redirect('/your-restaurant')->with('status', 'Change');
+    }
 }

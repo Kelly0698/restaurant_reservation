@@ -48,10 +48,12 @@ Route::post('/forgot-password', [UserController::class, 'ForgetPasswordStore'])-
 
 //restaurant_auth
 Route::get('/res-tau-rant/logout',[RestaurantController::class, 'logout'])->name('res_logout');
-Route::get('/your-restaurant', function () {return view('restaurant_login');})->name('restaurant_login_page');
+Route::get('/your-restaurant', function () {return view('restaurant.restaurant_login');})->name('restaurant_login_page');
 Route::post('/restaurant-login',[RestaurantController::class, 'login'])->name('r_login');
 Route::get('/register-restaurant',[RestaurantController::class, 'restaurantRegister'])->name('restaurant_register_page');
 Route::post('/restaurant-register',[RestaurantController::class, 'create'])->name('register_restaurant');
+Route::get('/restaurant-forget-password', [RestaurantController::class, 'forgotPassword'])->name('restaurant_forgot_password_page');
+Route::post('/restaurant-password', [RestaurantController::class, 'ForgetPasswordStore'])->name('restaurant_ForgetPasswordPost');
 
 //user
 Route::get('/user',[UserController::class, 'index'])->name('user_list');
@@ -67,6 +69,8 @@ Route::get('/profile-user',[UserController::class, 'user_profile'])->name('user_
 Route::get('/view/restaurant/{id}', [UserController::class, 'viewRestaurant'])->name('view_restaurant');
 Route::get('/get-ratings', [UserController::class, 'getRatings'])->name('get_ratings');
 Route::get('/search-restaurants', [UserController::class, 'search'])->name('search_restaurants');
+Route::get('/user/password/reset', [UserController::class, 'showUserResetForm'])->name('showUserResetForm');
+Route::post('/user/password/reset', [UserController::class, 'resetUserPassword'])->name('resetUserPasswordPost');
 
 //restaurant
 Route::get('/restaurant',[RestaurantController::class, 'index'])->name('restaurant_list');
@@ -80,7 +84,10 @@ Route::get('/your-profile',[RestaurantController::class, 'restaurant_profile'])-
 Route::post('/logo-pic/update/{restaurant}',[RestaurantController::class, 'updateLogo'])->name('update_logo');
 Route::post('/upload-picture', [RestaurantController::class, 'uploadPicture'])->name('upload_picture');
 Route::delete('/pic-delete/{id}',[RestaurantController::class, 'deleteAttachment'])->name('pic_delete');
-Route::post('/check/restaurant/email', [RestaurantController::class, 'checkEmail'])->name('check.email');
+Route::post('/restaurant-check', [RestaurantController::class, 'checkEmailExistence'])->name('check_email');
+Route::get('restaurant/password/reset', [RestaurantController::class, 'showResetForm'])->name('ResetPasswordPage');
+Route::post('restaurant/password/reset', [RestaurantController::class, 'resetPassword'])->name('ResetPasswordPost');
+
 
 //reservation
 Route::post('/reservation-make',[UserController::class, 'makeReservation'])->name('make_reservation');
@@ -93,10 +100,10 @@ Route::post('/reject-reservation/{id}',[RestaurantController::class, 'rejectRese
 Route::get('/reserve/reject', [RestaurantController::class, 'rejectResPage'])->name('reject_page');
 Route::post('/cancel-reservation/{id}', [UserController::class, 'cancelReservation'])->name('cancel_reservation');
 Route::get('/pending/reservation', [UserController::class, 'pendingReservation'])->name('pending_reservation');
+
 //rating
 Route::post('/ratings', [RatingController::class, 'store'])->name('store_rating');
 Route::get('/get-user-phone-number/{userName}', [RestaurantController::class, 'getUserPhoneNumber']);
-
 
 //holiday
 Route::get('/calendar', [HolidayController::class, 'index'])->name('holiday');

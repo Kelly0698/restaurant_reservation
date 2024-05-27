@@ -1,7 +1,5 @@
 @extends('layouts')
-
 @section('title', 'Approved Reservations')
-
 @section('content')
 <head>
     <style>
@@ -69,6 +67,7 @@
                                 </div> 
                                 <h2 class="lead"><b>Reservation for: {{$reservation->restaurant->name}}</b></h2><br>
                                 <p>User Name: &nbsp{{ $reservation->user->name }}</p>
+                                <p>Phone Number: &nbsp{{$reservation->user->phone_num}}</p>
                                 <p>Reservation Date: &nbsp{{ $reservation->date }}</p>
                                 <p>Time: &nbsp{{ $reservation->time }}</p>
                                 <p>Party Size: &nbsp{{ $reservation->party_size }}</p>
