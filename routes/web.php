@@ -43,7 +43,7 @@ Route::get('/login', function () {return view('login');})->name('login');
 Route::post('/login',[UserController::class, 'login']);
 Route::get('/user/register',[UserController::class, 'userRegister'])->name('register_page');
 Route::get('/logout',[UserController::class, 'logout'])->name('logout');
-Route::get('/forget-password', [UserController::class, 'forgotPassword'])->name('forgot_password_page');
+Route::get('/password/forgot', [UserController::class, 'forgotPassword'])->name('forgot_password_page');
 Route::post('/forgot-password', [UserController::class, 'ForgetPasswordStore'])->name('ForgetPasswordPost');
 
 //restaurant_auth
@@ -84,10 +84,12 @@ Route::get('/your-profile',[RestaurantController::class, 'restaurant_profile'])-
 Route::post('/logo-pic/update/{restaurant}',[RestaurantController::class, 'updateLogo'])->name('update_logo');
 Route::post('/upload-picture', [RestaurantController::class, 'uploadPicture'])->name('upload_picture');
 Route::delete('/pic-delete/{id}',[RestaurantController::class, 'deleteAttachment'])->name('pic_delete');
+Route::post('/check-email', [RestaurantController::class, 'checkEmail'])->name('check.email');
 Route::post('/restaurant-check', [RestaurantController::class, 'checkEmailExistence'])->name('check_email');
 Route::get('restaurant/password/reset', [RestaurantController::class, 'showResetForm'])->name('ResetPasswordPage');
 Route::post('restaurant/password/reset', [RestaurantController::class, 'resetPassword'])->name('ResetPasswordPost');
-
+Route::get('table/restaurant', [RestaurantController::class, 'restaurant_table'])->name('table_arrangement');
+Route::post('/upload-table-arrangement', [RestaurantController::class, 'upload_table_pic'])->name('table_arrangement_pic');
 
 //reservation
 Route::post('/reservation-make',[UserController::class, 'makeReservation'])->name('make_reservation');
@@ -100,6 +102,8 @@ Route::post('/reject-reservation/{id}',[RestaurantController::class, 'rejectRese
 Route::get('/reserve/reject', [RestaurantController::class, 'rejectResPage'])->name('reject_page');
 Route::post('/cancel-reservation/{id}', [UserController::class, 'cancelReservation'])->name('cancel_reservation');
 Route::get('/pending/reservation', [UserController::class, 'pendingReservation'])->name('pending_reservation');
+Route::get('/available-tables', [UserController::class, 'getAvailableTables']);
+Route::get('/absent-reserve', [RestaurantController::class, 'AbsentResPage'])->name('absent_page');
 
 //rating
 Route::post('/ratings', [RatingController::class, 'store'])->name('store_rating');

@@ -200,14 +200,21 @@ class RestaurantController extends Controller
         return response()->json(['message' => 'Status updated successfully']);
     }
     
-    public function updateCompleteness($id)
+    public function updateCompleteness(Request $request, $id)
     {
         $reservation = Reservation::findOrFail($id);
-        $reservation->completeness = 'Done';
-        $reservation->save();
-
-        return redirect()->back()->with('success', 'Reservation marked as complete.');
+        $completeness = $request->input('completeness');
+        
+        if (in_array($completeness, ['Done', 'Confirmed Absent', 'Eating'])) {
+            $reservation->completeness = $completeness;
+            $reservation->save();
+            
+            return redirect()->back()->with('success', 'Reservation status updated successfully.');
+        }
+        
+        return redirect()->back()->with('error', 'Invalid status update.');
     }
+    
 
     public function edit(Restaurant $restaurant, Request $req)
     {
@@ -257,11 +264,6 @@ class RestaurantController extends Controller
     {
         $restaurant = Restaurant::all();
         return view('restaurant.restaurant_register', compact('restaurant'));
-    }
-   
-    public function update(Request $request, Restaurant $restaurant)
-    {
-        //
     }
 
     public function destroy(Restaurant $restaurant)
@@ -357,7 +359,7 @@ class RestaurantController extends Controller
     
         // Build the query
         $reservationsQuery = Reservation::where('status', 'Approved')
-                                        ->whereIn('completeness', ['Pending', 'No_Show']);
+                                        ->whereIn('completeness', ['Pending', 'No_Show','Eating']);
     
         // Apply search filter if query is provided
         if ($query) {
@@ -596,4 +598,81 @@ class RestaurantController extends Controller
         // Redirect with success message
         return redirect('/your-restaurant')->with('status', 'Change');
     }
+    public function restaurant_table()
+    {
+        return view('restaurant.table_arrangement');
+    }
+
+    public function upload_table_pic(Request $request, Restaurant $restaurant)
+    {
+        // Validate the request data
+        $request->validate([
+            'table_arrange_pic' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'restaurant_id' => 'required|exists:restaurants,id',
+            'table_num' => 'required|integer|min:1',
+        ]);
+    
+        // Get the restaurant by ID
+        $restaurant = Restaurant::findOrFail($request->restaurant_id);
+    
+        // Handle the uploaded image
+        $oldImagePath = $restaurant->table_arrange_pic ?? null;
+        $newImagePath = $request->file('table_arrange_pic')->store('table_arrangement', 'public');
+    
+        // Update the restaurant's table arrangement picture and table number
+        $restaurant->table_arrange_pic = $newImagePath;
+        $restaurant->table_num = $request->table_num;
+        $restaurant->save();
+    
+        // Delete the old image from storage
+        if ($oldImagePath && $oldImagePath !== $newImagePath) {
+            Storage::delete($oldImagePath);
+        }
+    
+        // Redirect back with success message
+        return redirect()->back()->with('success', 'Table arrangement picture uploaded successfully');
+    }
+    
+
+        public function AbsentResPage(Request $request)
+        {
+            // Get the authenticated restaurant
+            $restaurant = Auth::guard('restaurant')->user();
+        
+            // Retrieve rejected reservations for the current restaurant
+            $query = $request->input('query');
+            $date = $request->input('date');
+            $sort = $request->input('sort', 'asc');
+        
+            $ReservationsQuery = Reservation::where([
+                ['status', 'Approved'],
+                ['completeness','Confirmed Absent'],
+                ['restaurant_id', $restaurant->id]
+            ]);
+        
+            // Apply search filter if query is provided
+            if ($query) {
+                $ReservationsQuery->where(function ($q) use ($query) {
+                    $q->whereHas('user', function ($userQuery) use ($query) {
+                        $userQuery->where('name', 'LIKE', "%{$query}%");
+                    })
+                    ->orWhere('time', 'LIKE', "%{$query}%")
+                    ->orWhere('party_size', 'LIKE', "%{$query}%")
+                    ->orWhere('remark', 'LIKE', "%{$query}%");
+                });
+            }
+        
+            // Apply date filter if date is provided
+            if ($date) {
+                $ReservationsQuery->whereDate('date', $date);
+            }
+        
+            // Apply sorting
+            $ReservationsQuery->orderBy('date', $sort);
+        
+            $Reservations = $ReservationsQuery->get();
+        
+            // Pass the rejected reservation records to the view
+            return view('restaurant.absent_reservation', compact('Reservations'));
+        }
 }

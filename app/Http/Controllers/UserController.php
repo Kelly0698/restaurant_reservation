@@ -228,9 +228,6 @@ class UserController extends Controller
         if ($req->hasFile('profile_pic')) {
             $imagePath = $req->file('profile_pic')->store('user_img', 'public');
             $data->profile_pic = $imagePath;
-        } else {
-            // Set default profile picture path if no file is uploaded
-            $data->profile_pic = 'public\assets\dist\img\defaultPic';
         }
     
         // Handle the preferred message type
@@ -300,7 +297,7 @@ class UserController extends Controller
         $user = User::where('email', $request->email)->first();
     
         if (!$user) {
-            return back()->withErrors(['email' => 'Email not found.']);
+            return redirect('/login')->with('status', 'fail');
         }
     
         // Generate a new password
@@ -311,18 +308,17 @@ class UserController extends Controller
         $user->save();
     
         // Send the new password to the user via email
-        $sent = Mail::to($request->email)->send(new ForgotPassword($newPassword));
-    
-        // Check if the email sending failed
-        if (!$sent) {
+        try {
+            Mail::to($request->email)->send(new ForgotPassword($newPassword));
+        } catch (\Exception $e) {
             // Email sending failed
             return back()->withErrors(['email' => 'Failed to send the new password.']);
         }
     
         // Email sent successfully
-        // Redirect to the login page and display a SweetAlert notification
         return redirect('/login')->with('status', 'success');
     }
+    
 
     public function validateUserForm(Request $request)
     {
@@ -464,6 +460,7 @@ class UserController extends Controller
             'time' => 'required|date_format:H:i',
             'party_size' => 'required|integer|min:1',
             'remark' => 'nullable|string|max:255',
+            'table_num' => 'nullable|integer',
         ]);
     
         // Check if validation fails
@@ -471,11 +468,48 @@ class UserController extends Controller
             return response()->json(['status' => 'error', 'errors' => $validator->errors()], 422);
         }
     
-        // Get the authenticated user's ID
-        $userId = Auth::id();
-    
         // Get the restaurant ID from the request
         $restaurantId = $request->input('restaurant_id');
+        $restaurant = Restaurant::find($restaurantId);
+    
+        // Check if the table number is provided
+        if ($request->input('table_num') !== null) {
+            $tableNum = $request->input('table_num');
+            
+            // Check if the table number is within the valid range for the restaurant
+            if ($tableNum < 1 || $tableNum > $restaurant->table_num) {
+                return response()->json(['status' => 'error', 'errors' => ['table_num' => 'Invalid table number']], 422);
+            }
+    
+            // Parse the reservation date and time
+            $reservationDateTime = Carbon::createFromFormat('Y-m-d H:i', $request->input('date') . ' ' . $request->input('time'));
+    
+            // Calculate the start and end time for the unavailable period
+            $unavailableStart = $reservationDateTime->copy()->subHour();
+            $unavailableEnd = $reservationDateTime->copy()->addHours(2);
+    
+            // Check if the table is already reserved within the unavailable period
+            $existingReservation = Reservation::where('restaurant_id', $restaurantId)
+                ->where('date', $request->input('date'))
+                ->where('table_num', $tableNum)
+                ->where('status', '!=', 'Rejected') // Ensure that rejected reservations are not considered
+                ->whereNotIn('completeness', ['Done', 'Confirmed Absent'])
+                ->where(function($query) use ($unavailableStart, $unavailableEnd) {
+                    $query->whereBetween('time', [$unavailableStart->format('H:i'), $unavailableEnd->format('H:i')])
+                          ->orWhere(function($query) use ($unavailableStart, $unavailableEnd) {
+                              $query->where('time', '<', $unavailableStart->format('H:i'))
+                                    ->whereRaw('? < ADDTIME(time, "03:00:00")', [$unavailableEnd->format('H:i')]);
+                          });
+                })
+                ->first();
+    
+            if ($existingReservation) {
+                return response()->json(['status' => 'error', 'errors' => ['table_num' => 'This table is already reserved within the specified time range']], 422);
+            }
+        }
+    
+        // Get the authenticated user's ID
+        $userId = Auth::id();
     
         // Create a new reservation instance
         $reservation = new Reservation;
@@ -485,6 +519,7 @@ class UserController extends Controller
         $reservation->time = $request->input('time');
         $reservation->party_size = $request->input('party_size');
         $reservation->remark = $request->input('remark');
+        $reservation->table_num = $request->input('table_num');
         $reservation->status = "Pending";
         $reservation->completeness = "Pending";
     
@@ -497,8 +532,45 @@ class UserController extends Controller
     
         return response()->json(['status' => 'success', 'message' => 'Reservation successfully made'], 200);
     }
-
-
+    
+    public function getAvailableTables(Request $request)
+    {
+        $restaurantId = $request->query('restaurant_id');
+        $date = $request->query('date');
+        $time = $request->query('time');
+    
+        $restaurant = Restaurant::find($restaurantId);
+    
+        // Calculate the start and end time for the unavailable period
+        $reservationDateTime = Carbon::createFromFormat('Y-m-d H:i', $date . ' ' . $time);
+        $unavailableStart = $reservationDateTime->copy()->subHour(); // Adjusted to exactly 1 hour before
+        $unavailableEnd = $reservationDateTime->copy()->addHours(2);   // Adjusted to 2 hours after
+    
+        // Get all tables for the restaurant
+        $allTables = range(1, $restaurant->table_num);
+    
+        // Get unavailable tables, filtering out reservations with completeness 'Done' or 'Confirmed Absent'
+        $unavailableTables = Reservation::where('restaurant_id', $restaurantId)
+            ->where('date', $date)
+            ->where('status', '!=', 'Rejected')
+            ->whereNotIn('completeness', ['Done', 'Confirmed Absent'])
+            ->where(function($query) use ($unavailableStart, $unavailableEnd) {
+                $query->whereBetween('time', [$unavailableStart->format('H:i'), $unavailableEnd->format('H:i')]);
+            })
+            ->pluck('table_num')
+            ->toArray();
+    
+        // Get available tables
+        $availableTables = array_diff($allTables, $unavailableTables);
+    
+        return response()->json([
+            'available_tables' => array_values($availableTables), // Ensure this is an array
+            'all_tables' => array_values($allTables),
+            'unavailable_tables' => array_values($unavailableTables)
+        ]);
+    }
+    
+    
     public function reservationRecord()
     {
         if (Auth::guard('restaurant')->check()) {

@@ -13,6 +13,14 @@
         .btn-pending {
             background-color: #ccc;
         }
+        .btn-eating {
+            background-color: #ff9800d7;
+            border-radius: 20px !important;
+        }
+        .btn-serving {
+            background-color: #ff9800d7;
+            border-radius: 20px !important;
+        }
     </style>
     <!-- Include SweetAlert CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
@@ -59,10 +67,10 @@
                             <div class="col-12">
                                 <br>
                                 <div class="text-right">
-                                    @if($reservation->status === 'Approved')
-                                    <button class="btn btn-complete">Approved</button>
+                                    @if($reservation->completeness === 'Eating')
+                                    <button class="btn btn-serving">Serving</button>
                                     @else
-                                    <button class="btn btn-pending">Pending...</button>
+                                    <button class="btn btn-complete">Approved</button>
                                     @endif
                                 </div> 
                                 <h2 class="lead"><b>Reservation for: {{$reservation->restaurant->name}}</b></h2><br>
@@ -71,6 +79,11 @@
                                 <p>Reservation Date: &nbsp{{ $reservation->date }}</p>
                                 <p>Time: &nbsp{{ $reservation->time }}</p>
                                 <p>Party Size: &nbsp{{ $reservation->party_size }}</p>
+                                @if($reservation->table_num)
+                                    <p>Table: Table&nbsp{{ $reservation->table_num}}</p>
+                                @else
+                                    <p>Table: &nbspNone</p>
+                                @endif
                                 @if($reservation->remark)
                                     <p>Remark: &nbsp{{ $reservation->remark }}</p>
                                 @else
@@ -81,9 +94,24 @@
                             @if($reservation->completeness !== 'Done')
                             <form id="complete-form-{{ $reservation->id }}" action="{{ route('update_completeness', $reservation->id) }}" method="POST" class="d-none">
                                 @csrf
+                                <input type="hidden" name="completeness" id="completeness-{{ $reservation->id }}">
                             </form>
-                            <div class="text-right">
-                                <button type="button" class="btn blue" onclick="confirmCompletion({{ $reservation->id }})">Completed?</button>
+                            <div>
+                                @if($reservation->completeness !== 'Eating')
+                                <div class="row">
+                                    <div class="col text-left">
+                                        <button type="button" class="btn btn-eating" onclick="markAsEating({{ $reservation->id }})">Serving?</button>
+                                    </div>
+                                    <div class="col text-right">
+                                        <button type="button" class="btn blue" onclick="confirmCompletion({{ $reservation->id }})">Completed?</button>
+                                    </div>
+                                </div>
+
+                                @else
+                                <div class="text-right">
+                                    <button type="button" class="btn blue" onclick="confirmCompletion({{ $reservation->id }})">Completed?</button>
+                                </div>
+                                @endif
                             </div>
                             @else
                             <div class="text-right">
@@ -107,20 +135,59 @@
 <!-- Include SweetAlert JS -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-    function confirmCompletion(reservationId) {
-        Swal.fire({
-            title: 'Are you sure?',
-            text: "You are about to mark this reservation as complete.",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
-            confirmButtonText: 'Yes, complete it!'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                document.getElementById('complete-form-' + reservationId).submit();
-            }
-        })
-    }
+function confirmCompletion(reservationId) {
+    Swal.fire({
+        title: 'Complete Reservation',
+        text: "Select an option:",
+        icon: 'warning',
+        showCancelButton: true,
+        cancelButtonText: 'Customer Confirmed Absent',
+        confirmButtonText: 'Customer Completed',
+        cancelButtonColor: '#d33',
+        confirmButtonColor: '#3085d6',
+        reverseButtons: true
+    }).then((result) => {
+        if (result.isConfirmed) {
+            document.getElementById('completeness-' + reservationId).value = 'Done';
+            document.getElementById('complete-form-' + reservationId).submit();
+            Swal.fire(
+                'Success!',
+                'The reservation has been marked as Completed.',
+                'success'
+            );
+        } else if (result.dismiss === Swal.DismissReason.cancel) {
+            document.getElementById('completeness-' + reservationId).value = 'Confirmed Absent';
+            document.getElementById('complete-form-' + reservationId).submit();
+            Swal.fire(
+                'Success!',
+                'The reservation has been marked as Confirmed Absent.',
+                'success'
+            );
+        }
+    });
+}
+
+function markAsEating(reservationId) {
+    Swal.fire({
+        title: 'Are you sure?',
+        text: "You are about to mark this reservation as Serving.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#ff9800',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, mark as Serving!'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            document.getElementById('completeness-' + reservationId).value = 'Eating';
+            document.getElementById('complete-form-' + reservationId).submit();
+            Swal.fire(
+                'Success!',
+                'The reservation has been marked as Serving.',
+                'success'
+            );
+        }
+    });
+}
+
 </script>
 @endsection

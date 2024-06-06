@@ -184,7 +184,7 @@
                 }
             },
             error: function(xhr) {
-                document.getElementById("email_name_error").innerHTML = "*Error checking email!";
+                document.getElementById("email_name_error").innerHTML = "*This Email Is Exist";
             }
         });
     }

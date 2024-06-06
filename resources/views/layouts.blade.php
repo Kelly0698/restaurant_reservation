@@ -329,11 +329,24 @@
                   <p>Completed Reservation</p>
               </a>
           </li>
+          <li class="nav-item">
+              <a href="{{ route('absent_page') }}" class="nav-link">
+                  <i class="nav-icon fas fa-user-times"></i>
+                  <p>Absent Reservation</p>
+              </a>
+          </li>
           <li class="nav-header" style="color: white !important;">HOLIDAY</li>
           <li class="nav-item">
               <a href="{{ route('holiday') }}" class="nav-link">
                   <i class="nav-icon fas fa-calendar-alt"></i>
                   <p>Restaurant Holiday</p>
+              </a>
+          </li>
+          <li class="nav-header" style="color: white !important;">TABLE ARRANGEMENT</li>
+          <li class="nav-item">
+              <a href="{{ route('table_arrangement') }}" class="nav-link">
+                  <i class="nav-icon fas fa-calendar-alt"></i>
+                  <p>Table Arrangement</p>
               </a>
           </li>
           @endif

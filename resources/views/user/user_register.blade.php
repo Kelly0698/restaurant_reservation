@@ -212,10 +212,37 @@ Swal.fire({
                 }
             });
         };
+        // Function to validate password match
+        $("#password_confirmation").on('keyup', function(){
+            var password = $("#password").val();
+            var confirmPassword = $(this).val();
+
+            if(password === confirmPassword){
+                $("#password_confirmation").removeClass('is-invalid');
+                $("#password_confirmation").addClass('is-valid');
+            } else {
+                $("#password_confirmation").removeClass('is-valid');
+                $("#password_confirmation").addClass('is-invalid');
+            }
+        });
 
         $('#user_add').submit(function(e) {
             e.preventDefault();
 
+            var password = $("#password").val();
+            var confirmPassword = $("#password_confirmation").val();
+
+            // Check if passwords match
+            if (password !== confirmPassword) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Passwords do not match!',
+                });
+                return; // Stop form submission
+            }
+
+            // If passwords match, proceed with form submission
             var formData = new FormData(this);
             $.ajax({
                 type: "POST",
@@ -247,44 +274,12 @@ Swal.fire({
                 }
             });
         });
-
         // Call checkData and checkData2 on input change
         $('#name').on('input', checkData);
         $('#email').on('input', function() { checkData2(this); });
     });
 </script>
 
-<script>
-    jQuery(document).ready(function($) {
-        $("#toggle-password").click(function(){
-            var passwordField = $("#password");
-            var fieldType = passwordField.attr('type');
-            passwordField.attr('type', fieldType === 'password' ? 'text' : 'password');
-            $(this).find('i').toggleClass('fa-eye-slash fa-eye');
-        });
-
-        $("#toggle-password-confirm").click(function(){
-            var passwordField = $("#password_confirmation");
-            var fieldType = passwordField.attr('type');
-            passwordField.attr('type', fieldType === 'password' ? 'text' : 'password');
-            $(this).find('i').toggleClass('fa-eye-slash fa-eye');
-        });
-
-        // Function to validate password match
-        $("#password_confirmation").on('keyup', function(){
-            var password = $("#password").val();
-            var confirmPassword = $(this).val();
-
-            if(password === confirmPassword){
-                $("#password_confirmation").removeClass('is-invalid');
-                $("#password_confirmation").addClass('is-valid');
-            } else {
-                $("#password_confirmation").removeClass('is-valid');
-                $("#password_confirmation").addClass('is-invalid');
-            }
-        });
-    });
-</script>
 
 </body>
 </html>

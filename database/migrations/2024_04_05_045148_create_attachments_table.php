@@ -15,7 +15,7 @@ return new class extends Migration
     {
         Schema::create('attachments', function (Blueprint $table) {
             $table->id();
-            $table->string('restaurant_id');  
+            $table->string('restaurant_id')->constrained('restaurants')->onDelete('cascade');  
             $table->string('picture')->nullable();
             $table->timestamps();
         });

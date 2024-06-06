@@ -86,7 +86,7 @@
                             </span>
                         </div>
                     </div>
-                    <a href="/forget-password" class="text-right d-block small" style="color: #002dce;">Forgot Password?</a>
+                    <a href="/password/forgot" class="text-right d-block small" style="color: #002dce;">Forgot Password?</a>
                 </div>
 
                 <br>
@@ -121,6 +121,16 @@
         title: 'Success',
         text: 'We have emailed the new password! Check your inbox to login again.',
         icon: 'Success',
+    });
+  </script>
+  @endif
+
+  @if(session('status') == 'fail')
+  <script>
+    Swal.fire({
+      title: 'Error',
+      text: 'Email not found.',
+      icon: 'error',
     });
   </script>
   @endif

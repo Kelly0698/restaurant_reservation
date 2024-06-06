@@ -15,11 +15,12 @@ return new class extends Migration
     {
         Schema::create('reservations', function (Blueprint $table) {
             $table->id();
-            $table->string('user_id');
-            $table->string('restaurant_id');
+            $table->string('user_id')->constrained('users')->onDelete('cascade');
+            $table->string('restaurant_id')->constrained('restaurants')->onDelete('cascade');
             $table->string('date');
             $table->string('time'); 
-            $table->string('party_size'); 
+            $table->string('party_size');
+            $table->string('table_num')->nullable();
             $table->string('remark')->nullable();
             $table->string('status');
             $table->string('completeness');

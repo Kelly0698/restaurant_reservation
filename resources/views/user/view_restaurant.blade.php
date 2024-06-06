@@ -255,6 +255,19 @@
                         @endif
                     </div>
                 </div>
+                @if($restaurant->table_arrange_pic)
+                <div class="card">
+                    <div class="blue" style="padding: 0.75rem 1.25rem; margin-bottom: 0; border-bottom: 0 solid rgba(0, 0, 0, 0.125);">
+                        <h3 class="card-title">Tables In Restaurant</h3>
+                    </div>
+                    <div class="card-body">
+                        <!-- Show table arrangement picture here -->
+                        <div class="col-md-8 offset-md-2">
+                            <img src="{{ asset('storage/' . $restaurant->table_arrange_pic) }}" alt="Table Arrangement" style="max-width: 100%;">
+                        </div>
+                    </div>
+                </div>
+                @endif
 
                 <div class="card">
                     <div class="yellow" style="padding: 0.75rem 1.25rem; margin-bottom: 0; border-bottom: 0 solid rgba(0, 0, 0, 0.125);">
@@ -276,13 +289,22 @@
                                 <label for="party_size">Party Size</label>
                                 <input type="number" name="party_size" class="form-control" id="party_size" placeholder="Enter party size">
                             </div>
+                            @if ($restaurant->table_num)
+                                <div class="form-group">
+                                    <label for="table_num">Table Number:</label>
+                                    <select id="table_num" name="table_num" class="form-control" required>
+                                        <option value="">Select a table</option>
+                                        <!-- Table options will be populated dynamically -->
+                                    </select>
+                                </div>
+                            @endif
                             <div class="form-group">
                                 <label for="remark">Remark</label>
                                 <input type="text" name="remark" class="form-control" id="remark" placeholder="Write any remarks here...">
                             </div>
                             <br>
-                            <div class="form-group text-center" style="border-radius: 5px;"> 
-                                <button type="submit" class="btn btn-md yellow">Make Reservation</button> 
+                            <div class="form-group text-center" style="border-radius: 5px;">
+                                <button type="submit" class="btn btn-md yellow">Make Reservation</button>
                             </div>
                         </form>
                     </div>
@@ -418,7 +440,7 @@
                 Swal.fire({
                     icon: 'success',
                     title: 'Success',
-                    text: 'Reservation made successfully, check your email!'
+                    text: 'Reservation made successfully!'
                 }).then((result) => {
                     if (result.isConfirmed) {
                         window.location.href = "{{ route('view_restaurant', ['id' => $restaurant->id]) }}";
@@ -427,10 +449,14 @@
             },
             error: function(xhr, status, error) {
                 console.log(xhr.responseText);
+                var errorMessage = 'There was an error making the reservation.';
+                if (xhr.responseJSON && xhr.responseJSON.errors && xhr.responseJSON.errors.table_num) {
+                    errorMessage = xhr.responseJSON.errors.table_num;
+                }
                 Swal.fire({
                     icon: 'error',
                     title: 'Error',
-                    text: 'There was an error making the reservation: ' + error
+                    text: errorMessage
                 });
             }
         });
@@ -489,6 +515,64 @@ $(document).ready(function() {
             document.getElementById('viewMoreBtn').style.display = 'none';
         }
     }
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const dateInput = document.getElementById('dateInput');
+    const timeInput = document.getElementById('time');
+    const tableSelect = document.getElementById('table_num');
+
+    function fetchAvailableTables() {
+        const date = dateInput.value;
+        const time = timeInput.value;
+        const restaurantId = "{{ $restaurant->id }}";
+
+        if (date && time) {
+            fetch(`/available-tables?restaurant_id=${restaurantId}&date=${date}&time=${time}`)
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Response data:', data); // Log the response for debugging
+                    tableSelect.innerHTML = '<option value="">Select a table</option>';
+                    if (Array.isArray(data.available_tables)) {
+                        data.available_tables.forEach(table => {
+                            const option = document.createElement('option');
+                            option.value = table;
+                            option.textContent = `Table ${table}`;
+                            tableSelect.appendChild(option);
+                        });
+                    } else {
+                        console.error('available_tables is not an array', data);
+                    }
+                })
+                .catch(error => console.error('Error fetching available tables:', error));
+        } else {
+            // Fetch and show all tables if date or time is not selected
+            fetch(`/available-tables?restaurant_id=${restaurantId}`)
+                .then(response => response.json())
+                .then(data => {
+                    tableSelect.innerHTML = '<option value="">Select a table</option>';
+                    if (Array.isArray(data.all_tables)) {
+                        data.all_tables.forEach(table => {
+                            const option = document.createElement('option');
+                            option.value = table;
+                            option.textContent = `Table ${table}`;
+                            tableSelect.appendChild(option);
+                        });
+                    } else {
+                        console.error('all_tables is not an array', data);
+                    }
+                })
+                .catch(error => console.error('Error fetching all tables:', error));
+        }
+    }
+
+    dateInput.addEventListener('change', fetchAvailableTables);
+    timeInput.addEventListener('change', fetchAvailableTables);
+});
+
+
+
+
 </script>
 @endsection
           

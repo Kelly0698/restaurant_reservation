@@ -25,6 +25,8 @@ return new class extends Migration
             $table->binary('license_pdf');
             $table->string('availability')->nullable();
             $table->string('description')->nullable();
+            $table->string('table_arrange_pic')->nullable();
+            $table->string('table_num')->nullable();
             $table->string('status');            
             $table->timestamps();
         });

@@ -23,6 +23,7 @@ class Restaurant extends Model implements Authenticatable
         'availability',
         'description',
         'status',
+        'table_arrange_pic'
     ];
 
     protected $hidden = ['password', 'remember_token'];

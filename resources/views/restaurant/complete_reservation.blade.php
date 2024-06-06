@@ -44,6 +44,11 @@
                                 <p>Reservation Date: &nbsp{{ $reservation->date }}</p>
                                 <p>Time: &nbsp{{ $reservation->time }}</p>
                                 <p>Party Size: &nbsp{{ $reservation->party_size }}</p>
+                                @if($reservation->table_num)
+                                    <p>Table: Table&nbsp{{ $reservation->table_num}}</p>
+                                @else
+                                    <p>Table: &nbspNone</p>
+                                @endif
                                 @if($reservation->remark)
                                     <p>Remark: &nbsp{{ $reservation->remark }}</p>
                                 @else
