@@ -6,6 +6,7 @@ use App\Http\Controllers\RoleController;
 use App\Http\Controllers\RestaurantController;
 use App\Http\Controllers\RatingController;
 use App\Http\Controllers\HolidayController;
+use App\Http\Controllers\LikeController;
 
 /*
 |--------------------------------------------------------------------------
@@ -37,6 +38,7 @@ Route::get('/show/role/{id}',[RoleController::class, 'show'])->name('show_role')
 Route::post('/edit/role/{role}',[RoleController::class, 'edit'])->name('edit_role');
 Route::get('get/role/{id}', [RoleController::class,'getRole'])->name('get_role');
 Route::post('/check/role', [RoleController::class, 'validateRoleForm'])->name('check_role');
+Route::get('/search-roles', [RoleController::class, 'search'])->name('roles.search');
 
 //user_auth
 Route::get('/login', function () {return view('login');})->name('login');  
@@ -57,6 +59,7 @@ Route::post('/restaurant-password', [RestaurantController::class, 'ForgetPasswor
 
 //user
 Route::get('/user',[UserController::class, 'index'])->name('user_list');
+Route::get('/search-users', [UserController::class, 'user_search'])->name('users.search');
 Route::post('/add/user',[UserController::class, 'adminCreate'])->name('add_user');
 Route::post('/register/user',[UserController::class, 'create'])->name('register_user');
 Route::post('/check/user', [UserController::class, 'validateUserForm'])->name('check_user');
@@ -74,6 +77,7 @@ Route::post('/user/password/reset', [UserController::class, 'resetUserPassword']
 
 //restaurant
 Route::get('/restaurant',[RestaurantController::class, 'index'])->name('restaurant_list');
+Route::get('/search-restaurant-list', [RestaurantController::class, 'restaurant_search'])->name('restaurants.search');
 Route::post('/add/restaurant',[RestaurantController::class, 'adminCreate'])->name('add_restaurant');
 Route::get('/show/restaurant/{id}',[RestaurantController::class, 'show'])->name('show_restaurant');
 Route::post('/edit/restaurant/{restaurant}',[RestaurantController::class, 'edit'])->name('edit_restaurant');
@@ -116,4 +120,8 @@ Route::get('/holidays', [HolidayController::class, 'show'])->name('show_holiday'
 Route::put('/update/holidays/{id}', [HolidayController::class, 'update'])->name('update_holiday');
 Route::delete('/delete/holidays/{id}', [HolidayController::class, 'delete'])->name('delete_Holidays');
 Route::get('/get-holidays', [HolidayController::class, 'getHoliday'])->name('get_holiday');
+
+//saved_restaurant
+Route::post('/save_restaurant/{id}', [LikeController::class, 'saveRestaurant']);
+Route::get('/user/saved-restaurants', [LikeController::class, 'savedRestaurants'])->name('saved_restaurants');
 

@@ -86,7 +86,7 @@
                             </span>
                         </div>
                     </div>
-                    <a href="/restaurant-forget-password" class="text-right d-block small" style="color: #002dce;">Forget Password?</a>
+                    <a href="/restaurant-forget-password" class="text-right d-block small" style="color: #002dce; font-weight: bold;">Forget Password?</a>
                 </div>
                 <br>
                 <div class="text-center">

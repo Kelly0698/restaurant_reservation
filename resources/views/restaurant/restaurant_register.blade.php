@@ -115,7 +115,7 @@
                 <div class="form-group">
                     <div class="input-group">
                         <div class="custom-file">
-                            <input type="file" class="custom-file-input" id="license_pdf" name="license_pdf" accept=".pdf" >
+                            <input type="file" class="custom-file-input" id="license_pdf" name="license_pdf" accept=".pdf" required>
                             <label class="custom-file-label" for="license_pdf">Lisence PDF File (One Only)</label>
                         </div>
                     </div>
@@ -123,7 +123,7 @@
                 <div class="form-group">
                     <div class="input-group">
                         <div class="custom-file">
-                            <input type="file" class="custom-file-input" id="logo_pic" name="logo_pic" accept="image/*">
+                            <input type="file" class="custom-file-input" id="logo_pic" name="logo_pic" accept="image/*" required>
                             <label class="custom-file-label" for="profile_pic">Restaurant Profile Picture</label>
                         </div>
                     </div>
@@ -192,7 +192,18 @@ Swal.fire({
 jQuery(document).ready(function($) {
     $('#restaurant_add').submit(function(e) {
         e.preventDefault();
+        var password = $("#password").val();
+            var confirmPassword = $("#password_confirmation").val();
 
+            // Check if passwords match
+            if (password !== confirmPassword) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Passwords do not match!',
+                });
+                return; // Stop form submission
+            }
         var formData = new FormData(this);
         $.ajax({
             type: "POST",

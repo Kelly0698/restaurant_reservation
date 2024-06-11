@@ -21,7 +21,7 @@
                                     @else
                                         <img src="{{ asset('assets/dist/img/defaultPic.png') }}" width="170" height="170" style="border-radius: 50%; overflow: hidden; border: 3px solid #adb5bd; margin: 0 auto; padding: 3px;">
                                     @endif
-                                    <a style="display:none; position:absolute; top:80%; left:58%" id="profile_pic-input" class="save-btn btn btn-sm btn-icon-only yellow" data-bs-toggle="modal" data-bs-target="#profile_pic">
+                                    <a style="display:none; position:absolute; top:80%; left:56%" id="profile_pic-input" class="save-btn btn btn-sm btn-icon-only yellow" data-bs-toggle="modal" data-bs-target="#profile_pic">
                                         <i class="fa fa-pen top-0" data-bs-toggle="tooltip" data-bs-placement="top" title="" aria-hidden="true" data-bs-original-title="Edit Image" aria-label="Edit Image"></i>
                                         <span class="sr-only">Edit Image</span>
                                     </a>

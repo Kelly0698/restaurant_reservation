@@ -62,4 +62,14 @@ class User extends Authenticatable
     {
         return $this->hasMany(Rating::class);
     }
+
+    public function likes()
+    {
+        return $this->hasMany(Like::class);
+    }
+
+    public function savedRestaurants()
+{
+    return $this->hasManyThrough(Restaurant::class, Like::class, 'user_id', 'id', 'id', 'restaurant_id');
+}
 }

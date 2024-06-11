@@ -47,4 +47,14 @@ class Restaurant extends Model implements Authenticatable
     {
         return $this->hasMany(Holiday::class);
     }
+
+    public function likes()
+    {
+        return $this->hasMany(Like::class);
+    }
+
+    public function users()
+    {
+        return $this->hasManyThrough(User::class, Like::class, 'restaurant_id', 'id', 'id', 'user_id');
+    }
 }

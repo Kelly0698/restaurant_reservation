@@ -59,8 +59,8 @@ class UserController extends Controller
             
             // Return both restaurant and user data
             return view('dashboard', compact('restaurantData'));
-        } elseif (Auth::check() && auth()->user()->role_id == '4') {
-            // For regular users with role ID 4
+        } elseif (Auth::check() && auth()->user()->role_id == '1') {
+            // For regular users with role ID 1
             $totalUsers = User::count();
             $approvedRestaurants = Restaurant::where('status', 'Approved')->count();
             $pendingRequests = Restaurant::where('status', 'Pending')->count();
@@ -163,6 +163,19 @@ class UserController extends Controller
         return view('admin.admin_user', compact('role','user')); 
     }
 
+    public function user_search(Request $request)
+    {
+        $query = $request->get('query');
+        $users = User::where('name', 'LIKE', "%{$query}%")
+                    ->orWhere('email', 'LIKE', "%{$query}%")
+                    ->orWhere('phone_num', 'LIKE', "%{$query}%")
+                    ->with('role') // Ensure you load the related role
+                    ->get();
+
+        return response()->json($users);
+    }
+
+
     public function adminCreate(Request $req, User $user)
     {
         $data = new User;
@@ -170,7 +183,9 @@ class UserController extends Controller
         $data->role_id = $req->input('role_id');
         $data->email = $req->input('email');
         $data->phone_num = $req->input('phone_num');
-    
+        $messageType = $req->input('message_type');
+        $data->message_type = json_encode($messageType);
+
         $generatedPassword = Str::random(8);
         $data->password = bcrypt($generatedPassword);
     
@@ -204,23 +219,23 @@ class UserController extends Controller
 
     public function create(Request $req, User $user)
     {
-        // Check if role_id 5 exists
-        $role = Role::find(5);
+        // Check if role_id 2 exists
+        $role = Role::find(2);
     
         if (!$role) {
-            // Role with id 5 does not exist
+            // Role with id 2 does not exist
             $response = [
                 'status' => 'failed',
-                'message' => 'Role with id 5 does not exist'
+                'message' => 'Role with id 2 does not exist'
             ];
     
             return response()->json($response, 404);
         }
     
-        // Role with id 5 exists, proceed with user creation
+        // Role with id 2 exists, proceed with user creation
         $data = new User;
         $data->name = $req->input('name');
-        $data->role_id = 5;
+        $data->role_id = 2;
         $data->email = $req->input('email');
         $data->password = bcrypt($req->input('password')); // Hash the password directly
         $data->phone_num = $req->input('phone_num');
@@ -266,9 +281,9 @@ class UserController extends Controller
             $user = Auth::user();
             $role = $user->role_id;
 
-            if ($role == 4) {
+            if ($role == 1) {
                 return redirect()->route('dashboard');
-            } elseif ($role == 5) {
+            } elseif ($role == 2) {
                 return redirect()->route('home');
             }
         }
@@ -319,7 +334,6 @@ class UserController extends Controller
         return redirect('/login')->with('status', 'success');
     }
     
-
     public function validateUserForm(Request $request)
     {
         // Get the User name from the request
@@ -390,10 +404,10 @@ class UserController extends Controller
         $user->email = $req->input('email');
         $user->phone_num = $req->input('phone_num');
     
-        if ($loggedInUserRole == 4) {
+        if ($loggedInUserRole == 1) {
             $user->role_id = $req->input('role_id');
-        } elseif ($loggedInUserRole == 5) {
-            $user->role_id = 5;
+        } elseif ($loggedInUserRole == 2) {
+            $user->role_id = 2;
         }
     
         $role = Role::find($user->role_id);
@@ -417,7 +431,6 @@ class UserController extends Controller
         }
     }
     
-
     public function updatePic(Request $req, User $user)
     {
         if (!$req->hasFile('profile_pic')) {
@@ -578,9 +591,12 @@ class UserController extends Controller
             $reservations = $restaurant->reservations()->where('status', 'Pending')->get();
         } elseif (Auth::check()) {
             $user = Auth::user();
-            if ($user->role_id === 5) {
-                $reservations = $user->reservations()->whereIn('status', ['Pending', 'Approved', 'Rejected'])->get();
-            } elseif ($user->role_id === 4) {
+            if ($user->role_id === 2) {
+                $reservations = $user->reservations()
+                                     ->whereIn('status', ['Pending', 'Approved', 'Rejected'])
+                                     ->orderBy('created_at', 'desc')
+                                     ->get();            
+            } elseif ($user->role_id === 1) {
                 $reservations = Reservation::all();
             } else {
                 // Handle other cases or restrict access

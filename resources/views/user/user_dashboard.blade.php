@@ -86,6 +86,27 @@
             color: #ffc107;
             -webkit-text-stroke: 0;
         }
+        .heart-icon {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            cursor: pointer;
+            font-size: 24px;
+            z-index: 10;
+        }
+
+        .heart-icon .fa-heart-o {
+            color: #e74c3c;
+        }
+
+        .heart-icon .fa-heart {
+            color: #e74c3c;
+        }
+
+        .heart-icon:hover .fa-heart-o,
+        .heart-icon:hover .fa-heart {
+            color: #c0392b;
+        }
     </style>
 </head>
 <div class="content-wrapper">
@@ -109,41 +130,50 @@
         <div class="recommended-restaurants">
             <h4>Recommended Restaurants</h4><br>
             <div class="restaurants-container" id="restaurants-container">
-                @foreach($restaurants as $restaurant)
-                <div class="col-md-4 restaurant-card">
-                    <div>
-                        <a href="{{ route('view_restaurant', ['id' => $restaurant->id]) }}">
-                            <div class="restaurant-img">
-                                @if($restaurant->logo_pic)
-                                    <img src="{{ asset('storage/' . $restaurant->logo_pic) }}" alt="{{ $restaurant->name }}">
-                                @else
-                                    <img src="{{ asset('assets/dist/img/defaultPic.png') }}" alt="Default">
-                                @endif
-                            </div>
-                            <p class="lucida-handwriting" style="font-size: 20px; color: #052d64;">{{ $restaurant->name }}</p>
-                        </a>
-                        <div class="d-flex justify-content-center">
-                            <div class="rating">
-                                @php
-                                    $averageRating = $restaurant->averageRating;
-                                    $filledStars = floor($averageRating);
-                                    $halfStar = $averageRating - $filledStars >= 0.5;
-                                @endphp
-                                @for ($i = 0; $i < $filledStars; $i++)
-                                    <span class="fa fa-star"></span>
-                                @endfor
-                                @if ($halfStar)
-                                    <span class="fa fa-star-half-o"></span>
-                                @endif
-                                @for ($i = $filledStars + ($halfStar ? 1 : 0); $i < 5; $i++)
-                                    <span class="fa fa-star-o"></span>
-                                @endfor
-                            </div>
+            @foreach($restaurants as $restaurant)
+            <div class="col-md-4 restaurant-card">
+                <div>
+                    <a href="{{ route('view_restaurant', ['id' => $restaurant->id]) }}">
+                        <div class="restaurant-img">
+                            @if($restaurant->logo_pic)
+                                <img src="{{ asset('storage/' . $restaurant->logo_pic) }}" alt="{{ $restaurant->name }}">
+                            @else
+                                <img src="{{ asset('assets/dist/img/defaultPic.png') }}" alt="Default">
+                            @endif
+                            <!-- Heart Icon -->
+                            @php
+                                $liked = Auth::user()->likes()->where('restaurant_id', $restaurant->id)->exists();
+                            @endphp
+                            <span class="heart-icon" onclick="saveRestaurant(event, {{ $restaurant->id }})">
+                                <i class="fa {{ $liked ? 'fa-heart' : 'fa-heart-o' }}" aria-hidden="true"></i>
+                            </span>
+                        </div>
+                        <p class="lucida-handwriting" style="font-size: 20px; color: #052d64;">{{ $restaurant->name }}</p>
+                    </a>
+                    <div class="d-flex justify-content-center">
+                        <div class="rating">
+                            @php
+                                $averageRating = $restaurant->averageRating;
+                                $filledStars = floor($averageRating);
+                                $halfStar = $averageRating - $filledStars >= 0.5;
+                            @endphp
+                            @for ($i = 0; $i < $filledStars; $i++)
+                                <span class="fa fa-star"></span>
+                            @endfor
+                            @if ($halfStar)
+                                <span class="fa fa-star-half-o"></span>
+                            @endif
+                            @for ($i = $filledStars + ($halfStar ? 1 : 0); $i < 5; $i++)
+                                <span class="fa fa-star-o"></span>
+                            @endfor
                         </div>
                     </div>
                 </div>
-                @endforeach
             </div>
+            @endforeach
+        </div>
+
+
             <div class="show-more-btn" id="prev-btn" style="display: none;" onclick="showPrevious()">&#171; Previous</div>
             @if(count($restaurants) > 4)
                 <div class="show-more-btn" id="next-btn" onclick="showNext()">Next &#187;</div>
@@ -220,4 +250,29 @@
     // Initially show the first page
     showPage(currentPage);
 </script>
+
+<script>
+    function saveRestaurant(event, restaurantId) {
+        event.preventDefault();
+        fetch(`/save_restaurant/${restaurantId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const icon = event.target.classList.contains('fa') ? event.target : event.target.querySelector('.fa');
+                icon.classList.toggle('fa-heart');
+                icon.classList.toggle('fa-heart-o');
+            } else {
+                alert('Failed to save restaurant.');
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    }
+</script>
+
 @endsection

@@ -87,24 +87,18 @@ class RoleController extends Controller
 
         return response()->json($role);
     }
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Role  $role
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, Role $role)
+    
+    public function search(Request $request)
     {
-        //
+        $query = $request->get('query');
+        $roles = Role::where('role_name', 'LIKE', "%{$query}%")
+                     ->orWhere('level', 'LIKE', "%{$query}%")
+                     ->orWhere('status', 'LIKE', "%{$query}%")
+                     ->get();
+    
+        return response()->json($roles);
     }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\Models\Role  $role
-     * @return \Illuminate\Http\Response
-     */
+    
     public function destroy(Role $role)
     {
         $role->delete();

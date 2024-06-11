@@ -125,7 +125,7 @@
                         <div class="col text-center">
                             <h2 class="d-inline small">Have account?</h2>
                             <span class="d-inline small" style="color: #002dce;"></span>
-                            <a href="/login" class="d-inline small" style="color: #002dce;">Login</a>
+                            <a href="/login" class="d-inline small" style="color: #002dce;font-weight: bold;">Login</a>
                         </div>
                     </div>
                 </div>

@@ -18,7 +18,7 @@
 
                         <div class="card-tools">
                             <div class="input-group input-group-sm" style="width: 150px;">
-                                <input type="text" name="table_search" class="form-control float-right" placeholder="Search">
+                                <input type="text" name="table_search" id="table_search" class="form-control float-right" placeholder="Search">
 
                                 <div class="input-group-append">
                                     <button type="submit" class="btn btn-default">
@@ -41,24 +41,21 @@
                                 <th>Action</th>
                             </tr>
                             </thead>
-                            <tbody>
-                            <tr>
+                            <tbody id="userTableBody">
                             @foreach($user as $item)
                                 <tr>
                                     <td>{{$loop->index+1}}</td>
-                                    <td style="display: flex; ">                                        
+                                    <td style="display: flex;">
                                         @if ($item->profile_pic)
                                             <img src="{{ asset('storage') }}/{{ $item->profile_pic }}" alt="Profile Picture" width="30" height="30" style="border-radius: 50%; overflow: hidden;">
                                         @else
                                             <img src="{{ asset('assets/dist/img/defaultPic.png') }}" alt="Profile Picture" width="30" height="30" style="border-radius: 50%; overflow: hidden;">
                                         @endif
-                                        &nbsp
+                                        &nbsp;
                                         {{$item->name}}
                                     </td>
                                     <td>{{$item->role->role_name}}</td>
-                                    <td>
-                                        {{$item->email}}
-                                    </td>
+                                    <td>{{$item->email}}</td>
                                     <td>{{$item->phone_num}}</td>
                                     <td>
                                         <a class="btn yellow show_user" href="{{ url('/show/user') }}/{{ $item->id }}">
@@ -69,8 +66,7 @@
                                         </button>
                                     </td>
                                 </tr>
-                                @endforeach
-                                </tr>
+                            @endforeach
                             </tbody>
                         </table>
                     </div>
@@ -96,7 +92,7 @@
                 @csrf
                 <div class="form-group">
                     <label for="name" class="col-form-label">Name:</label>
-                    <input type="text" class="form-control" id="name" onchange="checkData()" name="name" required>
+                    <input type="text" class="form-control" id="name" onchange="checkData()" name="name" placeholder="Name" required>
                     <div id="user_name_error" style="font-size:12px" class="text-danger"></div>
                 </div>
                 
@@ -110,13 +106,12 @@
                 </div>
                 <div class="form-group">
                     <label for="email" class="col-form-label">Email:</label>
-                    <input type="email" class="form-control" id="email" onchange="checkData2(this)" name="email" required>
+                    <input type="email" class="form-control" id="email" onchange="checkData2(this)" name="email" placeholder="Vxxxx@xxx.com" required>
                     <div id="email_name_error" style="font-size:12px" class="text-danger"></div>
                 </div>
-            
                 <div class="form-group">
                     <label for="phone_num" class="col-form-label">Phone Number:</label>
-                    <input type="text" class="form-control" id="phone_num" onchange="checkData2(this)" name="phone_num" required>
+                    <input type="text" class="form-control" id="phone_num" onchange="checkData2(this)" name="phone_num" placeholder="+60xxxxxxxxxx" required>
                     <div id="phone_num_error" style="font-size:12px" class="text-danger"></div>
                 </div>
                 <div class="form-group">
@@ -126,6 +121,17 @@
                             <input type="file" class="custom-file-input" id="profile_pic" name="profile_pic" accept="image/*">
                             <label class="custom-file-label" for="profile_pic">Choose file</label>
                         </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Preferred Message Type:</label><br>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="checkbox" id="message_type_whatsapp" name="message_type[]" value="WhatsApp">
+                        <label class="form-check-label" for="message_type_whatsapp">WhatsApp</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="checkbox" id="message_type_email" name="message_type[]" value="Email">
+                        <label class="form-check-label" for="message_type_email">Email</label>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -312,6 +318,9 @@
                 $.ajax({
                     type: 'DELETE',
                     url: "{{ url('delete/user') }}/" + id,
+                    beforeSend: function() {
+                        loadingModal();
+                    }, 
                     data: {
                         '_token': "{{ csrf_token() }}",
                     },
@@ -334,6 +343,50 @@
                     }
                 });
             }
+        });
+    });
+</script>
+<script>
+    $(document).ready(function(){
+        $('#table_search').on('keyup', function(){
+            let query = $(this).val();
+
+            $.ajax({
+                url: "{{ route('users.search') }}",
+                type: "GET",
+                data: {'query': query},
+                success: function(data){
+                    $('#userTableBody').html('');
+                    if(data.length > 0){
+                        $.each(data, function(index, user){
+                            let profilePic = user.profile_pic ? `{{ asset('storage') }}/${user.profile_pic}` : `{{ asset('assets/dist/img/defaultPic.png') }}`;
+                            $('#userTableBody').append(`
+                                <tr>
+                                    <td>${index + 1}</td>
+                                    <td style="display: flex;">
+                                        <img src="${profilePic}" alt="Profile Picture" width="30" height="30" style="border-radius: 50%; overflow: hidden;">
+                                        &nbsp;
+                                        ${user.name}
+                                    </td>
+                                    <td>${user.role.role_name}</td>
+                                    <td>${user.email}</td>
+                                    <td>${user.phone_num}</td>
+                                    <td>
+                                        <a class="btn yellow show_user" href="/show/user/${user.id}">
+                                            <span class="fas fa-eye"></span>
+                                        </a>
+                                        <button style="font-size:16.5px;" type="button" data-id="${user.id}" class="btn blue delete-btn">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            `);
+                        });
+                    } else {
+                        $('#userTableBody').append('<tr><td colspan="6" style="text-align:center;">No results found</td></tr>');
+                    }
+                }
+            });
         });
     });
 </script>

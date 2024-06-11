@@ -55,7 +55,7 @@
                                                 </div>
                                                 <div class="form-group">
                                                     <label for="comment">Comment:</label>
-                                                    <textarea name="comment" class="form-control" rows="3">Any comment...</textarea>
+                                                    <textarea name="comment" class="form-control" rows="3" placeholder="Any comment..." required></textarea>
                                                 </div>
                                                 <button type="submit" class="btn yellow">Submit Rating</button>
                                             </form>

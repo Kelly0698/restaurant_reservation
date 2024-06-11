@@ -221,7 +221,7 @@
       <!-- Sidebar Menu -->
       <nav class="mt-2">
         <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
-          @if((auth()->check() && auth()->user()->role_id != '5') || Auth::guard('restaurant')->check())
+          @if((auth()->check() && auth()->user()->role_id != '2') || Auth::guard('restaurant')->check())
           <li class="nav-item">
             <a href="{{ route('dashboard') }}" class="nav-link">
               <i class="nav-icon fas fa-tachometer-alt"></i>
@@ -231,7 +231,7 @@
             </a>
           </li>
           @endif
-          @if(auth()->check() && auth()->user()->role_id == '4')
+          @if(auth()->check() && auth()->user()->role_id == '1')
           <li class="nav-item">
             <a href="{{ route('role_list') }}" class="nav-link">
               <i class="nav-icon fas fa-users"></i>
@@ -247,7 +247,7 @@
             </a>
           </li>
           @endif
-          @if(auth()->check() && auth()->user()->role_id == '4')
+          @if(auth()->check() && auth()->user()->role_id == '1')
           <li class="nav-item menu-open">
               <a href="#" class="nav-link">
                   <i class="nav-icon fas fa-utensils"></i>
@@ -276,12 +276,21 @@
               </ul>
           </li>
           @endif
-          @if(auth()->check() && auth()->user()->role_id == '5')
+          @if(auth()->check() && auth()->user()->role_id == '2')
           <li class="nav-item">
             <a href="{{ route('home') }}" class="nav-link">
               <i class="nav-icon fas fa-tachometer-alt"></i>
               <p>Home</p>
             </a>
+          </li>
+          @endif
+          @if(auth()->check() && auth()->user()->role_id == '2')
+          <li class="nav-header" style="color: white !important;">Saved Restaurant</li>
+          <li class="nav-item">
+              <a href="{{ route('saved_restaurants') }}" class="nav-link">
+                  <i class="nav-icon fas fa-clock"></i>
+                  <p>Saved Restautants</p>
+              </a>
           </li>
           @endif
           @if(Auth::guard('restaurant')->check())
@@ -293,7 +302,7 @@
             </a>
           </li>
           @endif
-          @if(auth()->check() && auth()->user()->role_id == '5')
+          @if(auth()->check() && auth()->user()->role_id == '2')
           <li class="nav-header" style="color: white !important;">RESERVATION</li>
           <li class="nav-item">
               <a href="{{ route('pending_reservation') }}" class="nav-link">
@@ -302,7 +311,7 @@
               </a>
           </li>
           @endif
-          @if(auth()->check() && auth()->user()->role_id == '5')
+          @if(auth()->check() && auth()->user()->role_id == '2')
           <li class="nav-item">
             <a href="{{ route('reservation_record') }}" class="nav-link">
                 <i class="nav-icon fas fa-clipboard-list"></i>

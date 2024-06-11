@@ -55,7 +55,32 @@
                 margin-left: 0; /* Remove left margin on smaller screens */
             }
         }
+        .fixed-size-image {
+            width: 200px;  /* Set the desired width */
+            height: 200px; /* Set the desired height */
+            object-fit: cover;  /* Ensures the image covers the specified dimensions without distortion */
+        }
+        .heart-icon {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            cursor: pointer;
+            font-size: 24px;
+            z-index: 10;
+        }
 
+        .heart-icon .fa-heart-o {
+            color: #e74c3c;
+        }
+
+        .heart-icon .fa-heart {
+            color: #e74c3c;
+        }
+
+        .heart-icon:hover .fa-heart-o,
+        .heart-icon:hover .fa-heart {
+            color: #c0392b;
+        }
     </style>
 </head>
 
@@ -66,13 +91,19 @@
                 <div class="card">
                     <div class="blue text-center lucida-handwriting" style="padding: 0.75rem 1.25rem; margin-bottom: 0; border-bottom: 0 solid rgba(0, 0, 0, 0.125);">
                         <h3 style="font-size: 30px; margin-bottom: 0;">{{ $restaurant->name }}</h3>
+                        @php
+                            $liked = Auth::user()->likes()->where('restaurant_id', $restaurant->id)->exists();
+                        @endphp
+                        <span class="heart-icon" onclick="saveRestaurant(event, {{ $restaurant->id }})">
+                            <i class="fa {{ $liked ? 'fa-heart' : 'fa-heart-o' }}" aria-hidden="true"></i>
+                        </span>
                     </div>
                     <div class="row" id="image-row">
                         <!-- Display the first 3 images -->
                         @foreach($attachments->take(3) as $attachment)
                         <div class="col-md-4 mb-3">
                             <div class="position-relative image-container">
-                                <img src="{{ asset('storage/res_pic/' . $attachment->picture) }}" alt="Attachment" class="img-fluid image-with-outline">
+                                <img src="{{ asset('storage/res_pic/' . $attachment->picture) }}" alt="Attachment" class="img-fluid image-with-outline fixed-size-image">
                             </div>
                         </div>
                         @endforeach
@@ -440,7 +471,7 @@
                 Swal.fire({
                     icon: 'success',
                     title: 'Success',
-                    text: 'Reservation made successfully!'
+                    text: 'Reservation made successfully! Please wait the approval from restaurant.'
                 }).then((result) => {
                     if (result.isConfirmed) {
                         window.location.href = "{{ route('view_restaurant', ['id' => $restaurant->id]) }}";
@@ -569,10 +600,29 @@ document.addEventListener('DOMContentLoaded', function() {
     dateInput.addEventListener('change', fetchAvailableTables);
     timeInput.addEventListener('change', fetchAvailableTables);
 });
-
-
-
-
+</script>
+<script>
+    function saveRestaurant(event, restaurantId) {
+        event.preventDefault();
+        fetch(`/save_restaurant/${restaurantId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const icon = event.target.classList.contains('fa') ? event.target : event.target.querySelector('.fa');
+                icon.classList.toggle('fa-heart');
+                icon.classList.toggle('fa-heart-o');
+            } else {
+                alert('Failed to save restaurant.');
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    }
 </script>
 @endsection
           

@@ -128,8 +128,8 @@
                                                         <span class="fa fa-star-o"></span>
                                                     @endfor
                                                 </div>
-                                                <p class="restaurant-address">{{ $restaurant->address }}</p>
-                                                <p class="restaurant-description">{{ $restaurant->description }}</p>
+                                                <p class="restaurant-address" style="color: black">{{ $restaurant->address }}</p>
+                                                <p class="restaurant-description" style="color: black">{{ $restaurant->description }}</p>
                                             </a>
                                         </div>
                                     </div>

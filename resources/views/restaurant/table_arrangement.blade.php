@@ -1,5 +1,7 @@
 @extends('layouts')
-@section('title', 'Table Arrangement')
+
+@section('title','Table Arrangement')
+
 @section('content')
 <head>
     <meta charset="UTF-8">
@@ -9,7 +11,7 @@
         .draggable {
             border: 1px solid #000;
             text-align: center;
-            cursor: move;
+            cursor: pointer;
             position: relative;
             margin: 10px;
             border-radius: 10px;
@@ -19,6 +21,7 @@
             width: 100px;
             height: 100px;
             line-height: 100px;
+            font-size: 16px;
         }
         .diningTable {
             background-color: #f00;
@@ -32,8 +35,24 @@
         .toilet {
             background-color: #ff0;
         }
+        .window {
+            width: 200px; /* Adjust width as needed */
+            height: 25px; /* Adjust height as needed */
+            background-color: #ffcc00; /* Change color as needed */
+            transform-origin: center center;
+        }
+        .windowV {
+            width: 25px; /* Adjust width as needed */
+            height: 200px; /* Adjust height as needed */
+            background-color: #ffcc00; /* Change color as needed */
+            transform-origin: center center;
+            writing-mode: vertical-rl; /* Rotate the text to be vertical */
+            text-orientation: upright; /* Ensure the text orientation is upright */
+            line-height: 25px; /* Set line height to center text vertically */
+            text-align: center; /* Center text horizontally */
+        }
         .droppable {
-            width: 800px;
+            width: 760px;
             height: 600px;
             border: 2px dashed #000;
             position: relative;
@@ -43,127 +62,99 @@
 </head>
 <div class="content-wrapper">
     <div class="container-fluid py-4"> 
-        <h3>Set Up Your Restaurant Table Arrangement</h3>
+        <h3>Table Arrangement</h3>
         <br>
-        @if(session('success'))
-            <div class="alert alert-success">
-                {{ session('success') }}
-            </div>
-        @endif
         <div class="row">
-            <div id="dragItem1" class="draggable diningTable" draggable="true" ondragstart="drag(event)">Dining Table</div>
-            <div id="dragItem2" class="draggable counter" draggable="true" ondragstart="drag(event)">Counter</div>
-            <div id="dragItem3" class="draggable door" draggable="true" ondragstart="drag(event)">Door</div>
-            <div id="dragItem4" class="draggable toilet" draggable="true" ondragstart="drag(event)">Toilet</div>
-        </div>
-        <div class="mx-auto" style="width: 800px;">
-            <div>
-                <div id="dropArea" class="droppable" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+            <!-- Main Content Card -->
+            <div class="col-lg-8">
+                @if(session('success'))
+                    <div class="alert alert-success">
+                        {{ session('success') }}
+                    </div>
+                @endif
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row">
+                            <div id="dragItem1" class="draggable diningTable" draggable="true" ondragstart="drag(event)">Dining Table</div>
+                            <div id="dragItem2" class="draggable counter" draggable="true" ondragstart="drag(event)">Counter</div>
+                            <div id="dragItem3" class="draggable door" draggable="true" ondragstart="drag(event)">Door</div>
+                            <div id="dragItem4" class="draggable toilet" draggable="true" ondragstart="drag(event)">Toilet</div>
+                            <div id="dragItem5" class="draggable window" draggable="true" ondragstart="drag(event)">Window</div>
+                            <div id="dragItem6" class="draggable windowV" draggable="true" ondragstart="drag(event)">WindowV</div>
+                        </div>
+                        <div class="col-12 mx-auto" style="width: 800px;">
+                            <div>
+                                <div id="dropArea" class="droppable" ondrop="drop(event)" ondragover="allowDrop(event)"></div><br>
+                                <p style="color:red">*Please confirm the table arrangement, input the number of tables, and click "Start Upload"!</p>
+                            </div><br>
+                            <button id="download" class="btn blue float-right">Confirm Arrangement</button>
+                        </div>
+                        <br><br>
+                        <div class="col-12 mx-auto">
+                            <form id="image-upload-form" method="POST" action="{{ route('table_arrangement_pic') }}" enctype="multipart/form-data">
+                                @csrf
+                                <input type="hidden" name="restaurant_id" value="{{ Auth::guard('restaurant')->user()->id }}">
+                                <div class="form-group">
+                                    <label for="table_num">Number of Tables:</label>
+                                    <input type="number" class="form-control" name="table_num" id="table_num" min="1" required>
+                                </div>
+                                <div class="input-group mb-3">
+                                    <div class="custom-file">
+                                        <input type="file" class="custom-file-input" name="table_arrange_pic" id="table_arrange_pic" accept="image/*" onchange="previewImage()">
+                                        <label class="custom-file-label" for="table_arrange_pic">Choose file</label>
+                                    </div>
+                                    <div class="input-group-append">
+                                        <button type="submit" class="btn yellow">Start Upload</button>
+                                    </div>
+                                </div>
+                                <div id="image-preview" class="mt-2"></div> <!-- Image preview container -->
+                            </form>
+                        </div>
+                    </div>
+                </div>
             </div>
-        </div>
-        <br><br>
-        <div class="col-8 mx-auto">
-            <p>Please take a screenshot of the table arrangement and upload it:</p>
-            <form id="image-upload-form" method="POST" action="{{ route('table_arrangement_pic') }}" enctype="multipart/form-data">
-                @csrf
-                <input type="hidden" name="restaurant_id" value="{{ Auth::guard('restaurant')->user()->id }}">
-                <div class="form-group">
-                    <label for="table_num">Number of Tables:</label>
-                    <input type="number" class="form-control" name="table_num" id="table_num" min="1" required>
-                </div>
-                <div class="input-group mb-3">
-                    <div class="custom-file">
-                        <input type="file" class="custom-file-input" name="table_arrange_pic" id="table_arrange_pic" accept="image/*" onchange="previewImage()">
-                        <label class="custom-file-label" for="table_arrange_pic">Choose file</label>
+            <!-- End of Main Content Card -->
+            <!-- Current Table Arrangement Card -->
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">
+                        Current Table Arrangement
                     </div>
-                    <div class="input-group-append">
-                        <button type="submit" class="btn yellow">Start Upload</button>
+                    <div class="card-body">
+                        <img id="current-arrangement" class="img-fluid" src="{{ asset('storage/' . Auth::guard('restaurant')->user()->table_arrange_pic) }}" alt="Current Table Arrangement">
                     </div>
                 </div>
-                <div id="image-preview" class="mt-2"></div> <!-- Image preview container -->
-            </form>
+            </div>
+            <!-- End of Current Table Arrangement Card -->
         </div>
     </div>
 </div>
+
 @endsection
+
 @section('scripts')
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.3.2/html2canvas.min.js"></script>
+<script type="module" src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.3.2/html2canvas.esm.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.3.2/html2canvas.js"></script>
 <script>
-    var itemCounter = {diningTable: 0, counter: 0, door: 0, toilet: 0};
+    jQuery(document).ready(function() {
+        jQuery("#download").click(function() {
+            screenshot();
+        });
+    });
 
-    function allowDrop(event) {
-        event.preventDefault();
-    }
+    function screenshot() {
+        html2canvas(document.querySelector("#dropArea")).then(function(canvas) {
+            canvas.toBlob(function(blob) {
+                var file = new File([blob], "table_arrangement.png", { type: "image/png" });
+                var dataTransfer = new DataTransfer();
+                dataTransfer.items.add(file);
+                var fileInput = document.getElementById('table_arrange_pic');
+                fileInput.files = dataTransfer.files;
 
-    function drag(event) {
-        event.dataTransfer.setData("text", event.target.id);
-    }
-
-    function drop(event) {
-        event.preventDefault();
-        var data = event.dataTransfer.getData("text");
-        var draggableElement = document.getElementById(data);
-        var clone = draggableElement.cloneNode(true);
-        var dropArea = document.getElementById('dropArea');
-
-        // Calculate the correct drop position
-        var dropAreaRect = dropArea.getBoundingClientRect();
-        var elementRect = draggableElement.getBoundingClientRect();
-        var x = event.clientX - dropAreaRect.left + dropArea.scrollLeft - elementRect.width / 2;
-        var y = event.clientY - dropAreaRect.top + dropArea.scrollTop - elementRect.height / 2;
-
-        // Ensure the element stays within the bounds of the drop area
-        x = Math.max(0, Math.min(x, dropArea.clientWidth - elementRect.width));
-        y = Math.max(0, Math.min(y, dropArea.clientHeight - elementRect.height));
-
-        var itemType = draggableElement.classList[1];
-        itemCounter[itemType]++;
-        clone.textContent = itemType.charAt(0).toUpperCase() + itemType.slice(1) + ' ' + itemCounter[itemType];
-        clone.style.left = x + "px";
-        clone.style.top = y + "px";
-        clone.style.position = "absolute";
-        clone.onclick = function() {
-            this.remove();
-            itemCounter[itemType]--; // Decrement the counter when removing the box
-            updateCoordinatesList();
-        };
-        clone.id = "";
-        clone.ondragstart = function(event) {
-            event.dataTransfer.setData("text", this.outerHTML);
-            this.parentNode.removeChild(this);
-            itemCounter[itemType]--; // Decrement the counter when dragging the box
-            updateCoordinatesList();
-        };
-        clone.classList.add(itemType);
-        dropArea.appendChild(clone);
-        updateCoordinatesList();
-    }
-
-    function updateCoordinatesList() {
-        var diningTableList = document.getElementById('diningTableCoordinates');
-        var counterList = document.getElementById('counterCoordinates');
-        var doorList = document.getElementById('doorCoordinates');
-        var toiletList = document.getElementById('toiletCoordinates');
-        diningTableList.innerHTML = '';
-        counterList.innerHTML = '';
-        doorList.innerHTML = '';
-        toiletList.innerHTML = '';
-        itemCounter = {diningTable: 0, counter: 0, door: 0, toilet: 0};
-        var items = document.querySelectorAll('#dropArea > div');
-        items.forEach(function(item, index) {
-            var itemType = item.classList[1];
-            itemCounter[itemType]++;
-            item.textContent = itemType.charAt(0).toUpperCase() + itemType.slice(1) + ' ' + itemCounter[itemType];
-            var listItem = document.createElement('li');
-            listItem.textContent = item.textContent + ': ' + item.style.left + ', ' + item.style.top;
-            if (item.classList.contains('diningTable')) {
-                diningTableList.appendChild(listItem);
-            } else if (item.classList.contains('counter')) {
-                counterList.appendChild(listItem);
-            } else if (item.classList.contains('door')) {
-                doorList.appendChild(listItem);
-            } else if (item.classList.contains('toilet')) {
-                toiletList.appendChild(listItem);
-            }
+                // Trigger the change event to preview the image
+                previewImage();
+            });
         });
     }
 
@@ -189,6 +180,121 @@
         }
     }
 
+    var itemCounter = {diningTable: 0, counter: 0, door: 0, toilet: 0, window:0, windowV:0};
+
+    function allowDrop(event) {
+        event.preventDefault();
+    }
+
+    // Add a click event listener to the window element
+    document.getElementById('dragItem5').addEventListener('click', function(event) {
+        var rotation = getRotationDegrees(this);
+        rotation -= 90; // Rotate 90 degrees to the left
+        this.style.transform = 'rotate(' + rotation + 'deg)';
+    });
+
+    function drag(event) {
+        event.dataTransfer.setData("text", event.target.id);
+        var offsetX = event.target.offsetWidth / 2 -11; // Calculate the offset from the center
+        var offsetY = event.target.offsetHeight / 2 -11;
+        event.dataTransfer.setDragImage(event.target, offsetX, offsetY); // Set the drag image to the center
+        
+        // Get the current rotation angle of the element
+        var rotation = getRotationDegrees(event.target);
+        event.target.dataset.rotation = rotation;
+    }
+
+    // Function to get the current rotation angle of an element
+    function getRotationDegrees(element) {
+        var style = window.getComputedStyle(element);
+        var matrix = new WebKitCSSMatrix(style.webkitTransform);
+        var angle = Math.round(Math.atan2(matrix.b, matrix.a) * (180/Math.PI));
+        return angle;
+    }
+
+    function drop(event) {
+        event.preventDefault();
+        var data = event.dataTransfer.getData("text");
+        var draggableElement = document.getElementById(data);
+        var clone = draggableElement.cloneNode(true);
+        var dropArea = document.getElementById('dropArea');
+
+        // Calculate the drop position relative to the drop area
+        var dropX = event.clientX - dropArea.getBoundingClientRect().left - draggableElement.offsetWidth / 2;
+        var dropY = event.clientY - dropArea.getBoundingClientRect().top - draggableElement.offsetHeight / 2;
+
+        // Ensure the element stays within the bounds of the drop area
+        dropX = Math.max(0, Math.min(dropX, dropArea.clientWidth - draggableElement.offsetWidth));
+        dropY = Math.max(0, Math.min(dropY, dropArea.clientHeight - draggableElement.offsetHeight));
+
+        var itemType = draggableElement.classList[1];
+        itemCounter[itemType]++;
+        clone.textContent = itemType.charAt(0).toUpperCase() + itemType.slice(1) + ' ' + itemCounter[itemType];
+        clone.style.left = dropX + "px";
+        clone.style.top = dropY + "px";
+        clone.style.position = "absolute";
+        clone.style.transform = draggableElement.style.transform; // Retain the rotation angle
+        clone.onclick = function() {
+            this.remove();
+            itemCounter[itemType]--; // Decrement the counter when removing the box
+            this.classList.add('removed'); // Add a class to mark the item as removed
+            updateCoordinatesList();
+        };
+
+        clone.id = "";
+        clone.ondragstart = function(event) {
+            event.dataTransfer.setData("text", this.outerHTML);
+            this.parentNode.removeChild(this);
+            itemCounter[itemType]--; // Decrement the counter when dragging the box
+            updateCoordinatesList();
+        };
+        clone.classList.add(itemType);
+        dropArea.appendChild(clone);
+        updateCoordinatesList();
+    }
+
+    function updateCoordinatesList() {
+    var diningTableList = document.getElementById('diningTableCoordinates');
+    var counterList = document.getElementById('counterCoordinates');
+    var doorList = document.getElementById('doorCoordinates');
+    var toiletList = document.getElementById('toiletCoordinates');
+    var windowList = document.getElementById('windowCoordinates');
+    var windowVList = document.getElementById('windowVCoordinates');
+    diningTableList.innerHTML = '';
+    counterList.innerHTML = '';
+    doorList.innerHTML = '';
+    toiletList.innerHTML = '';
+    windowList.innerHTML = '';
+    windowVList.innerHTML = '';
+    itemCounter = {diningTable: 0, counter: 0, door: 0, toilet: 0, window: 0, windowV: 0};
+    var items = document.querySelectorAll('#dropArea > div');
+    items.forEach(function(item, index) {
+        var itemType = item.classList[1];
+        itemCounter[itemType]++;
+        item.textContent = itemType.charAt(0).toUpperCase() + itemType.slice(1) + ' ' + itemCounter[itemType];
+        var listItem = document.createElement('li');
+        listItem.textContent = item.textContent + ': ' + event.clientX + ', ' + event.clientY;
+        if (item.classList.contains('diningTable')) {
+            diningTableList.appendChild(listItem);
+        } else if (item.classList.contains('counter')) {
+            counterList.appendChild(listItem);
+        } else if (item.classList.contains('door')) {
+            // Increment the counter for the door item only if it is not being removed
+            if (!item.classList.contains('removed')) {
+                doorList.appendChild(listItem);
+            }
+        } else if (item.classList.contains('toilet')) {
+            toiletList.appendChild(listItem);
+        } else if (item.classList.contains('window')) {
+            windowList.appendChild(listItem);
+        } else if (item.classList.contains('windowV')) {
+            windowVList.appendChild(listItem);
+        }
+    });
+}
+
+
+
     // Handle form submission
     document.getElementById('image-upload-form').addEventListener('submit', function(event) {
         event.preventDefault(); // Prevent the default form submission
@@ -198,6 +304,9 @@
 
         // Send AJAX request to upload the image
         fetch('{{ route("table_arrangement_pic") }}', {
+            beforeSend: function() {
+                loadingModal();
+            }, 
             method: 'POST',
             body: formData,
             headers: {

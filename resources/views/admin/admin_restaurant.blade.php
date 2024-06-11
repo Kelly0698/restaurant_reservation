@@ -18,7 +18,7 @@
 
                         <div class="card-tools">
                             <div class="input-group input-group-sm" style="width: 150px;">
-                                <input type="text" name="table_search" class="form-control float-right" placeholder="Search">
+                                <input type="text" name="table_search" id="table_search" class="form-control float-right" placeholder="Search">
 
                                 <div class="input-group-append">
                                     <button type="submit" class="btn btn-default">
@@ -43,8 +43,7 @@
                                 <th>Action</th>
                             </tr>
                             </thead>
-                            <tbody>
-                            <tr>
+                            <tbody id="restaurantTableBody">
                             @foreach($restaurant as $item)
                             @if($item->status == 'Approved')
                                 <tr>
@@ -90,7 +89,6 @@
                                 </tr>
                             @endif
                             @endforeach
-                            </tr>
                             </tbody>
                         </table>
                     </div>
@@ -290,6 +288,56 @@
                     }
                 });
             }
+        });
+    });
+</script>
+<script>
+    $(document).ready(function(){
+        $('#table_search').on('keyup', function(){
+            let query = $(this).val();
+
+            $.ajax({
+                url: "{{ route('restaurants.search') }}",
+                type: "GET",
+                data: {'query': query},
+                success: function(data){
+                    $('#restaurantTableBody').html('');
+                    if(data.length > 0){
+                        $.each(data, function(index, restaurant){
+                            let profilePic = restaurant.logo_pic ? `{{ asset('storage') }}/${restaurant.logo_pic}` : `{{ asset('assets/dist/img/defaultPic.png') }}`;
+                            let address = restaurant.address.length > 20 ? restaurant.address.substring(0, 20) + '...' : restaurant.address;
+                            let pdfName = restaurant.license_pdf ? restaurant.license_pdf.split('/').pop() : 'No License';
+                            let pdfPath = `{{ Storage::url('license_pdf') }}/${pdfName}`;
+
+                            $('#restaurantTableBody').append(`
+                                <tr>
+                                    <td>${index + 1}</td>
+                                    <td style="display: flex;">
+                                        <img src="${profilePic}" alt="Profile Picture" width="30" height="30" style="border-radius: 50%; overflow: hidden;">
+                                        &nbsp;
+                                        ${restaurant.name}
+                                    </td>
+                                    <td>${restaurant.email}</td>
+                                    <td>${restaurant.phone_num}</td>
+                                    <td>${address}</td>
+                                    <td><a href="${pdfPath}" target="_blank" id="pdf-text-${index}" style="display:block">&nbsp;${pdfName}</a></td>
+                                    <td>${restaurant.status}</td>
+                                    <td>
+                                        <a class="btn yellow show_user" href="/show/restaurant/${restaurant.id}">
+                                            <span class="fas fa-eye"></span>
+                                        </a>
+                                        <button style="font-size:16.5px;" type="button" data-id="${restaurant.id}" class="btn blue delete-btn">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            `);
+                        });
+                    } else {
+                        $('#restaurantTableBody').append('<tr><td colspan="8" style="text-align:center;">No results found</td></tr>');
+                    }
+                }
+            });
         });
     });
 </script>

@@ -25,16 +25,16 @@
 <div class="login-box">
   <div class="card card-outline">
     <div class="card-header text-center">
-        <div class="row" style="background-color: #ffde59;">
+        <div class="row" style="background-color: #082A44">
             <div class="col-auto">
                 <p class="mt-3 mb-1">
                     <a href="#" onclick="window.history.back();" class="btn btn-sm">
-                        <i class="fas fa-arrow-left" style="margin-bottom: 11px;"></i>
+                        <i class="fas fa-arrow-left" style="margin-bottom: 11px; color:white"></i>
                     </a>
                 </p>
             </div>
             <div class="col align-self-center">
-                <p class="h3 mb-0" style="padding-right: 35px;"><b>Future Reserve It</b></p>
+                <p class="h3 mb-0" style="padding-right: 35px; color:white"><b>Future Reserve It</b></p>
             </div>
         </div>
     </div>
@@ -55,7 +55,7 @@
         </div>
         <div class="row">
           <div class="col-12">
-            <button type="submit" class="btn btn-block" style="background-color: #ffde59;">Request new password</button>
+            <button type="submit" class="btn btn-block" style="background-color: #082A44; color: white;">Request new password</button>
           </div>
         </div>
       </form>

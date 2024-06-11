@@ -5,24 +5,15 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Rating extends Model
+class Like extends Model
 {
     use HasFactory;
 
     protected $fillable = [
         'id',
-        'reservation_id',
         'user_id',
-        'restaurant_id',
-        'mark',
-        'comment'
+        'restaurant_id'
     ];
-
-    // Define the relationship with the Reservation model
-    public function reservation()
-    {
-        return $this->belongsTo(Reservation::class);
-    }
 
     // Define the relationship with the User model
     public function user()

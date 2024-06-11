@@ -18,7 +18,7 @@
 
                         <div class="card-tools">
                             <div class="input-group input-group-sm" style="width: 150px;">
-                                <input type="text" name="table_search" class="form-control float-right" placeholder="Search">
+                                <input type="text" name="table_search" id="table_search" class="form-control float-right" placeholder="Search">
 
                                 <div class="input-group-append">
                                     <button type="submit" class="btn btn-default">
@@ -40,7 +40,7 @@
                                     <th>Action</th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody id="roleTableBody">
                             @foreach($role as $item)
                                 <tr style="text-align:center;">
                                     <td>{{$loop->index+1}}</td>
@@ -66,7 +66,6 @@
         </div>     
     </div>
 </div>
-
 
 <!-- Add Role Modal -->
 <div class="modal fade" id="addModal" tabindex="-1" role="dialog" aria-labelledby="addModalTitle" aria-hidden="true">
@@ -410,5 +409,43 @@
         }
     });
 });
+</script>
+<script>
+    $(document).ready(function(){
+        $('#table_search').on('keyup', function(){
+            let query = $(this).val();
+
+            $.ajax({
+                url: "{{ route('roles.search') }}",
+                type: "GET",
+                data: {'query': query},
+                success: function(data){
+                    $('#roleTableBody').html('');
+                    if(data.length > 0){
+                        $.each(data, function(index, role){
+                            $('#roleTableBody').append(`
+                                <tr style="text-align:center;">
+                                    <td>${index + 1}</td>
+                                    <td>${role.role_name}</td>
+                                    <td>${role.level}</td>
+                                    <td>${role.status}</td>
+                                    <td>
+                                        <a class="btn yellow show_role" href="#" data-role-id="${role.id}">
+                                            <span class="fas fa-eye"></span>
+                                        </a>
+                                        <button style="font-size:16.5px;" type="button" data-id="${role.id}" class="btn blue delete-btn">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            `);
+                        });
+                    } else {
+                        $('#roleTableBody').append('<tr><td colspan="5" style="text-align:center;">No results found</td></tr>');
+                    }
+                }
+            });
+        });
+    });
 </script>
 @endsection

@@ -107,7 +107,14 @@
                         text: 'Number of Reservations'
                     },
                     ticks: {
-                        beginAtZero: true
+                        beginAtZero: true,
+                        min: 0, // Ensure y-axis starts from 0
+                        stepSize: 1, // Ensure y-axis displays only whole numbers
+                        callback: function(value) {
+                            if (value % 1 === 0) {
+                                return value;
+                            }
+                        }
                     }
                 },
                 x: {

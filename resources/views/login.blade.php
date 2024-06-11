@@ -86,7 +86,7 @@
                             </span>
                         </div>
                     </div>
-                    <a href="/password/forgot" class="text-right d-block small" style="color: #002dce;">Forgot Password?</a>
+                    <a href="/password/forgot" class="text-right d-block small" style="color: #002dce; font-weight: bold;">Forgot Password?</a>
                 </div>
 
                 <br>
@@ -96,7 +96,7 @@
                         <div class="col text-center">
                             <h2 class="d-inline small">No account?</h2>
                             <span class="d-inline small" style="color: #002dce;"></span>
-                            <a href="/user/register" class="d-inline small" style="color: #002dce;">Register Account</a>
+                            <a href="/user/register" class="d-inline small" style="color: #002dce; font-weight: bold;">Register Account</a>
                         </div>
                     </div>
                 </div><br>
