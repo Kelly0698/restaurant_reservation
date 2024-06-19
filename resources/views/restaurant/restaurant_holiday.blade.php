@@ -50,7 +50,7 @@ $(document).ready(function() {
                     success: function(data) {
                         // Refresh the calendar to display the new event
                         $('#calendar').fullCalendar('refetchEvents');
-                        toastr.success('Holiday added successfully!', 'Success');
+                        toastr.success('Holiday Added Successfully!', 'Success');
                     },
                     error: function(xhr, status, error) {
                         toastr.error('Failed to add holiday!', 'Error');
@@ -153,7 +153,7 @@ $(document).ready(function() {
                                 if (response.success) {
                                     // Remove the event from the FullCalendar UI
                                     $('#calendar').fullCalendar('removeEvents', event.id);
-                                    displayMessage("Event Deleted Successfully", 'success');
+                                    displayMessage("Holiday Deleted Successfully", 'success');
                                 }
                             },
                             error: function(xhr, status, error) {

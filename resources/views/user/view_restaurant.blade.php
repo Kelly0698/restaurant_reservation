@@ -137,9 +137,11 @@
                         <strong><i class="fas fa-clock mr-1"></i>Operation Time</strong>
                         <p class="text-muted">{{ $restaurant->operation_time }}</p>
                         <hr>
-                        <strong><i class="fas fa-info-circle mr-1"></i>Description</strong>
-                        <p class="text-muted">{{ $restaurant->description }}</p>
-                        <hr> 
+                        @if($restaurant->description)
+                            <strong><i class="fas fa-info-circle mr-1"></i>Description</strong>
+                            <p class="text-muted">{{ $restaurant->description }}</p>
+                            <hr>
+                        @endif
                         <strong><i class="fas fa-info-circle mr-1"></i>Holiday(Restaurant Close)</strong>
                         <div class="col-md-8 offset-md-2"> 
                             <div class="card">              
@@ -325,7 +327,6 @@
                                     <label for="table_num">Table Number:</label>
                                     <select id="table_num" name="table_num" class="form-control" required>
                                         <option value="">Select a table</option>
-                                        <!-- Table options will be populated dynamically -->
                                     </select>
                                 </div>
                             @endif

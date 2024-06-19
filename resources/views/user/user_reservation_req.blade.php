@@ -3,6 +3,25 @@
 @section('content')
 <div class="content-wrapper">
     <div class="container-fluid">
+    <div class="row">
+            <div class="col-12">
+                <div class="search-bar">
+                    <form action="{{ route('pending_reservation') }}" method="GET">
+                        <div class="input-group mb-3">
+                            <input type="text" class="form-control rounded-pill" placeholder="Search Record (Restaurant Name, Time, Party Size, Remark)" name="query" style="width: 50%;" value="{{ request('query') }}">
+                            <input type="date" class="form-control rounded-pill" name="date" style="width: 20%;" value="{{ request('date') }}">
+                            <select class="form-control rounded-pill" name="sort" style="width: 10%;">
+                                <option value="asc" {{ request('sort') == 'asc' ? 'selected' : '' }}>Asc</option>
+                                <option value="desc" {{ request('sort') == 'desc' ? 'selected' : '' }}>Desc</option>
+                            </select>
+                            <div class="input-group-append">
+                                <button class="btn btn-outline-secondary yellow rounded-pill" type="submit" style="width: 100%;">Search</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
         <div class="row justify-content-center">
             <div class="col-md-10">
                 <div class="row">
@@ -41,6 +60,35 @@
                     </div>
                     @endforeach
                 </div>
+                <div class="row justify-content-center mt-4">
+                    <div class="col-md-12">
+                        <nav aria-label="Page navigation example">
+                            <ul class="pagination justify-content-center">
+                                {{-- Previous Page Link --}}
+                                @if ($pendingReservations->onFirstPage())
+                                    <li class="page-item disabled">
+                                        <span class="page-link">Previous</span>
+                                    </li>
+                                @else
+                                    <li class="page-item">
+                                        <a class="page-link" href="{{ $pendingReservations->previousPageUrl() }} " style="color: #ff9c62;" aria-label="Previous">Previous</a>
+                                    </li>
+                                @endif
+
+                                {{-- Next Page Link --}}
+                                @if ($pendingReservations->hasMorePages())
+                                    <li class="page-item">
+                                        <a class="page-link" href="{{ $pendingReservations->nextPageUrl() }}" style="color: #ff9c62;" aria-label="Next">Next</a>
+                                    </li>
+                                @else
+                                    <li class="page-item disabled">
+                                        <span class="page-link">Next</span>
+                                    </li>
+                                @endif
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -73,7 +121,7 @@
                         // Show success message
                         Swal.fire({
                             title: 'Canceled!',
-                            text: 'Your reservation has been canceled.',
+                            text: 'Your reservation has been cancelled.',
                             icon: 'success',
                             confirmButtonText: 'OK'
                         }).then((result) => {

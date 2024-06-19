@@ -28,17 +28,17 @@ Route::get('/', function () {
 });
 
 Route::get('/dashboard',[UserController::class, 'adminDashboard'])->name('dashboard');
-Route::get('/home',[UserController::class, 'userDashboard'])->name('home');
+Route::get('/home',[UserController::class, 'userDashboard'])->name('home')->middleware('auth');
 
 //Role
-Route::get('/role',[RoleController::class, 'index'])->name('role_list');
-Route::delete('/delete/role/{role}',[RoleController::class, 'destroy'])->name('destroy_role');
-Route::post('/create/role',[RoleController::class, 'create'])->name('create_role');
-Route::get('/show/role/{id}',[RoleController::class, 'show'])->name('show_role');
-Route::post('/edit/role/{role}',[RoleController::class, 'edit'])->name('edit_role');
-Route::get('get/role/{id}', [RoleController::class,'getRole'])->name('get_role');
-Route::post('/check/role', [RoleController::class, 'validateRoleForm'])->name('check_role');
-Route::get('/search-roles', [RoleController::class, 'search'])->name('roles.search');
+Route::get('/role',[RoleController::class, 'index'])->name('role_list')->middleware('auth');
+Route::delete('/delete/role/{role}',[RoleController::class, 'destroy'])->name('destroy_role')->middleware('auth');
+Route::post('/create/role',[RoleController::class, 'create'])->name('create_role')->middleware('auth');
+Route::get('/show/role/{id}',[RoleController::class, 'show'])->name('show_role')->middleware('auth');
+Route::post('/edit/role/{role}',[RoleController::class, 'edit'])->name('edit_role')->middleware('auth');
+Route::get('get/role/{id}', [RoleController::class,'getRole'])->name('get_role')->middleware('auth');
+Route::post('/check/role', [RoleController::class, 'validateRoleForm'])->name('check_role')->middleware('auth');
+Route::get('/search-roles', [RoleController::class, 'search'])->name('roles.search')->middleware('auth');
 
 //user_auth
 Route::get('/login', function () {return view('login');})->name('login');  
@@ -84,41 +84,41 @@ Route::post('/edit/restaurant/{restaurant}',[RestaurantController::class, 'edit'
 Route::delete('/delete/restaurant/{restaurant}',[RestaurantController::class, 'destroy'])->name('destroy_restaurant');
 Route::get('/request',[RestaurantController::class, 'index_req'])->name('restaurant_req_list');
 Route::post('/update-status/{id}',[RestaurantController::class, 'updateStatus'])->name('update_status');
-Route::get('/your-profile',[RestaurantController::class, 'restaurant_profile'])->name('restaurant_profile');
-Route::post('/logo-pic/update/{restaurant}',[RestaurantController::class, 'updateLogo'])->name('update_logo');
-Route::post('/upload-picture', [RestaurantController::class, 'uploadPicture'])->name('upload_picture');
-Route::delete('/pic-delete/{id}',[RestaurantController::class, 'deleteAttachment'])->name('pic_delete');
+Route::get('/your-profile',[RestaurantController::class, 'restaurant_profile'])->name('restaurant_profile')->middleware('auth:restaurant');
+Route::post('/logo-pic/update/{restaurant}',[RestaurantController::class, 'updateLogo'])->name('update_logo')->middleware('auth:restaurant');
+Route::post('/upload-picture', [RestaurantController::class, 'uploadPicture'])->name('upload_picture')->middleware('auth:restaurant');
+Route::delete('/pic-delete/{id}',[RestaurantController::class, 'deleteAttachment'])->name('pic_delete')->middleware('auth:restaurant');
 Route::post('/check-email', [RestaurantController::class, 'checkEmail'])->name('check.email');
 Route::post('/restaurant-check', [RestaurantController::class, 'checkEmailExistence'])->name('check_email');
-Route::get('restaurant/password/reset', [RestaurantController::class, 'showResetForm'])->name('ResetPasswordPage');
-Route::post('restaurant/password/reset', [RestaurantController::class, 'resetPassword'])->name('ResetPasswordPost');
-Route::get('table/restaurant', [RestaurantController::class, 'restaurant_table'])->name('table_arrangement');
-Route::post('/upload-table-arrangement', [RestaurantController::class, 'upload_table_pic'])->name('table_arrangement_pic');
+Route::get('restaurant/password/reset', [RestaurantController::class, 'showResetForm'])->name('ResetPasswordPage')->middleware('auth:restaurant');
+Route::post('restaurant/password/reset', [RestaurantController::class, 'resetPassword'])->name('ResetPasswordPost')->middleware('auth:restaurant');
+Route::get('table/restaurant', [RestaurantController::class, 'restaurant_table'])->name('table_arrangement')->middleware('auth:restaurant');
+Route::post('/upload-table-arrangement', [RestaurantController::class, 'upload_table_pic'])->name('table_arrangement_pic')->middleware('auth:restaurant');
 
 //reservation
 Route::post('/reservation-make',[UserController::class, 'makeReservation'])->name('make_reservation');
 Route::get('/record', [UserController::class, 'reservationRecord'])->name('reservation_record');
-Route::post('/approve-reservation/{id}', [RestaurantController::class, 'approveReservation'])->name('approve_reservation');
-Route::get('/reserve/approve', [RestaurantController::class, 'approveResPage'])->name('approve_page');
-Route::post('/update-completeness/{id}', [RestaurantController::class, 'updateCompleteness'])->name('update_completeness');
-Route::get('/done-reservations', [RestaurantController::class, 'showDoneReservations'])->name('done_reservations');
-Route::post('/reject-reservation/{id}',[RestaurantController::class, 'rejectReservation'])->name('reject_reservation');
-Route::get('/reserve/reject', [RestaurantController::class, 'rejectResPage'])->name('reject_page');
+Route::post('/approve-reservation/{id}', [RestaurantController::class, 'approveReservation'])->name('approve_reservation')->middleware('auth:restaurant');
+Route::get('/reserve/approve', [RestaurantController::class, 'approveResPage'])->name('approve_page')->middleware('auth:restaurant');
+Route::post('/update-completeness/{id}', [RestaurantController::class, 'updateCompleteness'])->name('update_completeness')->middleware('auth:restaurant');
+Route::get('/done-reservations', [RestaurantController::class, 'showDoneReservations'])->name('done_reservations')->middleware('auth:restaurant');
+Route::post('/reject-reservation/{id}',[RestaurantController::class, 'rejectReservation'])->name('reject_reservation')->middleware('auth:restaurant');
+Route::get('/reserve/reject', [RestaurantController::class, 'rejectResPage'])->name('reject_page')->middleware('auth:restaurant');
 Route::post('/cancel-reservation/{id}', [UserController::class, 'cancelReservation'])->name('cancel_reservation');
 Route::get('/pending/reservation', [UserController::class, 'pendingReservation'])->name('pending_reservation');
 Route::get('/available-tables', [UserController::class, 'getAvailableTables']);
-Route::get('/absent-reserve', [RestaurantController::class, 'AbsentResPage'])->name('absent_page');
+Route::get('/absent-reserve', [RestaurantController::class, 'AbsentResPage'])->name('absent_page')->middleware('auth:restaurant');
 
 //rating
 Route::post('/ratings', [RatingController::class, 'store'])->name('store_rating');
-Route::get('/get-user-phone-number/{userName}', [RestaurantController::class, 'getUserPhoneNumber']);
+Route::get('/get-user-phone-number/{userName}', [RestaurantController::class, 'getUserPhoneNumber'])->middleware('auth:restaurant');
 
 //holiday
 Route::get('/calendar', [HolidayController::class, 'index'])->name('holiday');
-Route::post('/add-holiday', [HolidayController::class, 'store'])->name('add_holiday');
-Route::get('/holidays', [HolidayController::class, 'show'])->name('show_holiday');
-Route::put('/update/holidays/{id}', [HolidayController::class, 'update'])->name('update_holiday');
-Route::delete('/delete/holidays/{id}', [HolidayController::class, 'delete'])->name('delete_Holidays');
+Route::post('/add-holiday', [HolidayController::class, 'store'])->name('add_holiday')->middleware('auth:restaurant');
+Route::get('/holidays', [HolidayController::class, 'show'])->name('show_holiday')->middleware('auth:restaurant');
+Route::put('/update/holidays/{id}', [HolidayController::class, 'update'])->name('update_holiday')->middleware('auth:restaurant');
+Route::delete('/delete/holidays/{id}', [HolidayController::class, 'delete'])->name('delete_Holidays')->middleware('auth:restaurant');
 Route::get('/get-holidays', [HolidayController::class, 'getHoliday'])->name('get_holiday');
 
 //saved_restaurant

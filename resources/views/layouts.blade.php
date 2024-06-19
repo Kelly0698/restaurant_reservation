@@ -354,10 +354,11 @@
           <li class="nav-header" style="color: white !important;">TABLE ARRANGEMENT</li>
           <li class="nav-item">
               <a href="{{ route('table_arrangement') }}" class="nav-link">
-                  <i class="nav-icon fas fa-calendar-alt"></i>
+                  <i class="nav-icon fas fa-chair"></i>
                   <p>Table Arrangement</p>
               </a>
           </li>
+
           @endif
 
       </nav>

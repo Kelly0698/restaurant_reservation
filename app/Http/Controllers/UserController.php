@@ -620,23 +620,49 @@ class UserController extends Controller
         $reservation->delete();
         
         // Redirect back with a success message
-        return redirect()->back()->with('success', 'Reservation canceled successfully');
+        return redirect()->back()->with('success', 'Reservation cancelled successfully');
     }
 
-    public function pendingReservation()
+    public function pendingReservation(Request $request)
     {
         // Retrieve the authenticated user's ID
         $userId = auth()->user()->id;
     
         // Query pending reservations for the authenticated user
-        $pendingReservations = Reservation::where('user_id', $userId)
-            ->where('status', 'pending')
-            ->get();
+        $pendingReservationsQuery = Reservation::where('user_id', $userId)
+            ->where('status', 'pending');
     
-        // Return the pending reservations to the user_reservation_req view
+        // Apply search filter if query is provided
+        $query = $request->input('query');
+        if ($query) {
+            $pendingReservationsQuery->where(function ($q) use ($query) {
+                $q->whereHas('restaurant', function ($restaurantQuery) use ($query) {
+                    $restaurantQuery->where('name', 'LIKE', "%{$query}%");
+                })
+                ->orWhere('time', 'LIKE', "%{$query}%")
+                ->orWhere('party_size', 'LIKE', "%{$query}%")
+                ->orWhere('remark', 'LIKE', "%{$query}%");
+            });
+        }
+    
+        // Apply date filter if date is provided
+        $date = $request->input('date');
+        if ($date) {
+            $pendingReservationsQuery->whereDate('date', $date);
+        }
+    
+        // Apply sorting
+        $sort = $request->input('sort', 'asc');
+        $pendingReservationsQuery->orderBy('date', $sort);
+    
+        // Paginate the results
+        $perPage = 5; // Number of records per page
+        $pendingReservations = $pendingReservationsQuery->paginate($perPage);
+    
+        // Return the paginated pending reservations to the user_reservation_req view
         return view('user.user_reservation_req', compact('pendingReservations'));
     }
-    
+       
     public function showUserResetForm()
     {
         return view('user.reset_password');

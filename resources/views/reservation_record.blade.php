@@ -6,9 +6,41 @@
         <div class="row justify-content-center">
             <div class="col-md-10">
                 <div class="row">
+                    @if(Auth::guard('web')->check())
+                    <div class="col-12 mb-3">
+                        <div class="text-right">
+                            <div class="dropdown">
+                                <button class="btn yellow dropdown-toggle" type="button" id="filterDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="border-radius:20px; width: 120px;">
+                                    Filter
+                                </button>
+                                <div class="dropdown-menu" aria-labelledby="filterDropdown">
+                                    <a class="dropdown-item filter-btn active" href="#" data-filter="all">All Reservations</a>
+                                    <a class="dropdown-item filter-btn" href="#" data-filter="approved-completed">Approved (With Rating)</a>
+                                    <a class="dropdown-item filter-btn" href="#" data-filter="approved-pending">Pending Completion</a>
+                                    <a class="dropdown-item filter-btn" href="#" data-filter="rejected">Rejected</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    @endif
+
+                    <div class="col-12 no-record-message" style="display: none;">
+                        <br><br>
+                        <div class="card blue text-center">
+                            <div class="card-body">
+                                <p class="m-0">No record found</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    @if($reservations->isEmpty())
+                    <div class="col-12 mb-3">
+                        <p>No record found</p>
+                    </div>
+                    @else
                     @foreach($reservations as $reservation)
                     @if(Auth::guard('web')->check() && ($reservation->status === 'Approved' || $reservation->status === 'Rejected'))
-                    <div class="col-12 mb-3"> 
+                    <div class="col-12 mb-3 reservation-card" data-status="{{ strtolower($reservation->status) }}" data-completeness="{{ strtolower($reservation->completeness) }}">
                         <div class="card bg-light">
                             <div class="card-body">
                                 <h2 class="lead"><b>Reservation for: {{$reservation->restaurant->name}}</b></h2>
@@ -17,16 +49,8 @@
                                 <p>Reservation Date: &nbsp{{ $reservation->date }}</p>
                                 <p>Time: &nbsp{{ $reservation->time }}</p>
                                 <p>Party Size: &nbsp{{ $reservation->party_size }}</p>
-                                @if($reservation->table_num)
-                                    <p>Table: Table&nbsp{{ $reservation->table_num}}</p>
-                                @else
-                                    <p>Table: &nbspNone</p>
-                                @endif
-                                @if($reservation->remark)
-                                    <p>Remark: &nbsp{{ $reservation->remark }}</p>
-                                @else
-                                    <p>Remark: &nbspNone</p>
-                                @endif
+                                <p>Table: &nbsp{{ $reservation->table_num ?? 'None' }}</p>
+                                <p>Remark: &nbsp{{ $reservation->remark ?? 'None' }}</p>
                                 <p>Status:
                                     @if($reservation->status === 'Approved')
                                         <button class="btn btn-sm" style="background-color:#36d2a3d7; border-radius: 20px !important;">Approved</button>
@@ -37,7 +61,7 @@
                                     @endif
                                 </p>
                                 <div class="text-left">
-                                @if($reservation->status === 'Approved' && \Carbon\Carbon::parse($reservation->date . ' ' . $reservation->time) < \Carbon\Carbon::now() && $reservation->completeness === 'Done')
+                                    @if($reservation->status === 'Approved' && \Carbon\Carbon::parse($reservation->date . ' ' . $reservation->time) < \Carbon\Carbon::now() && $reservation->completeness === 'Done')
                                         @if(!$reservation->rating)
                                         <div id="ratingForm_{{ $reservation->id }}" style="display: none;">
                                             <form class="rating-form" data-reservation-id="{{ $reservation->id }}">
@@ -81,8 +105,7 @@
                         </div>
                     </div>
                     @elseif(Auth::guard('restaurant')->check())
-                    <!-- Show all reservations for restaurants -->
-                    <div class="col-12 mb-3"> 
+                    <div class="col-12 mb-3">
                         <div class="card bg-light">
                             <div class="card-body">
                                 <h2 class="lead"><b>Reservation for: {{$reservation->restaurant->name}}</b></h2>
@@ -91,16 +114,8 @@
                                 <p>Reservation Date: &nbsp{{ $reservation->date }}</p>
                                 <p>Time: &nbsp{{ $reservation->time }}</p>
                                 <p>Party Size: &nbsp{{ $reservation->party_size }}</p>
-                                @if($reservation->table_num)
-                                    <p>Table: Table&nbsp{{ $reservation->table_num}}</p>
-                                @else
-                                    <p>Table: &nbspNone</p>
-                                @endif
-                                @if($reservation->remark)
-                                    <p>Remark: &nbsp{{ $reservation->remark }}</p>
-                                @else
-                                    <p>Remark: &nbspNone</p>
-                                @endif
+                                <p>Table: &nbsp{{ $reservation->table_num ?? 'None' }}</p>
+                                <p>Remark: &nbsp{{ $reservation->remark ?? 'None' }}</p>
                                 <p>Status:
                                     @if($reservation->status === 'Approved')
                                         <button class="btn btn-sm" style="background-color:#36d2a3d7; border-radius: 20px !important;">Approved</button>
@@ -127,6 +142,7 @@
                     </div>
                     @endif
                     @endforeach
+                    @endif
                 </div>
             </div>
         </div>
@@ -134,11 +150,64 @@
 </div>
 @endsection
 
-
 @section('scripts')
 <script>
+document.addEventListener('DOMContentLoaded', function () {
+    const filterButtons = document.querySelectorAll('.filter-btn');
+    const reservationCards = document.querySelectorAll('.reservation-card');
+    const noRecordMessage = document.querySelector('.no-record-message');
+
+    filterButtons.forEach(button => {
+        button.addEventListener('click', function () {
+            const filter = button.getAttribute('data-filter');
+            let hasVisibleCard = false;
+
+            reservationCards.forEach(card => {
+                const status = card.getAttribute('data-status');
+                const completeness = card.getAttribute('data-completeness');
+
+                if (filter === 'all') {
+                    card.style.display = 'block';
+                    hasVisibleCard = true;
+                } else if (filter === 'approved-completed') {
+                    if (status === 'approved' && completeness === 'done') {
+                        card.style.display = 'block';
+                        hasVisibleCard = true;
+                    } else {
+                        card.style.display = 'none';
+                    }
+                } else if (filter === 'approved-pending') {
+                    if (status === 'approved' && completeness !== 'done') {
+                        card.style.display = 'block';
+                        hasVisibleCard = true;
+                    } else {
+                        card.style.display = 'none';
+                    }
+                } else if (filter === 'rejected') {
+                    if (status === 'rejected') {
+                        card.style.display = 'block';
+                        hasVisibleCard = true;
+                    } else {
+                        card.style.display = 'none';
+                    }
+                }
+            });
+
+            if (!hasVisibleCard) {
+                noRecordMessage.style.display = 'block';
+            } else {
+                noRecordMessage.style.display = 'none';
+            }
+
+            // Update active button state
+            filterButtons.forEach(btn => btn.classList.remove('active'));
+            button.classList.add('active');
+        });
+    });
+});
+</script>
+<script>
 function approveReservation(reservationId, userName, userPhone, messageType, restaurantName, reservationTime, reservationDate) {
-    // Show confirmation dialog
     Swal.fire({
         title: 'Are you sure?',
         text: 'Do you want to approve the reservation for user ' + userName + '?',
@@ -149,7 +218,6 @@ function approveReservation(reservationId, userName, userPhone, messageType, res
         confirmButtonText: 'Yes, approve it!'
     }).then((result) => {
         if (result.isConfirmed) {
-            // Send an AJAX request to update the status
             $.ajax({
                 url: '/approve-reservation/' + reservationId,
                 beforeSend: function() {
@@ -161,7 +229,6 @@ function approveReservation(reservationId, userName, userPhone, messageType, res
                     status: 'Approved'
                 },
                 success: function(response) {
-                    // Show success message
                     Swal.fire({
                         title: 'Approved!',
                         text: 'The reservation for user ' + userName + ' has been approved.',
@@ -173,12 +240,11 @@ function approveReservation(reservationId, userName, userPhone, messageType, res
                             window.open(`https://web.whatsapp.com/send?phone=${userPhone}&text=${encodeURIComponent(message)}`);
                             window.location.reload();
                         } else {
-                            window.location.reload(); // Reload the page to reflect the changes
+                            window.location.reload();
                         }
                     });
                 },
                 error: function(xhr, status, error) {
-                    // Handle errors if any
                     Swal.fire({
                         title: 'Error!',
                         text: 'Approval failed',
@@ -194,7 +260,6 @@ function approveReservation(reservationId, userName, userPhone, messageType, res
 }
 
 function rejectReservation(reservationId, userName, userPhone, messageType, restaurantName, reservationTime, reservationDate) {
-    // Show confirmation dialog
     Swal.fire({
         title: 'Are you sure?',
         text: 'Do you want to reject the reservation for user ' + userName + '?',
@@ -205,7 +270,6 @@ function rejectReservation(reservationId, userName, userPhone, messageType, rest
         confirmButtonText: 'Yes, reject it!'
     }).then((result) => {
         if (result.isConfirmed) {
-            // Send an AJAX request to update the status
             $.ajax({
                 url: '/reject-reservation/' + reservationId,
                 beforeSend: function() {
@@ -217,7 +281,6 @@ function rejectReservation(reservationId, userName, userPhone, messageType, rest
                     status: 'Rejected'
                 },
                 success: function(response) {
-                    // Show success message
                     Swal.fire({
                         title: 'Rejected!',
                         text: 'The reservation for user ' + userName + ' has been rejected.',
@@ -229,12 +292,11 @@ function rejectReservation(reservationId, userName, userPhone, messageType, rest
                             window.open(`https://web.whatsapp.com/send?phone=${userPhone}&text=${encodeURIComponent(message)}`);
                             window.location.reload();
                         } else {
-                            window.location.reload(); // Reload the page to reflect the changes
+                            window.location.reload();
                         }
                     });
                 },
                 error: function(xhr, status, error) {
-                    // Handle errors if any
                     Swal.fire({
                         title: 'Error!',
                         text: 'Rejection failed',
@@ -249,7 +311,6 @@ function rejectReservation(reservationId, userName, userPhone, messageType, rest
     });
 }
 </script>
-
 <script>
     function toggleRatingForm(reservationId) {
         var ratingForm = document.getElementById('ratingForm_' + reservationId);
@@ -260,7 +321,6 @@ function rejectReservation(reservationId, userName, userPhone, messageType, rest
         }
     }
 </script>
-
 <script>
     $(document).ready(function() {
         $('.rating-form').submit(function(e) {

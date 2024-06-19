@@ -105,9 +105,15 @@
                         </div>
                         <div class="form-group">
                             <label for="description" style="font-size: 1em;">Description</label>
-                            <p id="description-text" style="display:block">&nbsp{{ Auth::guard('restaurant')->user()->description }}</p>
-                            <input style="display:none" type="text" class="form-control" name="description" id="description-input" value="{{ Auth::guard('restaurant')->user()->description }}" >
+                            @php
+                                $description = Auth::guard('restaurant')->user()->description;
+                            @endphp
+                            <p id="description-text" style="display:block">
+                                {{ $description ? $description : 'None' }}
+                            </p>
+                            <input style="display:none" type="text" class="form-control" name="description" id="description-input" value="{{ $description }}">
                         </div>
+
                         <div class="d-flex justify-content-end mt-4">
                             <a href="/restaurant" type="button" name="button" class="btn blue m-0">Back</a>
                             &nbsp
