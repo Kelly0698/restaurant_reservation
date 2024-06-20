@@ -28,7 +28,7 @@
             padding: 20px;
             box-sizing: border-box;
             position: relative;
-            background-color: #ffd34f24;
+            background-color: #bc601528;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             transition: transform 0.3s, box-shadow 0.3s;
         }

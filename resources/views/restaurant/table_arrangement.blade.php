@@ -62,7 +62,7 @@
 </head>
 <div class="content-wrapper">
     <div class="container-fluid py-4"> 
-        <h3>Table Arrangement</h3>
+    <h2 style="background-color: #bc601528; padding:10px; padding-left: 20px;">Restaurant Table Arrangement</h2>
         <br>
         <div class="row">
             <!-- Main Content Card -->

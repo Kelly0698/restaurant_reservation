@@ -14,10 +14,9 @@
 
                 <div class="card">
                     <div class="card-header">
-                        <h3 class="card-title">Role List</h3>
-
+                        <h2 class="card-title">Role List</h2>
                         <div class="card-tools">
-                            <div class="input-group input-group-sm" style="width: 150px;">
+                            <div class="input-group input-group-sm" style="width: 130px;">
                                 <input type="text" name="table_search" id="table_search" class="form-control float-right" placeholder="Search">
 
                                 <div class="input-group-append">
@@ -28,8 +27,7 @@
                             </div>
                         </div>
                     </div>
-
-                    <div class="card-body table-responsive p-0" style="height: 300px;">
+                    <div class="card-body table-responsive p-0" style="height: auto;">
                         <table class="table table-head-fixed text-nowrap">
                             <thead>
                                 <tr style="text-align:center;">
@@ -167,6 +165,18 @@
 @endsection
 
 @section('scripts')
+<script>
+$(document).ready(function() {
+    $('.table').DataTable({
+        "paging": true,
+        "searching": false,
+        "ordering": false,
+        "info": false,
+        "lengthMenu": [5, 10, 20, 30]
+    });
+});
+</script>
+
 <script>
     function checkDataAdd(inputElement) {
         var check = inputElement.value;

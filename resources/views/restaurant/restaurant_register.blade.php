@@ -87,7 +87,7 @@
                     <input type="email" class="form-control" id="email" name="email" placeholder="Email" required>
                 </div>
                 <div class="form-group">
-                    <input type="text" class="form-control" id="phone_num" placeholder="Phone Number" name="phone_num" required>
+                    <input type="text" class="form-control" id="phone_num" name="phone_num" placeholder="+60xxxxxxxxxxx" required>
                 </div>   
                 <div class="form-group">
                     <div class="input-group">
@@ -192,24 +192,41 @@ Swal.fire({
 jQuery(document).ready(function($) {
     $('#restaurant_add').submit(function(e) {
         e.preventDefault();
+        
+        // Validate passwords match
         var password = $("#password").val();
-            var confirmPassword = $("#password_confirmation").val();
+        var confirmPassword = $("#password_confirmation").val();
 
-            // Check if passwords match
-            if (password !== confirmPassword) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: 'Passwords do not match!',
-                });
-                return; // Stop form submission
-            }
+        if (password !== confirmPassword) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Passwords do not match!',
+            });
+            return; // Stop form submission
+        }
+
+        // Validate phone number format
+        var phoneNumber = $("#phone_num").val();
+        var phonePattern = /^\+[0-9\s()+-]+$/;
+
+        if (!phonePattern.test(phoneNumber)) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Invalid Phone Number Format',
+                html: "Phone number must start with '<b>+</b>' and can include digits, spaces, '<b>+</b>', '<b>()</b>', and '<b>-</b>'!",
+            });
+
+            return; // Stop form submission
+        }
+
+        // Proceed with form submission using AJAX
         var formData = new FormData(this);
         $.ajax({
             type: "POST",
             url: "/restaurant-register",
             beforeSend: function() {
-                loadingModal();
+                loadingModal(); // Show loading indicator if you have one
             },
             data: formData,
             contentType: false,
@@ -243,7 +260,6 @@ jQuery(document).ready(function($) {
     });
 });
 </script>
-
 <script>
     jQuery(document).ready(function($) {
         $("#toggle-password").click(function(){

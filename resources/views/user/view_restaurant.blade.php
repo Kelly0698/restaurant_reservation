@@ -419,6 +419,7 @@
             // initialize the datepicker with a beforeShowDay function
             $('#dateInput').datepicker({
                 dateFormat: 'yy-mm-dd',
+                minDate: 0, // disable dates before today
                 beforeShowDay: function(date) {
                     var dateString = $.datepicker.formatDate('yy-mm-dd', date);
 
@@ -453,6 +454,7 @@
             console.log("Error loading holidays: " + xhr.responseText);
         }
     });
+
 
     $('#make_reservation').submit(function(e) {
         e.preventDefault();

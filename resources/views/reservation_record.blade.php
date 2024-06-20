@@ -3,6 +3,7 @@
 @section('content')
 <div class="content-wrapper">
     <div class="container-fluid">
+    <h2 style="background-color: #bc601528; padding:10px; padding-left: 20px;">Reservation Record</h2><br>
         <div class="row justify-content-center">
             <div class="col-md-10">
                 <div class="row">

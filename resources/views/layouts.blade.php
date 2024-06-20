@@ -34,10 +34,11 @@
 <!-- summernote -->
 <link rel="stylesheet" href="{{ asset('assets/plugins/summernote/summernote-bs4.min.css') }}">
 
-
-
 <!-- Dropzone CSS -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.9.2/min/dropzone.min.css">
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.css">
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap4.min.css">
+
 
 <style>
     .nav-link.active{
@@ -95,11 +96,51 @@
         font-family: 'Lucida Handwriting', cursive;
     }
     .container-fluid{
-          background-color: #fcffec;
-      }
-      .content-wrapper {
-          background-color: #fcffec;
-      }
+        background-color: #fcffec;
+    }
+    .content-wrapper {
+        background-color: #fcffec;
+    }
+
+    .dataTables_wrapper .dataTables_paginate {
+        position: sticky !important;
+        bottom: 0 !important;
+        right: 0 !important;
+        z-index: 10 !important; /* Ensure buttons are above table content */
+        background-color: #ffffff !important; /* Adjust background color as needed */
+        padding: 10px !important; /* Adjust padding as needed */
+        display: flex !important;
+        justify-content: center !important; /* Center aligns items horizontally */
+    }
+    .dataTables_wrapper .dataTables_paginate .paginate_button {
+        padding: 0.3rem 0.75rem !important;
+        font-size: 1rem !important;
+        line-height: 1.5 !important;
+        border-radius: 0.25rem !important;
+        border: 1px solid #ced4da !important;
+        color: #ff9c62 !important; 
+        text-align: center !important;
+        margin-right: 5px !important;
+        margin-bottom: 10px !important;
+        position: sticky !important;
+    }
+    .dataTables_wrapper .dataTables_length select {
+        width: auto !important;
+        height: 32px !important; /* Example: Adjust height smaller */
+        padding: 6px 8px 4px !important; /* Example: Adjust padding */
+        font-size: 14px !important; /* Example: Adjust font size */
+        line-height: 1.5 !important;
+        border-radius: 4px !important;
+        outline: none !important; /* Remove outline */
+    }
+    .dataTables_length label {
+        font-family: Arial, sans-serif; /* Replace with your preferred font stack */
+        font-size: 14px; /* Adjust font size as needed */
+        font-weight: bold; /* Adjust font weight as needed */
+        margin-left: 20px;
+        margin-top: 10px;
+    }
+
 </style>
 
 </head>
@@ -288,8 +329,8 @@
           <li class="nav-header" style="color: white !important;">Saved Restaurant</li>
           <li class="nav-item">
               <a href="{{ route('saved_restaurants') }}" class="nav-link">
-                  <i class="nav-icon fas fa-clock"></i>
-                  <p>Saved Restautants</p>
+                  <i class="nav-icon fas fa-heart"></i> <!-- Changed to heart icon -->
+                  <p>Saved Restaurants</p>
               </a>
           </li>
           @endif
@@ -417,6 +458,9 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bs-custom-file-input/1.3.4/bs-custom-file-input.min.js"></script> 
 
 <script src="{{ asset('assets/dist/js/custom.js') }}"></script>
+
+<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.js"></script>
+
 
 <script>
   $(document).ready(function() {

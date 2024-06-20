@@ -68,7 +68,12 @@
 <body>
 <div class="container login-container">
     <div class="row">
-        <div class="col-md-12 login-form-1"><br>
+        <div class="col-md-12 login-form-1">
+            <div class="text-right" style="right: 5px; top: 0px;">
+                <a href="/login" style="padding: 5px 10px; font-size:13px; color: #002dce; font-weight: bold; border: 2px solid #002dce; border-radius: 20px;">
+                    Customer Login <i class="fas fa-arrow-right" style="font-size:14px; color: #002dce;"></i>
+                </a>
+            </div><br><br>
             <h3 style="color: #01356c;">Future Reserve It</h3>
             <h3 style="color: #01356c;">Login to Your Restaurant</h3><br><br>
             <form role="form" class="text-start" method="post" action="{{ route('r_login') }}">

@@ -29,7 +29,7 @@
                         </div>
                     </div>
 
-                    <div class="card-body table-responsive p-0" style="height: 300px;">
+                    <div class="card-body table-responsive p-0" style="height: auto;">
                         <table class="table table-head-fixed text-nowrap">
                             <thead>
                             <tr>
@@ -71,11 +71,21 @@
                                     </td>
                                     <td>
                                         @php
+                                            // Get the PDF file name and extension
                                             $pdfName = pathinfo($item->license_pdf, PATHINFO_FILENAME);
                                             $pdfExtension = pathinfo($item->license_pdf, PATHINFO_EXTENSION);
-                                            $pdfPath = Storage::url('license_pdf/' . $pdfName . '.' . $pdfExtension);
+                                            
+                                            // Combine the file name and extension
+                                            $pdfFileName = $pdfName . '.' . $pdfExtension;
+                                            
+                                            // Limit the file name to 15 characters
+                                            $truncatedFileName = strlen($pdfFileName) > 15 ? substr($pdfFileName, 0, 15) . '...' : $pdfFileName;
+                                            
+                                            // Get the PDF file path
+                                            $pdfPath = Storage::url('license_pdf/' . $pdfFileName);
                                         @endphp
-                                        <a href="{{ $pdfPath }}" target="_blank" id="pdf-text-{{ $loop->index }}" style="display:block">&nbsp;{{ $pdfName . '.' . $pdfExtension }}</a>
+                                        
+                                        <a href="{{ $pdfPath }}" target="_blank" id="pdf-text-{{ $loop->index }}" style="display:block">&nbsp;{{ $truncatedFileName }}</a>
                                     </td>
                                     <td>{{$item->status}}</td>
                                     <td>
@@ -162,6 +172,17 @@
 
 @section('scripts')
 <script>
+$(document).ready(function() {
+    $('.table').DataTable({
+        "paging": true,
+        "searching": false,
+        "ordering": false,
+        "info": false,
+        "lengthMenu": [5, 10, 20, 30]
+    });
+});
+</script>
+<script>
     function checkEmail(input) {
         var email = input.value;
         var formData = new FormData();
@@ -196,10 +217,10 @@
         }
 
         var phone_num = $('#phone_num').val();
-        var phonePattern = /^[\d\s()+-]+$/;
+        var phonePattern = /^\+[0-9\s()+-]+$/; // Updated pattern to start with '+'
 
         if (!phonePattern.test(phone_num)) {
-            document.getElementById("phone_num_error").innerHTML = "*Invalid phone number format!";
+            document.getElementById("phone_num_error").innerHTML = "*Phone number must start with '+' and can include digits, spaces, '+', '()', and '-'!";
             return;
         } else {
             document.getElementById("phone_num_error").innerHTML = "";

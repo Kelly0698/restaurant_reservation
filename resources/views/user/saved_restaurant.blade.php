@@ -79,7 +79,7 @@
 <div class="content-wrapper">
     <div class="container-fluid">
         <div class="col-12">
-            <h1>Saved Restaurants</h1>
+            <h2 style="background-color: #bc601528; padding:10px; padding-left: 20px;">Saved Restaurants</h2><br>
 
             @if($likedRestaurants->isEmpty())
                 <p>No saved restaurants.</p>

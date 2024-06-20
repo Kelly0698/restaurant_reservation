@@ -3,6 +3,7 @@
 @section('content')
 <div class="content-wrapper">
     <div class="container-fluid">
+    <h2 style="background-color: #bc601528; padding:10px; padding-left: 20px;">Absent Reservation Record</h2><br>
         <div class="row">
             <div class="col-12">
                 <div class="search-bar">

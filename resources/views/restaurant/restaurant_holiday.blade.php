@@ -8,7 +8,7 @@
 </head>
 <div class="content-wrapper">
     <div class="container-fluid py-4"> 
-        <h4>Holidays</h4>   
+    <h2 style="background-color: #bc601528; padding:10px; padding-left: 20px;">Restaurant Holidays</h2>
         <div class="card card-body mt-4">
             <div id='calendar'></div>
         </div>

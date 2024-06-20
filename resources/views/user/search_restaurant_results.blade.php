@@ -4,12 +4,11 @@
 <head>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <style>
-        /* Your existing styles for the recommended restaurants */
 
         /* New styles for card content */
         .search-container {
             padding: 20px;
-            background-color: #f9f9f9;
+            background-color: #bc601528;
             max-width: 96%; 
             margin: 0 auto;
         }

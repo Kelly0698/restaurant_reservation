@@ -103,7 +103,7 @@
                     </div>
                 </div>
                 <div class="form-group">
-                    <input type="text" class="form-control" id="phone_num" onchange="checkData2(this)" placeholder="Phone Number" name="phone_num" required>
+                    <input type="text" class="form-control" id="phone_num" onchange="checkData2(this)" placeholder="Phone Number: +60xxxxxxxxxx" name="phone_num" required>
                     <div id="phone_num_error" style="font-size:12px" class="text-danger"></div>
                 </div>
                 <!-- New Checkbox Group -->
@@ -167,12 +167,13 @@ Swal.fire({
 
 <script>
     jQuery(document).ready(function($) {
+        // Function to check data on name input change
         function checkData() { 
             var check = $('#name').val();
             var formData = new FormData();
             formData.append("name", check);
-            formData.append("_token", "{{csrf_token()}}");
-            console.log(check);
+            formData.append("_token", "{{ csrf_token() }}");
+
             // Submit to backend
             $.ajax({
                 type: "post",
@@ -188,15 +189,34 @@ Swal.fire({
                     document.getElementById("user_name_error").innerHTML ="*This Username Is Exist!";
                 }
             });
-        };
+        }
 
-        function checkData2(emailInput) { 
-            var check = $(emailInput).val();
+        // Function to validate email and phone number
+        function checkData2(input) { 
+            var check = $(input).val();
             var formData = new FormData();
-            formData.append("email", check);
-            formData.append("_token", "{{csrf_token()}}");
-            console.log(check);
-            // Submit to backend
+            var id = $(input).attr('id');
+
+            if (id === 'email') {
+                var emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+                if (!emailPattern.test(check)) {
+                    document.getElementById("email_name_error").innerHTML ="*Invalid Email Format!";
+                    return;
+                }
+                document.getElementById("email_name_error").innerHTML ="";
+                formData.append("email", check);
+            } else if (id === 'phone_num') {
+                var phonePattern = /^\+?[1-9]\d{1,14}$/; // Pattern requiring a '+' followed by digits
+                if (!phonePattern.test(check)) {
+                    document.getElementById("phone_num_error").innerHTML = "*Invalid Phone Number Format!";
+                    return;
+                }
+                document.getElementById("phone_num_error").innerHTML = "";
+                formData.append("phone_num", check);
+            }
+
+            formData.append("_token", "{{ csrf_token() }}");
+
             $.ajax({
                 type: "post",
                 url: "/check/user", 
@@ -205,13 +225,22 @@ Swal.fire({
                 contentType: false,
                 success: function (response) {
                     console.log("success");
-                    document.getElementById("email_name_error").innerHTML ="";
+                    if (id === 'email') {
+                        document.getElementById("email_name_error").innerHTML ="";
+                    } else if (id === 'phone_num') {
+                        document.getElementById("phone_num_error").innerHTML ="";
+                    }
                 },
                 error: function (error) {
-                    document.getElementById("email_name_error").innerHTML ="*This Email Is Exist!";
+                    if (id === 'email') {
+                        document.getElementById("email_name_error").innerHTML ="*This Email Is Exist!";
+                    } else if (id === 'phone_num') {
+                        document.getElementById("phone_num_error").innerHTML ="*Invalid Phone Number Format!";
+                    }
                 }
             });
-        };
+        }
+
         // Function to validate password match
         $("#password_confirmation").on('keyup', function(){
             var password = $("#password").val();
@@ -226,12 +255,13 @@ Swal.fire({
             }
         });
 
+        // Form submission handler
         $('#user_add').submit(function(e) {
             e.preventDefault();
 
             var password = $("#password").val();
             var confirmPassword = $("#password_confirmation").val();
-
+            
             // Check if passwords match
             if (password !== confirmPassword) {
                 Swal.fire({
@@ -240,6 +270,22 @@ Swal.fire({
                     text: 'Passwords do not match!',
                 });
                 return; // Stop form submission
+            }
+
+            var email = $('#email').val();
+            var emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+            if (!emailPattern.test(email)) {
+                document.getElementById("email_name_error").innerHTML ="*Invalid Email Format!";
+                return;
+            }
+
+            // Validate phone number format
+            var phoneNum = $('#phone_num').val();
+            var phonePattern = /^\+[1-9]\d{1,14}$/;
+
+            if (!phonePattern.test(phoneNum)) {
+                document.getElementById("phone_num_error").innerHTML ="*Invalid Phone Number Format! Must be +xxxxxxxxxx";
+                return;
             }
 
             // If passwords match, proceed with form submission
@@ -274,9 +320,11 @@ Swal.fire({
                 }
             });
         });
+
         // Call checkData and checkData2 on input change
         $('#name').on('input', checkData);
         $('#email').on('input', function() { checkData2(this); });
+        $('#phone_num').on('input', function() { checkData2(this); });
     });
 </script>
 

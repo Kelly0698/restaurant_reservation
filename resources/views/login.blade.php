@@ -68,15 +68,22 @@
 <body>
 
 <div class="container login-container">
+  
     <div class="row">
-        <div class="col-md-12 login-form-1"><br>
+        <div class="col-md-12 login-form-1">
+          <div class="text-right" style="right: 5px; top: 0px;">
+              <a href="/your-restaurant" style="padding: 5px 10px; font-size:13px; color: #002dce; font-weight: bold; border: 2px solid #002dce; border-radius: 20px;">
+                  Restaurant Login <i class="fas fa-arrow-right" style="font-size:14px; color: #002dce;"></i>
+              </a>
+          </div>
+            <br><br>
             <h3 style="color: #01356c;">Login to Future Reserve It</h3><br><br>
             <form role="form" class="text-start" method="post" action="login">
-              @csrf
+                @csrf
                 <div class="form-group">
                     <input id="email" name="email" type="email" class="form-control" placeholder="Email" value="" style="border-radius: 15px;">
                 </div>
-   
+
                 <div class="form-group">
                     <div class="input-group">
                         <input id="password" name="password" type="password" class="form-control" placeholder="Password" value="" style="border-radius: 15px;">
@@ -91,19 +98,20 @@
 
                 <br>
                 <div class="text-center">
-                    <button type="submit" class="btn" style="width: 50%; border-radius: 20px; background-color:#ffde59; ">Login</button> 
+                    <button type="submit" class="btn" style="width: 50%; border-radius: 20px; background-color:#ffde59;">Login</button>
                     <div class="row justify-content-center">
                         <div class="col text-center">
                             <h2 class="d-inline small">No account?</h2>
-                            <span class="d-inline small" style="color: #002dce;"></span>
                             <a href="/user/register" class="d-inline small" style="color: #002dce; font-weight: bold;">Register Account</a>
                         </div>
                     </div>
-                </div><br>
+                </div>
+                <br>
             </form>
         </div>
     </div>
 </div>
+
   
   @if(session('status')=="failed")
   <script>                    

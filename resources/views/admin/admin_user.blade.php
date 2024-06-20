@@ -29,7 +29,7 @@
                         </div>
                     </div>
 
-                    <div class="card-body table-responsive p-0" style="height: 300px;">
+                    <div class="card-body table-responsive p-0" style="height: auto;">
                         <table class="table table-head-fixed text-nowrap">
                             <thead>
                             <tr>
@@ -148,6 +148,17 @@
 
 @section('scripts')
 <script>
+$(document).ready(function() {
+    $('.table').DataTable({
+        "paging": true,
+        "searching": false,
+        "ordering": false,
+        "info": false,
+        "lengthMenu": [5, 10, 20, 30]
+    });
+});
+</script>
+<script>
     function checkData(){ 
         var check = $('#name').val();
         var formData = new FormData();
@@ -185,12 +196,12 @@
             document.getElementById("email_name_error").innerHTML ="";
             formData.append("email", check);
         } else if (id === 'phone_num') {
-            var phonePattern = /^\+?[1-9]\d{1,14}$/;
+            var phonePattern = /^\+[1-9]\d{1,14}$/; // Pattern requiring a '+' followed by digits
             if (!phonePattern.test(check)) {
-                document.getElementById("phone_num_error").innerHTML ="*Invalid Phone Number Format!";
+                document.getElementById("phone_num_error").innerHTML = "*Phone number must start with '+' and can include digits, spaces, '+', '()', and '-'!";
                 return;
             }
-            document.getElementById("phone_num_error").innerHTML ="";
+            document.getElementById("phone_num_error").innerHTML = "";
             formData.append("phone_num", check);
         }
 
@@ -215,7 +226,7 @@
                 if (id === 'email') {
                     document.getElementById("email_name_error").innerHTML ="*This Email Is Exist!";
                 } else if (id === 'phone_num') {
-                    document.getElementById("phone_num_error").innerHTML ="*Invalid Phone Number Format!";
+                    document.getElementById("phone_num_error").innerHTML ="*Phone number must start with '+' and can include digits, spaces, '+', '()', and '-'!";
                 }
             }
         });
@@ -238,7 +249,7 @@
         var phoneNum = $('#phone_num').val();
         var phonePattern = /^\+?[1-9]\d{1,14}$/;
         if (!phonePattern.test(phoneNum)) {
-            document.getElementById("phone_num_error").innerHTML ="*Invalid Phone Number Format!";
+            document.getElementById("phone_num_error").innerHTML ="*Phone number must start with '+' and can include digits, spaces, '+', '()', and '-'!";
             return;
         }
 
