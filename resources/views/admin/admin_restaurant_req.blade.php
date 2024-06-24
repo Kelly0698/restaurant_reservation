@@ -4,6 +4,7 @@
 
 <div class="content-wrapper">
     <div class="container-fluid">
+    <h2 style="background-color: #bc601528; padding:10px; padding-left: 20px;">Restaurant Registration Requests</h2><br>
         @php
             $pendingRestaurants = $restaurant->where('status', 'Pending');
         @endphp

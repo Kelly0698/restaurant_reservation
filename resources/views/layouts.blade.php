@@ -50,6 +50,10 @@
       color: #ffc107;
     }
 
+    .blue:hover {
+        color: #ffffff;
+    }
+
     .yellow{
       background-color: #ffde59; 
       color: #01356c;
@@ -155,37 +159,10 @@
       <li class="nav-item">
         <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
       </li>
-      <!-- <li class="nav-item d-none d-sm-inline-block">
-        <a href="index3.html" class="nav-link">Home</a>
-      </li>
-      <li class="nav-item d-none d-sm-inline-block">
-        <a href="#" class="nav-link">Contact</a>
-      </li> -->
     </ul>
 
     <!-- Right navbar links -->
     <ul class="navbar-nav ml-auto">
-      <!-- Navbar Search -->
-      <li class="nav-item">
-        <a class="nav-link" data-widget="navbar-search" href="#" role="button">
-          <i class="fas fa-search"></i>
-        </a>
-        <div class="navbar-search-block">
-          <form class="form-inline">
-            <div class="input-group input-group-sm">
-              <input class="form-control form-control-navbar" type="search" placeholder="Search" aria-label="Search">
-              <div class="input-group-append">
-                <button class="btn btn-navbar" type="submit">
-                  <i class="fas fa-search"></i>
-                </button>
-                <button class="btn btn-navbar" type="button" data-widget="navbar-search">
-                  <i class="fas fa-times"></i>
-                </button>
-              </div>
-            </div>
-          </form>
-        </div>
-      </li>
       <li class="nav-item dropdown">
       @if(Auth::guard('restaurant')->check())
           <a class="nav-link" data-toggle="dropdown" href="#">
@@ -200,7 +177,7 @@
           </a>
           <div class="dropdown-divider"></div>
           <a href="/restaurant/password/reset" class="dropdown-item">
-            <i class="fa fa-key mr-2"></i> Change Password
+            <i class="fa fa-key mr-2"></i> Reset Password
           </a>
           <div class="dropdown-divider"></div>
           <a href="/login" class="dropdown-item">
@@ -225,7 +202,7 @@
           </a>
           <div class="dropdown-divider"></div>
           <a href="/user/password/reset" class="dropdown-item">
-            <i class="fa fa-key mr-2"></i> Change Password
+            <i class="fa fa-key mr-2"></i> Reset Password
           </a>
           <div class="dropdown-divider"></div>
           <a href="/your-restaurant" class="dropdown-item">
@@ -329,7 +306,7 @@
           <li class="nav-header" style="color: white !important;">Saved Restaurant</li>
           <li class="nav-item">
               <a href="{{ route('saved_restaurants') }}" class="nav-link">
-                  <i class="nav-icon fas fa-heart"></i> <!-- Changed to heart icon -->
+                  <i class="nav-icon fas fa-heart"></i> 
                   <p>Saved Restaurants</p>
               </a>
           </li>
@@ -349,6 +326,12 @@
               <a href="{{ route('pending_reservation') }}" class="nav-link">
                   <i class="nav-icon fas fa-clock"></i>
                   <p>Pending Reservation</p>
+              </a>
+          </li>
+          <li class="nav-item">
+              <a href="{{ route('view_cancel') }}" class="nav-link">
+                  <i class="nav-icon fas fa-trash-alt"></i>
+                  <p>Cancelled Reservation</p>
               </a>
           </li>
           @endif
@@ -383,6 +366,12 @@
               <a href="{{ route('absent_page') }}" class="nav-link">
                   <i class="nav-icon fas fa-user-times"></i>
                   <p>Absent Reservation</p>
+              </a>
+          </li>
+          <li class="nav-item">
+              <a href="{{ route('restaurant_view_cancel') }}" class="nav-link">
+                  <i class="nav-icon fas fa-trash-alt"></i>
+                  <p>Cancelled Reservation</p>
               </a>
           </li>
           <li class="nav-header" style="color: white !important;">HOLIDAY</li>
@@ -487,7 +476,6 @@
     $(document).ready(function() {
         bsCustomFileInput.init();
         
-        // Optional: You can handle the change event to update the label with the selected file name
         $('.custom-file-input').on('change', function() {
             var fileName = $(this).val().split('\\').pop(); // Get the file name
             $(this).next('.custom-file-label').html(fileName); // Update the label with the file name

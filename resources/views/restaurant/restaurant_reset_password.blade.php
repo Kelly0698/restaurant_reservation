@@ -1,7 +1,8 @@
 @extends('layouts')
 @section('title', 'Restaurant Reset Password')
 @section('content')
-<div class="content-wrapper">
+<div class="content-wrapper">    
+    <h2 style="background-color: #bc601528; padding:10px; padding-left: 20px;">Reset Password</h2><br>
     <div class="container-fluid d-flex justify-content-center">
         <div class="col-md-8 mx-auto">
             <br><br><br><br>

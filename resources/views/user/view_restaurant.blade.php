@@ -325,7 +325,7 @@
                             @if ($restaurant->table_num)
                                 <div class="form-group">
                                     <label for="table_num">Table Number:</label>
-                                    <select id="table_num" name="table_num" class="form-control" required>
+                                    <select id="table_num" name="table_num" class="form-control">
                                         <option value="">Select a table</option>
                                     </select>
                                 </div>

@@ -3,7 +3,11 @@
 @section('content')
 <div class="content-wrapper">
     <div class="container-fluid">
+    @if(Auth::guard('web')->check())
     <h2 style="background-color: #bc601528; padding:10px; padding-left: 20px;">Reservation Record</h2><br>
+    @elseif(Auth::guard('restaurant')->check())
+    <h2 style="background-color: #bc601528; padding:10px; padding-left: 20px;">Reservation Request</h2><br>
+    @endif
         <div class="row justify-content-center">
             <div class="col-md-10">
                 <div class="row">
@@ -35,8 +39,10 @@
                     </div>
 
                     @if($reservations->isEmpty())
-                    <div class="col-12 mb-3">
-                        <p>No record found</p>
+                    <div class="card blue text-center col-12">
+                        <div class="card-body">
+                            <p class="m-0">No User's Reservation Record</p>
+                        </div>
                     </div>
                     @else
                     @foreach($reservations as $reservation)

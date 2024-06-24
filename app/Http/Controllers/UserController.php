@@ -119,7 +119,7 @@ class UserController extends Controller
             'query' => $query,
         ]);
     }
-    
+
     public function viewRestaurant($id)
     {
         $restaurant = Restaurant::findOrFail($id);
@@ -506,7 +506,7 @@ class UserController extends Controller
                 ->where('date', $request->input('date'))
                 ->where('table_num', $tableNum)
                 ->where('status', '!=', 'Rejected') // Ensure that rejected reservations are not considered
-                ->whereNotIn('completeness', ['Done', 'Confirmed Absent'])
+                ->whereNotIn('completeness', ['Done', 'Confirmed Absent', 'Cancel'])
                 ->where(function($query) use ($unavailableStart, $unavailableEnd) {
                     $query->whereBetween('time', [$unavailableStart->format('H:i'), $unavailableEnd->format('H:i')])
                           ->orWhere(function($query) use ($unavailableStart, $unavailableEnd) {
@@ -613,16 +613,63 @@ class UserController extends Controller
 
     public function cancelReservation($id)
     {
-        // Find the reservation by ID
-        $reservation = Reservation::findOrFail($id);
-        
-        // Delete the reservation
-        $reservation->delete();
-        
-        // Redirect back with a success message
-        return redirect()->back()->with('success', 'Reservation cancelled successfully');
+        // Retrieve the reservation by its ID
+        $reservation = Reservation::find($id);
+    
+        if (!$reservation) {
+            return response()->json(['message' => 'Reservation not found'], 404);
+        }
+    
+        // Update the status and completeness
+        $reservation->status = 'Cancel';
+        $reservation->completeness = 'Cancel';
+    
+        // Save the changes to the database
+        $reservation->save();
+    
+        return response()->json(['message' => 'Reservation cancelled successfully'], 200);
     }
 
+    public function viewCanceledReservations(Request $request)
+    {
+        // Retrieve the authenticated user's ID
+        $userId = auth()->user()->id;
+    
+        // Query canceled reservations for the authenticated user
+        $canceledReservationsQuery = Reservation::where('user_id', $userId)
+                                                 ->where('status', 'Cancel');
+    
+        // Apply search filter if query is provided
+        $query = $request->input('query');
+        if ($query) {
+            $canceledReservationsQuery->where(function ($q) use ($query) {
+                $q->whereHas('restaurant', function ($restaurantQuery) use ($query) {
+                    $restaurantQuery->where('name', 'LIKE', "%{$query}%");
+                })
+                ->orWhere('time', 'LIKE', "%{$query}%")
+                ->orWhere('party_size', 'LIKE', "%{$query}%")
+                ->orWhere('remark', 'LIKE', "%{$query}%");
+            });
+        }
+    
+        // Apply date filter if date is provided
+        $date = $request->input('date');
+        if ($date) {
+            $canceledReservationsQuery->whereDate('date', $date);
+        }
+    
+        // Apply sorting
+        $sort = $request->input('sort_order', 'asc');
+        $canceledReservationsQuery->orderBy('date', $sort);
+    
+        // Paginate the results
+        $perPage = 5; // Number of records per page
+        $canceledReservations = $canceledReservationsQuery->paginate($perPage);
+    
+        // Return the view with the paginated canceled reservations
+        return view('user.cancel_reservation', compact('canceledReservations'));
+    }
+       
     public function pendingReservation(Request $request)
     {
         // Retrieve the authenticated user's ID
@@ -673,7 +720,6 @@ class UserController extends Controller
         // Validate the input
         $request->validate([
             'email' => 'required|email',
-            'password' => 'required|confirmed|min:6',
         ]);
     
         // Get the authenticated user

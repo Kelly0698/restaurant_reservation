@@ -124,10 +124,11 @@
                 </div>
                 @endforeach
             @else
-                <div class="col-12">
-                    <br><br>
-                    <h5 style="color:#6c757d">&nbsp&nbsp No Record Found!</h5>
+            <div class="card blue text-center col-12">
+                <div class="card-body">
+                    <p class="m-0">No record found</p>
                 </div>
+            </div>
             @endif
         </div>
     </div>

@@ -58,7 +58,7 @@ Route::get('/restaurant-forget-password', [RestaurantController::class, 'forgotP
 Route::post('/restaurant-password', [RestaurantController::class, 'ForgetPasswordStore'])->name('restaurant_ForgetPasswordPost');
 
 //user
-Route::get('/user',[UserController::class, 'index'])->name('user_list');
+Route::get('/user',[UserController::class, 'index'])->name('user_list')->middleware('auth');
 Route::get('/search-users', [UserController::class, 'user_search'])->name('users.search');
 Route::post('/add/user',[UserController::class, 'adminCreate'])->name('add_user');
 Route::post('/register/user',[UserController::class, 'create'])->name('register_user');
@@ -104,7 +104,9 @@ Route::post('/update-completeness/{id}', [RestaurantController::class, 'updateCo
 Route::get('/done-reservations', [RestaurantController::class, 'showDoneReservations'])->name('done_reservations')->middleware('auth:restaurant');
 Route::post('/reject-reservation/{id}',[RestaurantController::class, 'rejectReservation'])->name('reject_reservation')->middleware('auth:restaurant');
 Route::get('/reserve/reject', [RestaurantController::class, 'rejectResPage'])->name('reject_page')->middleware('auth:restaurant');
-Route::post('/cancel-reservation/{id}', [UserController::class, 'cancelReservation'])->name('cancel_reservation');
+Route::post('/cancel-reservation/{id}', [UserController::class, 'cancelReservation'])->name('cancel_reservation')->middleware('auth');
+Route::get('/view-cancel-reservation',[UserController::class, 'viewCanceledReservations'])->name('view_cancel')->middleware('auth');
+Route::get('/restaurant-view-cancel-reservation',[RestaurantController::class, 'CanceledReservations'])->name('restaurant_view_cancel')->middleware('auth:restaurant');
 Route::get('/pending/reservation', [UserController::class, 'pendingReservation'])->name('pending_reservation');
 Route::get('/available-tables', [UserController::class, 'getAvailableTables']);
 Route::get('/absent-reserve', [RestaurantController::class, 'AbsentResPage'])->name('absent_page')->middleware('auth:restaurant');

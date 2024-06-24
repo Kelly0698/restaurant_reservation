@@ -18,8 +18,8 @@
             box-shadow: 0px 0px 10px rgba(0,0,0,0.15);
         }
         .diningTable, .counter, .door, .toilet {
-            width: 100px;
-            height: 100px;
+            width: 110px;
+            height: 110px;
             line-height: 100px;
             font-size: 16px;
         }

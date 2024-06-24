@@ -379,6 +379,7 @@ class RestaurantController extends Controller
     {
         // Get the authenticated restaurant
         $restaurant = Auth::guard('restaurant')->user();
+        $restaurantId = $restaurant->id;
     
         // Get query parameters
         $query = $request->input('query');
@@ -387,7 +388,8 @@ class RestaurantController extends Controller
     
         // Build the query
         $reservationsQuery = Reservation::where('status', 'Approved')
-                                        ->whereIn('completeness', ['Pending', 'No_Show','Eating']);
+                                        ->whereIn('completeness', ['Pending', 'No_Show', 'Eating'])
+                                        ->where('restaurant_id', $restaurantId);
     
         // Apply search filter if query is provided
         if ($query) {
@@ -423,12 +425,18 @@ class RestaurantController extends Controller
         // For regular HTTP requests, return the view with data
         return view('restaurant.approved_reservation', compact('approvedReservations'));
     }
+    
 
     public function showDoneReservations(Request $request)
     {
+        // Get the authenticated restaurant
+        $restaurant = Auth::guard('restaurant')->user();
+        $restaurantId = $restaurant->id;
+    
         // Define the base query to fetch completed reservations
         $doneReservationsQuery = Reservation::where('status', 'Approved')
-                                            ->where('completeness', 'Done');
+                                            ->where('completeness', 'Done')
+                                            ->where('restaurant_id', $restaurantId);
     
         // Retrieve request parameters for sorting
         $sortField = $request->input('sort_by', 'date');
@@ -469,6 +477,7 @@ class RestaurantController extends Controller
         // Pass the reservations to the view
         return view('restaurant.complete_reservation', compact('doneReservations'));
     }
+    
 
     public function approveReservation($id)
     {
@@ -703,4 +712,46 @@ class RestaurantController extends Controller
         // Pass the rejected reservation records to the view
         return view('restaurant.absent_reservation', compact('Reservations'));
     }
+
+    public function CanceledReservations(Request $request)
+    {
+        // Retrieve the authenticated restaurant's ID
+        $restaurant = Auth::guard('restaurant')->user();
+        $restaurantId = $restaurant->id;
+    
+        // Query canceled reservations for the authenticated restaurant
+        $canceledReservationsQuery = Reservation::where('status', 'Cancel')
+                                                 ->where('restaurant_id', $restaurantId);
+    
+        // Apply search filter if query is provided
+        $query = $request->input('query');
+        if ($query) {
+            $canceledReservationsQuery->where(function ($q) use ($query) {
+                $q->whereHas('user', function ($userQuery) use ($query) {
+                    $userQuery->where('name', 'LIKE', "%{$query}%");
+                })
+                ->orWhere('time', 'LIKE', "%{$query}%")
+                ->orWhere('party_size', 'LIKE', "%{$query}%")
+                ->orWhere('remark', 'LIKE', "%{$query}%");
+            });
+        }
+    
+        // Apply date filter if date is provided
+        $date = $request->input('date');
+        if ($date) {
+            $canceledReservationsQuery->whereDate('date', $date);
+        }
+    
+        // Apply sorting
+        $sort = $request->input('sort_order', 'asc');
+        $canceledReservationsQuery->orderBy('date', $sort);
+    
+        // Paginate the results
+        $perPage = 5; // Number of records per page
+        $canceledReservations = $canceledReservationsQuery->paginate($perPage);
+    
+        // Return the view with the paginated canceled reservations
+        return view('restaurant.restaurant_cancel_reservation', compact('canceledReservations'));
+    }
+    
 }

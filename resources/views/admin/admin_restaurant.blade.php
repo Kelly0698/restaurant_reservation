@@ -142,13 +142,13 @@
                 </div>
                 <div class="form-group">
                     <label for="License" class="col-form-label">License:</label>
-                    <span class="text-danger">*one PDF file only</span>
                     <div class="input-group">
                         <div class="custom-file">
                             <input type="file" class="custom-file-input" id="license_pdf" name="license_pdf" accept=".pdf">
                             <label class="custom-file-label" for="license_pdf">Choose file</label>
                         </div>
                     </div>
+                    <span class="text-danger" style="font-size: 0.875em;">*one PDF file only</span>
                 </div>
                 <div class="form-group">
                     <label for="status" class="col-form-label">Status:</label>

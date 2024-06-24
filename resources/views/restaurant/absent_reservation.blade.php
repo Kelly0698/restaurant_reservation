@@ -25,10 +25,11 @@
         </div>
         <div class="row">
             @if($Reservations->isEmpty())
-                <div class="col-12">
-                    <br><br>
-                    <h5 style="color:#6c757d">&nbsp&nbsp No Record Found!</h5>
+            <div class="card blue text-center col-12">
+                <div class="card-body">
+                    <p class="m-0">No record found</p>
                 </div>
+            </div>
             @else
                 @foreach($Reservations as $reservation)
                 <div class="col-md-4 mb-3"> 

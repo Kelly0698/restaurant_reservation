@@ -53,7 +53,7 @@
                                 @else
                                     <img src="{{ asset('assets/dist/img/defaultPic.png') }}" style="max-height:50%; max-width: 50%;">
                                 @endif
-                                <a style="display:none; position:absolute; top:93%; left:49%" id="profile_pic-input" class="save-btn btn btn-sm btn-icon-only yellow" data-bs-toggle="modal" data-bs-target="#profile_pic">
+                                <a style="display:none; position:absolute; top:93%; left:39%" id="profile_pic-input" class="save-btn btn btn-sm btn-icon-only yellow" data-bs-toggle="modal" data-bs-target="#profile_pic">
                                     <i class="fa fa-pen top-0" data-bs-toggle="tooltip" data-bs-placement="top" title="" aria-hidden="true" data-bs-original-title="Edit Image" aria-label="Edit Image"></i>
                                     <span class="sr-only">Edit Image</span>
                                 </a>
