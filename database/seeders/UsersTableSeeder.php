@@ -22,6 +22,7 @@ class UsersTableSeeder extends Seeder
                 'email' => '75262@siswa.unimas.my',
                 'phone_num' => '+601118940965',
                 'password' => Hash::make('123456'),
+                'message_type' => '["WhatsApp","Email"]',
             ],
         ]);
     }
