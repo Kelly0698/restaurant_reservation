@@ -48,57 +48,60 @@
             </div>
         </div>
         <div class="row">
-            @if(count($approvedReservations) > 0)
-                @foreach($approvedReservations as $reservation)
-                @php
-                    $currentDateTime = \Carbon\Carbon::now();
-                    $reservationDateTime = \Carbon\Carbon::parse($reservation->date . ' ' . $reservation->time);
-                    $isPastReservation = $reservationDateTime->isPast();
-                    
-                    if ($isPastReservation && $reservation->completeness === 'Pending') {
-                        $reservation->completeness = 'No_Show';
-                        $reservation->save();
-                    }
+        @if(count($approvedReservations) > 0)
+    @foreach($approvedReservations as $reservation)
+        @php
+            // Determine reservation date/time and current time
+            $currentDateTime = \Carbon\Carbon::now();
+            $reservationDateTime = \Carbon\Carbon::parse($reservation->date . ' ' . $reservation->time);
+            
+            // Check if reservation date and time have passed to mark as 'No_Show'
+            if ($currentDateTime->greaterThanOrEqualTo($reservationDateTime) && $reservation->completeness === 'Pending') {
+                $reservation->completeness = 'No_Show';
+                $reservation->save();
+            }
+            
+            // Determine card background color based on completeness and past status
+            $cardClass = $currentDateTime->greaterThanOrEqualTo($reservationDateTime) && $reservation->completeness !== 'Done' ? 'back' : 'bg-light';
+        @endphp
 
-                    $cardClass = $isPastReservation && $reservation->completeness !== 'Done' ? 'back' : 'bg-light';
-                @endphp
-                <div class="col-md-4 mb-3"> 
-                    <div class="card {{ $cardClass }} d-flex flex-fill">
-                        <div class="card-body pt-0">
-                            <div class="col-12">
-                                <br>
-                                <div class="text-right">
-                                    @if($reservation->completeness === 'Eating')
-                                    <button class="btn btn-serving">Serving</button>
-                                    @else
-                                    <button class="btn btn-complete">Approved</button>
-                                    @endif
-                                </div> 
-                                <h2 class="lead"><b>Reservation for: {{$reservation->restaurant->name}}</b></h2><br>
-                                <p>User Name: &nbsp{{ $reservation->user->name }}</p>
-                                <p>Phone Number: &nbsp{{$reservation->user->phone_num}}</p>
-                                <p>Reservation Date: &nbsp{{ $reservation->date }}</p>
-                                <p>Time: &nbsp{{ $reservation->time }}</p>
-                                <p>Party Size: &nbsp{{ $reservation->party_size }}</p>
-                                @if($reservation->table_num)
-                                    <p>Table: Table&nbsp{{ $reservation->table_num}}</p>
-                                @else
-                                    <p>Table: &nbspNone</p>
-                                @endif
-                                @if($reservation->remark)
-                                    <p>Remark: &nbsp{{ $reservation->remark }}</p>
-                                @else
-                                    <p>Remark: &nbspNone</p>
-                                @endif
-                            </div>
-                            <hr>
-                            @if($reservation->completeness !== 'Done')
-                            <form id="complete-form-{{ $reservation->id }}" action="{{ route('update_completeness', $reservation->id) }}" method="POST" class="d-none">
-                                @csrf
-                                <input type="hidden" name="completeness" id="completeness-{{ $reservation->id }}">
-                            </form>
-                            <div>
-                                @if($reservation->completeness !== 'Eating')
+        <div class="col-md-4 mb-3"> 
+            <div class="card {{ $cardClass }} d-flex flex-fill">
+                <div class="card-body pt-0">
+                    <div class="col-12">
+                        <br>
+                        <div class="text-right">
+                            @if($reservation->completeness === 'Eating')
+                                <button class="btn btn-serving">Serving</button>
+                            @else
+                                <button class="btn btn-complete">Approved</button>
+                            @endif
+                        </div> 
+                        <h2 class="lead"><b>Reservation for: {{$reservation->restaurant->name}}</b></h2><br>
+                        <p>User Name: &nbsp{{ $reservation->user->name }}</p>
+                        <p>Phone Number: &nbsp{{$reservation->user->phone_num}}</p>
+                        <p>Reservation Date: &nbsp{{ $reservation->date }}</p>
+                        <p>Time: &nbsp{{ $reservation->time }}</p>
+                        <p>Party Size: &nbsp{{ $reservation->party_size }}</p>
+                        @if($reservation->table_num)
+                            <p>Table: Table&nbsp{{ $reservation->table_num}}</p>
+                        @else
+                            <p>Table: &nbspNone</p>
+                        @endif
+                        @if($reservation->remark)
+                            <p>Remark: &nbsp{{ $reservation->remark }}</p>
+                        @else
+                            <p>Remark: &nbspNone</p>
+                        @endif
+                    </div>
+                    <hr>
+                    @if($reservation->completeness !== 'Done')
+                        <form id="complete-form-{{ $reservation->id }}" action="{{ route('update_completeness', $reservation->id) }}" method="POST" class="d-none">
+                            @csrf
+                            <input type="hidden" name="completeness" id="completeness-{{ $reservation->id }}">
+                        </form>
+                        <div>
+                            @if($reservation->completeness !== 'Eating')
                                 <div class="row">
                                     <div class="col text-left">
                                         <button type="button" class="btn btn-eating" onclick="markAsEating({{ $reservation->id }})">Serving?</button>
@@ -107,29 +110,29 @@
                                         <button type="button" class="btn blue" onclick="confirmCompletion({{ $reservation->id }})">Completed?</button>
                                     </div>
                                 </div>
-
-                                @else
+                            @else
                                 <div class="text-right">
                                     <button type="button" class="btn blue" onclick="confirmCompletion({{ $reservation->id }})">Completed?</button>
                                 </div>
-                                @endif
-                            </div>
-                            @else
-                            <div class="text-right">
-                                <button class="btn btn-secondary" disabled>Done</button>
-                            </div>
                             @endif
                         </div>
-                    </div>
-                </div>
-                @endforeach
-            @else
-            <div class="card blue text-center col-12">
-                <div class="card-body">
-                    <p class="m-0">No record found</p>
+                    @else
+                        <div class="text-right">
+                            <button class="btn btn-secondary" disabled>Done</button>
+                        </div>
+                    @endif
                 </div>
             </div>
-            @endif
+        </div>
+    @endforeach
+@else
+    <div class="card blue text-center col-12">
+        <div class="card-body">
+            <p class="m-0">No record found</p>
+        </div>
+    </div>
+@endif
+
         </div>
     </div>
 </div>

@@ -584,20 +584,45 @@ class UserController extends Controller
     }
     
     
-    public function reservationRecord()
+    public function reservationRecord(Request $request)
     {
+        // Check authentication and role
         if (Auth::guard('restaurant')->check()) {
             $restaurant = Auth::guard('restaurant')->user();
             $reservations = $restaurant->reservations()->where('status', 'Pending')->get();
+            
+            // Apply date range filter if provided
+            if ($request->has('start_date') && $request->has('end_date')) {
+                $start_date = $request->input('start_date');
+                $end_date = $request->input('end_date');
+                $reservations = $reservations->whereBetween('date', [$start_date, $end_date]);
+            }
         } elseif (Auth::check()) {
             $user = Auth::user();
             if ($user->role_id === 2) {
+                // Fetch reservations for regular users with role_id 2
                 $reservations = $user->reservations()
                                      ->whereIn('status', ['Pending', 'Approved', 'Rejected'])
-                                     ->orderBy('created_at', 'desc')
-                                     ->get();            
+                                     ->orderBy('created_at', 'desc');
+        
+                // Apply date range filter if provided
+                if ($request->has('start_date') && $request->has('end_date')) {
+                    $start_date = $request->input('start_date');
+                    $end_date = $request->input('end_date');
+                    $reservations->whereBetween('date', [$start_date, $end_date]);
+                }
+        
+                $reservations = $reservations->get();
             } elseif ($user->role_id === 1) {
+                // Fetch all reservations for admin users with role_id 1
                 $reservations = Reservation::all();
+        
+                // Apply date range filter if provided
+                if ($request->has('start_date') && $request->has('end_date')) {
+                    $start_date = $request->input('start_date');
+                    $end_date = $request->input('end_date');
+                    $reservations = $reservations->whereBetween('date', [$start_date, $end_date]);
+                }
             } else {
                 // Handle other cases or restrict access
                 abort(403, 'Unauthorized action.');
@@ -606,10 +631,12 @@ class UserController extends Controller
             // Handle guest users or restrict access
             abort(403, 'Unauthorized action.');
         }
-    
+        
         // Pass the reservation records to the view
         return view('reservation_record', compact('reservations'));
     }
+    
+    
 
     public function cancelReservation($id)
     {
@@ -652,10 +679,11 @@ class UserController extends Controller
             });
         }
     
-        // Apply date filter if date is provided
-        $date = $request->input('date');
-        if ($date) {
-            $canceledReservationsQuery->whereDate('date', $date);
+        // Apply date range filter if dates are provided
+        $startDate = $request->input('start_date');
+        $endDate = $request->input('end_date');
+        if ($startDate && $endDate) {
+            $canceledReservationsQuery->whereBetween('date', [$startDate, $endDate]);
         }
     
         // Apply sorting
@@ -677,7 +705,7 @@ class UserController extends Controller
     
         // Query pending reservations for the authenticated user
         $pendingReservationsQuery = Reservation::where('user_id', $userId)
-            ->where('status', 'pending');
+            ->where('status', 'Pending'); // Adjust status check to 'Pending'
     
         // Apply search filter if query is provided
         $query = $request->input('query');
@@ -692,10 +720,11 @@ class UserController extends Controller
             });
         }
     
-        // Apply date filter if date is provided
-        $date = $request->input('date');
-        if ($date) {
-            $pendingReservationsQuery->whereDate('date', $date);
+        // Apply date range filter if dates are provided
+        $startDate = $request->input('start_date');
+        $endDate = $request->input('end_date');
+        if ($startDate && $endDate) {
+            $pendingReservationsQuery->whereBetween('date', [$startDate, $endDate]);
         }
     
         // Apply sorting

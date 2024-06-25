@@ -7,19 +7,21 @@
     <div class="row">
             <div class="col-12">
                 <div class="search-bar">
-                    <form action="{{ route('pending_reservation') }}" method="GET">
-                        <div class="input-group mb-3">
-                            <input type="text" class="form-control rounded-pill" placeholder="Search Record (Restaurant Name, Time, Party Size, Remark)" name="query" style="width: 50%;" value="{{ request('query') }}">
-                            <input type="date" class="form-control rounded-pill" name="date" style="width: 20%;" value="{{ request('date') }}">
-                            <select class="form-control rounded-pill" name="sort" style="width: 10%;">
-                                <option value="asc" {{ request('sort') == 'asc' ? 'selected' : '' }}>Asc</option>
-                                <option value="desc" {{ request('sort') == 'desc' ? 'selected' : '' }}>Desc</option>
-                            </select>
-                            <div class="input-group-append">
-                                <button class="btn btn-outline-secondary yellow rounded-pill" type="submit" style="width: 100%;">Search</button>
-                            </div>
+                <form action="{{ route('pending_reservation') }}" method="GET">
+                    <div class="input-group mb-3">
+                        <input type="text" class="form-control rounded-pill" placeholder="Search Record: Restaurant Name, Time, Party Size, Remark" name="query" style="width: 40%;" value="{{ request('query') }}">
+                        <input type="date" class="form-control rounded-pill" name="start_date" style="width: 20%;" value="{{ request('start_date') }}">
+                        <input type="date" class="form-control rounded-pill" name="end_date" style="width: 20%;" value="{{ request('end_date') }}">
+                        <select class="form-control rounded-pill" name="sort" style="width: 10%;">
+                            <option value="asc" {{ request('sort') == 'asc' ? 'selected' : '' }}>Asc</option>
+                            <option value="desc" {{ request('sort') == 'desc' ? 'selected' : '' }}>Desc</option>
+                        </select>
+                        <div class="input-group-append">
+                            <button class="btn btn-outline-secondary yellow rounded-pill" type="submit" style="width: 100%;">Search</button>
+                            <a href="{{ route('pending_reservation') }}" class="btn btn-outline-secondary yellow rounded-pill" style="width: 50%;"><i class="fas fa-undo"></i></a>
                         </div>
-                    </form>
+                    </div>
+                </form>
                 </div>
             </div>
         </div>

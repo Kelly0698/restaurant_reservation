@@ -20,6 +20,7 @@ use App\Mail\RestaurantRegistrationSuccess;
 use App\Mail\RestaurantRegistrationRejected;
 use App\Mail\ReservationApprovalNotification;
 use App\Mail\ForgotPassword;
+use Carbon\Carbon;
 
 class RestaurantController extends Controller
 {
@@ -416,6 +417,17 @@ class RestaurantController extends Controller
     
         // Get the filtered, sorted reservations
         $approvedReservations = $reservationsQuery->get();
+    
+        // Loop through reservations to mark 'No_Show' if past
+        $currentDateTime = Carbon::now();
+        foreach ($approvedReservations as $reservation) {
+            $reservationDateTime = Carbon::parse($reservation->date . ' ' . $reservation->time);
+            
+            if ($currentDateTime->greaterThanOrEqualTo($reservationDateTime) && $reservation->completeness === 'Pending') {
+                $reservation->completeness = 'No_Show';
+                $reservation->save();
+            }
+        }
     
         // Check if the request expects a JSON response (AJAX request)
         if ($request->expectsJson()) {

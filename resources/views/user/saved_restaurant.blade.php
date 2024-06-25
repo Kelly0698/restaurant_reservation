@@ -82,7 +82,11 @@
             <h2 style="background-color: #bc601528; padding:10px; padding-left: 20px;">Saved Restaurants</h2><br>
 
             @if($likedRestaurants->isEmpty())
-                <p>No saved restaurants.</p>
+            <div class="card blue text-center col-12">
+                <div class="card-body">
+                    <p class="m-0">No Saved Restaurant</p>
+                </div>
+            </div>
             @else
             <div class="restaurant-container">
                 @foreach($likedRestaurants as $restaurant)

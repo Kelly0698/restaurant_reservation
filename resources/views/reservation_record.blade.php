@@ -11,11 +11,11 @@
         <div class="row justify-content-center">
             <div class="col-md-10">
                 <div class="row">
-                    @if(Auth::guard('web')->check())
-                    <div class="col-12 mb-3">
-                        <div class="text-right">
+                    <div class="col-md-5">
+                        @if(Auth::guard('web')->check())
+                        <div class="text-left">
                             <div class="dropdown">
-                                <button class="btn yellow dropdown-toggle" type="button" id="filterDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="border-radius:20px; width: 120px;">
+                                <button class="btn yellow dropdown-toggle" type="button" id="filterDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="border-radius:20px; width: 120px; margin-top: 30px;">
                                     Filter
                                 </button>
                                 <div class="dropdown-menu" aria-labelledby="filterDropdown">
@@ -26,9 +26,29 @@
                                 </div>
                             </div>
                         </div>
+                        @endif
                     </div>
-                    @endif
+                    <div class="col-md-7">
+                        <form action="{{ route('reservation_record') }}" method="GET">
+                            <div class="form-row">
+                                <div class="form-group col-md-4">
+                                    <label for="start_date">Start Date</label>
+                                    <input type="date" class="form-control" id="start_date" name="start_date" value="{{ request('start_date') }}">
+                                </div>
+                                <div class="form-group col-md-4">
+                                    <label for="end_date">End Date</label>
+                                    <input type="date" class="form-control" id="end_date" name="end_date" value="{{ request('end_date') }}">
+                                </div>
+                                <div class="form-group col-md-4 align-self-end d-flex justify-content-between">
+                                    <button type="submit" class="btn blue btn-block" style="border-radius:20px; width: 150px;">Choose Date</button>
+                                    <a href="{{ route('reservation_record') }}" class="btn btn-outline-secondary yellow rounded-pill align-self-end"><i class="fas fa-undo"></i></a>
+                                </div>
+                            </div> 
+                        </form>
+                        <br>
+                    </div>
 
+                    @if(Auth::guard('web')->check())
                     <div class="col-12 no-record-message" style="display: none;">
                         <br><br>
                         <div class="card blue text-center">
@@ -37,13 +57,18 @@
                             </div>
                         </div>
                     </div>
+                    @endif
 
                     @if($reservations->isEmpty())
-                    <div class="card blue text-center col-12">
-                        <div class="card-body">
-                            <p class="m-0">No User's Reservation Record</p>
+                    @if(Auth::guard('restaurant')->check())
+                    <div class="col-12">
+                        <div class="card blue text-center ">
+                            <div class="card-body">
+                                <p class="m-0">No User's Reservation Record</p>
+                            </div>
                         </div>
                     </div>
+                    @endif
                     @else
                     @foreach($reservations as $reservation)
                     @if(Auth::guard('web')->check() && ($reservation->status === 'Approved' || $reservation->status === 'Rejected'))
@@ -211,6 +236,25 @@ document.addEventListener('DOMContentLoaded', function () {
             button.classList.add('active');
         });
     });
+
+    // Initial check on page load
+    checkNoRecordMessage();
+
+    function checkNoRecordMessage() {
+        let visibleCardsExist = false;
+        reservationCards.forEach(card => {
+            if (card.style.display !== 'none') {
+                visibleCardsExist = true;
+                return;
+            }
+        });
+
+        if (!visibleCardsExist) {
+            noRecordMessage.style.display = 'block';
+        } else {
+            noRecordMessage.style.display = 'none';
+        }
+    }
 });
 </script>
 <script>

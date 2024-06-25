@@ -94,7 +94,12 @@
         <div class="restaurant-container">
             <div style="max-width: 95%; margin: 0 auto;">
                 @if($restaurants->isEmpty())
-                    <p>No restaurants found.</p>
+                <br>
+                <div class="card blue text-center col-12">
+                    <div class="card-body">
+                        <p class="m-0">No Restaurant Found!</p>
+                    </div>
+                </div>  
                 @else
                     <div class="row">
                         @foreach($restaurants as $restaurant)
