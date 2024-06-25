@@ -17,6 +17,7 @@
                             </select>
                             <div class="input-group-append">
                                 <button class="btn btn-outline-secondary yellow rounded-pill" type="submit">Search</button>
+                                <a href="{{ route('reject_page') }}" class="btn btn-outline-secondary yellow rounded-pill" style="width: 50%;"><i class="fas fa-undo"></i></a>
                             </div>
                         </div>
                     </form>

@@ -27,7 +27,7 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/dashboard',[UserController::class, 'adminDashboard'])->name('dashboard');
+Route::get('/dashboard', [UserController::class, 'adminDashboard'])->name('dashboard');
 Route::get('/home',[UserController::class, 'userDashboard'])->name('home')->middleware('auth');
 
 //Role
@@ -59,30 +59,30 @@ Route::post('/restaurant-password', [RestaurantController::class, 'ForgetPasswor
 
 //user
 Route::get('/user',[UserController::class, 'index'])->name('user_list')->middleware('auth');
-Route::get('/search-users', [UserController::class, 'user_search'])->name('users.search');
-Route::post('/add/user',[UserController::class, 'adminCreate'])->name('add_user');
-Route::post('/register/user',[UserController::class, 'create'])->name('register_user');
-Route::post('/check/user', [UserController::class, 'validateUserForm'])->name('check_user');
-Route::delete('/delete/user/{user}',[UserController::class, 'destroy'])->name('destroy_user');
-Route::get('/show/user/{id}',[UserController::class, 'show'])->name('show_user');
-Route::get('get/user/{id}', [UserController::class,'getUser'])->name('get_user');
-Route::post('/edit/user/{user}',[UserController::class, 'edit'])->name('edit_user');
-Route::post('/update-profile-pic/{user}',[UserController::class, 'updatePic'])->name('update_pic');
-Route::get('/profile-user',[UserController::class, 'user_profile'])->name('user_profile');
-Route::get('/view/restaurant/{id}', [UserController::class, 'viewRestaurant'])->name('view_restaurant');
-Route::get('/get-ratings', [UserController::class, 'getRatings'])->name('get_ratings');
-Route::get('/search-restaurants', [UserController::class, 'search'])->name('search_restaurants');
-Route::get('/user/password/reset', [UserController::class, 'showUserResetForm'])->name('showUserResetForm');
-Route::post('/user/password/reset', [UserController::class, 'resetUserPassword'])->name('resetUserPasswordPost');
+Route::get('/search-users', [UserController::class, 'user_search'])->name('users.search')->middleware('auth');
+Route::post('/add/user',[UserController::class, 'adminCreate'])->name('add_user')->middleware('auth');
+Route::post('/register/user',[UserController::class, 'create'])->name('register_user')->middleware('auth');
+Route::post('/check/user', [UserController::class, 'validateUserForm'])->name('check_user')->middleware('auth');
+Route::delete('/delete/user/{user}',[UserController::class, 'destroy'])->name('destroy_user')->middleware('auth');
+Route::get('/show/user/{id}',[UserController::class, 'show'])->name('show_user')->middleware('auth');
+Route::get('get/user/{id}', [UserController::class,'getUser'])->name('get_user')->middleware('auth');
+Route::post('/edit/user/{user}',[UserController::class, 'edit'])->name('edit_user')->middleware('auth');
+Route::post('/update-profile-pic/{user}',[UserController::class, 'updatePic'])->name('update_pic')->middleware('auth');
+Route::get('/profile-user',[UserController::class, 'user_profile'])->name('user_profile')->middleware('auth');
+Route::get('/view/restaurant/{id}', [UserController::class, 'viewRestaurant'])->name('view_restaurant')->middleware('auth');
+Route::get('/get-ratings', [UserController::class, 'getRatings'])->name('get_ratings')->middleware('auth');
+Route::get('/search-restaurants', [UserController::class, 'search'])->name('search_restaurants')->middleware('auth');
+Route::get('/user/password/reset', [UserController::class, 'showUserResetForm'])->name('showUserResetForm')->middleware('auth');
+Route::post('/user/password/reset', [UserController::class, 'resetUserPassword'])->name('resetUserPasswordPost')->middleware('auth');
 
 //restaurant
-Route::get('/restaurant',[RestaurantController::class, 'index'])->name('restaurant_list');
-Route::get('/search-restaurant-list', [RestaurantController::class, 'restaurant_search'])->name('restaurants.search');
-Route::post('/add/restaurant',[RestaurantController::class, 'adminCreate'])->name('add_restaurant');
-Route::get('/show/restaurant/{id}',[RestaurantController::class, 'show'])->name('show_restaurant');
-Route::post('/edit/restaurant/{restaurant}',[RestaurantController::class, 'edit'])->name('edit_restaurant');
-Route::delete('/delete/restaurant/{restaurant}',[RestaurantController::class, 'destroy'])->name('destroy_restaurant');
-Route::get('/request',[RestaurantController::class, 'index_req'])->name('restaurant_req_list');
+Route::get('/restaurant',[RestaurantController::class, 'index'])->name('restaurant_list')->middleware('auth');
+Route::get('/search-restaurant-list', [RestaurantController::class, 'restaurant_search'])->name('restaurants.search')->middleware('auth');
+Route::post('/add/restaurant',[RestaurantController::class, 'adminCreate'])->name('add_restaurant')->middleware('auth');
+Route::get('/show/restaurant/{id}',[RestaurantController::class, 'show'])->name('show_restaurant')->middleware('auth');
+Route::post('/edit/restaurant/{restaurant}',[RestaurantController::class, 'edit'])->name('edit_restaurant')->middleware('auth');
+Route::delete('/delete/restaurant/{restaurant}',[RestaurantController::class, 'destroy'])->name('destroy_restaurant')->middleware('auth');
+Route::get('/request',[RestaurantController::class, 'index_req'])->name('restaurant_req_list')->middleware('auth');
 Route::post('/update-status/{id}',[RestaurantController::class, 'updateStatus'])->name('update_status');
 Route::get('/your-profile',[RestaurantController::class, 'restaurant_profile'])->name('restaurant_profile')->middleware('auth:restaurant');
 Route::post('/logo-pic/update/{restaurant}',[RestaurantController::class, 'updateLogo'])->name('update_logo')->middleware('auth:restaurant');
@@ -96,7 +96,7 @@ Route::get('table/restaurant', [RestaurantController::class, 'restaurant_table']
 Route::post('/upload-table-arrangement', [RestaurantController::class, 'upload_table_pic'])->name('table_arrangement_pic')->middleware('auth:restaurant');
 
 //reservation
-Route::post('/reservation-make',[UserController::class, 'makeReservation'])->name('make_reservation');
+Route::post('/reservation-make',[UserController::class, 'makeReservation'])->name('make_reservation')->middleware('auth');
 Route::get('/record', [UserController::class, 'reservationRecord'])->name('reservation_record');
 Route::post('/approve-reservation/{id}', [RestaurantController::class, 'approveReservation'])->name('approve_reservation')->middleware('auth:restaurant');
 Route::get('/reserve/approve', [RestaurantController::class, 'approveResPage'])->name('approve_page')->middleware('auth:restaurant');
@@ -112,11 +112,11 @@ Route::get('/available-tables', [UserController::class, 'getAvailableTables']);
 Route::get('/absent-reserve', [RestaurantController::class, 'AbsentResPage'])->name('absent_page')->middleware('auth:restaurant');
 
 //rating
-Route::post('/ratings', [RatingController::class, 'store'])->name('store_rating');
+Route::post('/ratings', [RatingController::class, 'store'])->name('store_rating')->middleware('auth');
 Route::get('/get-user-phone-number/{userName}', [RestaurantController::class, 'getUserPhoneNumber'])->middleware('auth:restaurant');
 
 //holiday
-Route::get('/calendar', [HolidayController::class, 'index'])->name('holiday');
+Route::get('/calendar', [HolidayController::class, 'index'])->name('holiday')->middleware('auth:restaurant');
 Route::post('/add-holiday', [HolidayController::class, 'store'])->name('add_holiday')->middleware('auth:restaurant');
 Route::get('/holidays', [HolidayController::class, 'show'])->name('show_holiday')->middleware('auth:restaurant');
 Route::put('/update/holidays/{id}', [HolidayController::class, 'update'])->name('update_holiday')->middleware('auth:restaurant');
@@ -124,6 +124,6 @@ Route::delete('/delete/holidays/{id}', [HolidayController::class, 'delete'])->na
 Route::get('/get-holidays', [HolidayController::class, 'getHoliday'])->name('get_holiday');
 
 //saved_restaurant
-Route::post('/save_restaurant/{id}', [LikeController::class, 'saveRestaurant']);
-Route::get('/user/saved-restaurants', [LikeController::class, 'savedRestaurants'])->name('saved_restaurants');
+Route::post('/save_restaurant/{id}', [LikeController::class, 'saveRestaurant'])->middleware('auth');
+Route::get('/user/saved-restaurants', [LikeController::class, 'savedRestaurants'])->name('saved_restaurants')->middleware('auth');
 

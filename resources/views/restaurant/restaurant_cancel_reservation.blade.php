@@ -7,7 +7,7 @@
         <div class="row">
             <div class="col-12">
                 <div class="search-bar">
-                    <form action="{{ route('view_cancel') }}" method="GET">
+                    <form action="{{ route('restaurant_view_cancel') }}" method="GET">
                         <div class="input-group mb-3">
                             <input type="text" class="form-control rounded-pill" placeholder="Search Record (User Name, Time, Party Size, Remark)" name="query" style="width: 50%;" value="{{ request('query') }}">
                             <input type="date" class="form-control rounded-pill" name="date" style="width: 20%;" value="{{ request('date') }}">
@@ -17,6 +17,7 @@
                             </select>
                             <div class="input-group-append">
                                 <button class="btn btn-outline-secondary yellow rounded-pill" type="submit">Search</button>
+                                <a href="{{ route('restaurant_view_cancel') }}" class="btn btn-outline-secondary yellow rounded-pill" style="width: 50%;"><i class="fas fa-undo"></i></a>
                             </div>
                         </div>
                     </form>

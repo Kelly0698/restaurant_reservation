@@ -376,6 +376,7 @@ class RestaurantController extends Controller
         return response()->json(['status' => 'success'], 200);
     }
 
+
     public function approveResPage(Request $request)
     {
         // Get the authenticated restaurant
@@ -418,11 +419,10 @@ class RestaurantController extends Controller
         // Get the filtered, sorted reservations
         $approvedReservations = $reservationsQuery->get();
     
-        // Loop through reservations to mark 'No_Show' if past
-        $currentDateTime = Carbon::now();
+        // Check and update completeness based on current date/time
+        $currentDateTime = Carbon::now('Asia/Singapore');
         foreach ($approvedReservations as $reservation) {
-            $reservationDateTime = Carbon::parse($reservation->date . ' ' . $reservation->time);
-            
+            $reservationDateTime = Carbon::parse($reservation->date . ' ' . $reservation->time, 'Asia/Singapore');
             if ($currentDateTime->greaterThanOrEqualTo($reservationDateTime) && $reservation->completeness === 'Pending') {
                 $reservation->completeness = 'No_Show';
                 $reservation->save();
@@ -438,7 +438,6 @@ class RestaurantController extends Controller
         return view('restaurant.approved_reservation', compact('approvedReservations'));
     }
     
-
     public function showDoneReservations(Request $request)
     {
         // Get the authenticated restaurant
