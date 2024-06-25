@@ -83,7 +83,7 @@ Route::get('/show/restaurant/{id}',[RestaurantController::class, 'show'])->name(
 Route::post('/edit/restaurant/{restaurant}',[RestaurantController::class, 'edit'])->name('edit_restaurant')->middleware('auth');
 Route::delete('/delete/restaurant/{restaurant}',[RestaurantController::class, 'destroy'])->name('destroy_restaurant')->middleware('auth');
 Route::get('/request',[RestaurantController::class, 'index_req'])->name('restaurant_req_list')->middleware('auth');
-Route::post('/update-status/{id}',[RestaurantController::class, 'updateStatus'])->name('update_status');
+Route::post('/update-status/{id}',[RestaurantController::class, 'updateStatus'])->name('update_status')->middleware('auth');
 Route::get('/your-profile',[RestaurantController::class, 'restaurant_profile'])->name('restaurant_profile')->middleware('auth:restaurant');
 Route::post('/logo-pic/update/{restaurant}',[RestaurantController::class, 'updateLogo'])->name('update_logo')->middleware('auth:restaurant');
 Route::post('/upload-picture', [RestaurantController::class, 'uploadPicture'])->name('upload_picture')->middleware('auth:restaurant');
