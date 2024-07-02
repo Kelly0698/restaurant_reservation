@@ -250,14 +250,14 @@
           </li>
           @endif
           @if(auth()->check() && auth()->user()->role_id == '1')
-          <li class="nav-item">
+          <!-- <li class="nav-item">
             <a href="{{ route('role_list') }}" class="nav-link">
               <i class="nav-icon fas fa-users"></i>
               <p>
                 Role
               </p>
             </a>
-          </li>
+          </li> -->
           <li class="nav-item">
             <a href="{{ route('user_list') }}" class="nav-link">
               <i class="nav-icon fas fa-user"></i>

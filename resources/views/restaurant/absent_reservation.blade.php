@@ -8,18 +8,33 @@
             <div class="col-12">
                 <div class="search-bar">
                     <form action="{{ route('absent_page') }}" method="GET">
+                        <div class="card p-3" style="background-color: #fff6ea;">
                         <div class="input-group mb-3">
-                            <input type="text" class="form-control rounded-pill" placeholder="Search Record (User Name, Time, Party Size, Remark)" name="query" style="width: 50%;" value="{{ request('query') }}">
-                            <input type="date" class="form-control rounded-pill" name="date" style="width: 20%;" value="{{ request('date') }}">
-                            <select class="form-control rounded-pill" name="sort_order">
-                                <option value="asc" {{ request('sort_order') == 'asc' ? 'selected' : '' }}>Asc</option>
-                                <option value="desc" {{ request('sort_order') == 'desc' ? 'selected' : '' }}>Desc</option>
-                            </select>
-                            <div class="input-group-append">
-                                <button class="btn btn-outline-secondary yellow rounded-pill" type="submit">Search</button>
-                                <a href="{{ route('absent_page') }}" class="btn btn-outline-secondary yellow rounded-pill" style="width: 50%;"><i class="fas fa-undo"></i></a>
+                            <div class="col-md-4">
+                                <label for="query">Search Record</label>
+                                <input type="text" class="form-control rounded-pill" id="query" placeholder="Search Record (User Name, Time, Party Size, Remark)" name="query" value="{{ request('query') }}">
+                            </div>
+                            <div class="col-md-2">
+                                <label for="start_date">Start Date</label>
+                                <input type="date" class="form-control rounded-pill" id="start_date" name="start_date" value="{{ request('start_date') }}">
+                            </div>
+                            <div class="col-md-2">
+                                <label for="end_date">End Date</label>
+                                <input type="date" class="form-control rounded-pill" id="end_date" name="end_date" value="{{ request('end_date') }}">
+                            </div>
+                            <div class="col-md-2">
+                                <label for="sort">Sort Order</label>
+                                <select class="form-control rounded-pill" id="sort" name="sort">
+                                    <option value="asc" {{ request('sort') == 'asc' ? 'selected' : '' }}>Earliest</option>
+                                    <option value="desc" {{ request('sort') == 'desc' ? 'selected' : '' }}>Latest</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2 justify-content-between">
+                                <button class="btn btn-outline-secondary yellow" type="submit" style="border-radius:20px; width: 120px; margin-top: 30px;">Search</button>
+                                <a href="{{ route('absent_page') }}" class="btn btn-outline-secondary yellow" style="border-radius:20px; width: 40px; margin-top: 30px;"><i class="fas fa-undo"></i></a>
                             </div>
                         </div>
+                        </div><br>
                     </form>
                 </div>
             </div>
@@ -41,9 +56,11 @@
                                 <div class="text-right">
                                     <button class="btn btn-secondary" disabled style="border-radius: 20px !important">Absent</button>
                                 </div> 
-                                <h2 class="lead"><b>Reservation for: {{$reservation->restaurant->name}}</b></h2><br>
+                                <!-- <h2 class="lead"><b>Reservation for: {{$reservation->restaurant->name}}</b></h2><br> -->
+                                <strong>
                                 <p>User Name: &nbsp{{ $reservation->user->name }}</p>
                                 <p>Phone Number: &nbsp{{$reservation->user->phone_num}}</p>
+                                </strong>
                                 <p>Reservation Date: &nbsp{{ $reservation->date }}</p>
                                 <p>Time: &nbsp{{ $reservation->time }}</p>
                                 @if($reservation->table_num)

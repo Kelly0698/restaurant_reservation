@@ -1,27 +1,45 @@
 @extends('layouts')
-@section('title', 'Pending Reservation')
+
+@section('title', 'Pending Reservations')
+
 @section('content')
 <div class="content-wrapper">
     <div class="container-fluid">
-    <h2 style="background-color: #bc601528; padding:10px; padding-left: 20px;">Pending Reservation</h2><br>
-    <div class="row">
+        <h2 style="background-color: #bc601528; padding:10px; padding-left: 20px;">Pending Reservations</h2><br>
+        <div class="row">
             <div class="col-12">
                 <div class="search-bar">
-                <form action="{{ route('pending_reservation') }}" method="GET">
-                    <div class="input-group mb-3">
-                        <input type="text" class="form-control rounded-pill" placeholder="Search Record: Restaurant Name, Time, Party Size, Remark" name="query" style="width: 40%;" value="{{ request('query') }}">
-                        <input type="date" class="form-control rounded-pill" name="start_date" style="width: 20%;" value="{{ request('start_date') }}">
-                        <input type="date" class="form-control rounded-pill" name="end_date" style="width: 20%;" value="{{ request('end_date') }}">
-                        <select class="form-control rounded-pill" name="sort" style="width: 10%;">
-                            <option value="asc" {{ request('sort') == 'asc' ? 'selected' : '' }}>Asc</option>
-                            <option value="desc" {{ request('sort') == 'desc' ? 'selected' : '' }}>Desc</option>
-                        </select>
-                        <div class="input-group-append">
-                            <button class="btn btn-outline-secondary yellow rounded-pill" type="submit" style="width: 100%;">Search</button>
-                            <a href="{{ route('pending_reservation') }}" class="btn btn-outline-secondary yellow rounded-pill" style="width: 50%;"><i class="fas fa-undo"></i></a>
-                        </div>
-                    </div>
-                </form>
+                    <form action="{{ route('pending_reservation') }}" method="GET">
+                        <div class="card p-3" style="background-color: #fff6ea;">
+                            <div class="input-group mb-3">
+                                <div class="row w-100">
+                                    <div class="col-md-4">
+                                        <label for="query">Search Record</label>
+                                        <input type="text" class="form-control rounded-pill" id="query" placeholder="Search Record (User Name, Time, Party Size, Remark)" name="query" value="{{ request('query') }}">
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label for="start_date">Start Date</label>
+                                        <input type="date" class="form-control rounded-pill" id="start_date" name="start_date" value="{{ request('start_date') }}">
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label for="end_date">End Date</label>
+                                        <input type="date" class="form-control rounded-pill" id="end_date" name="end_date" value="{{ request('end_date') }}">
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label for="sort">Sort Order</label>
+                                        <select class="form-control rounded-pill" id="sort" name="sort">
+                                            <option value="asc" {{ request('sort') == 'asc' ? 'selected' : '' }}>Earliest</option>
+                                            <option value="desc" {{ request('sort') == 'desc' ? 'selected' : '' }}>Latest</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-2 justify-content-between">
+                                        <button class="btn btn-outline-secondary yellow" type="submit" style="border-radius:20px; width: 120px; margin-top: 30px;">Search</button>
+                                        <a href="{{ route('pending_reservation') }}" class="btn btn-outline-secondary yellow" style="border-radius:20px; width: 40px; margin-top: 30px;"><i class="fas fa-undo"></i></a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div><br>
+                    </form>
                 </div>
             </div>
         </div>
@@ -29,40 +47,47 @@
         <div class="row justify-content-center">
             <div class="col-md-10">
                 <div class="row">
-                    @foreach($pendingReservations as $reservation)
-                    <div class="col-12 mb-3"> 
-                        <div class="card bg-light">
+                    @if($pendingReservations->isEmpty())
+                        <div class="card blue text-center col-12">
                             <div class="card-body">
-                                <h2 class="lead"><b>Reservation for: {{$reservation->restaurant->name}}</b></h2>
-                                <p>User Name: &nbsp{{ $reservation->user->name }}</p>
-                                <p>Reservation Date: &nbsp{{ $reservation->date }}</p>
-                                <p>Time: &nbsp{{ $reservation->time }}</p>
-                                <p>Party Size: &nbsp{{ $reservation->party_size }}</p>
-                                @if($reservation->remark)
-                                    <p>Remark: &nbsp{{ $reservation->remark }}</p>
-                                @else
-                                    <p>Remark: &nbspNone</p>
-                                @endif
-                                <p>Status:
-                                    @if($reservation->status === 'Approved')
-                                        <button class="btn btn-sm" style="background-color:#36d2a3d7; border-radius: 20px !important;">Approved</button>
-                                    @elseif($reservation->status === 'Rejected')
-                                        <button class="btn btn-sm" style="background-color:#ff8274de; border-radius: 20px !important;">Rejected</button>
-                                    @else
-                                        <span style="color: red;">Pending...</span>
-                                    @endif
-                                </p>
-                            </div>
-                            <div class="card-footer">
-                                <div class="text-right">                 
-                                    @if($reservation->status == 'Pending')
-                                        <button class="btn" style="background-color:#fd001974; border-radius: 20px !important;" onclick="cancelReservation('{{ $reservation->id }}', '{{ $reservation->user->name }}')">Cancel Reservation</button>
-                                    @endif           
-                                </div>
+                                <p class="m-0">No record found</p>
                             </div>
                         </div>
-                    </div>
-                    @endforeach
+                    @else
+                        @foreach($pendingReservations as $reservation)
+                            <div class="col-12 mb-3"> 
+                                <div class="card bg-light">
+                                    <div class="card-body">
+                                        <h2 class="lead"><b>Reservation for: {{$reservation->restaurant->name}}</b></h2><br>
+                                        <p>Reservation Date: &nbsp{{ $reservation->date }}</p>
+                                        <p>Time: &nbsp{{ $reservation->time }}</p>
+                                        <p>Party Size: &nbsp{{ $reservation->party_size }}</p>
+                                        @if($reservation->remark)
+                                            <p>Remark: &nbsp{{ $reservation->remark }}</p>
+                                        @else
+                                            <p>Remark: &nbspNone</p>
+                                        @endif
+                                        <p>Status:
+                                            @if($reservation->status === 'Approved')
+                                                <button class="btn btn-sm" style="background-color:#36d2a3d7; border-radius: 20px !important;">Approved</button>
+                                            @elseif($reservation->status === 'Rejected')
+                                                <button class="btn btn-sm" style="background-color:#ff8274de; border-radius: 20px !important;">Rejected</button>
+                                            @else
+                                                <span style="color: red;">Pending...</span>
+                                            @endif
+                                        </p>
+                                    </div>
+                                    <div class="card-footer">
+                                        <div class="text-right">                 
+                                            @if($reservation->status == 'Pending')
+                                                <button class="btn" style="background-color:#fd001974; border-radius: 20px !important;" onclick="cancelReservation('{{ $reservation->id }}', '{{ $reservation->user->name }}')">Cancel Reservation</button>
+                                            @endif           
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
+                    @endif
                 </div>
                 <div class="row justify-content-center mt-4">
                     <div class="col-md-12">
@@ -98,7 +123,6 @@
     </div>
 </div>
 @endsection
-
 
 @section('scripts')
 <script>

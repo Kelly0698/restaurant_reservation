@@ -11,8 +11,12 @@
 
         @if($pendingRestaurants->isEmpty())
             <div class="no-requests">
-                <br><br>
-                <h5 style="color:#6c757d">&nbsp;&nbsp; No Request Found!</h5>
+                <br>
+                <div class="card blue text-center">
+                    <div class="card-body">
+                        <p class="m-0">No record found</p>
+                    </div>
+                </div>
             </div>
         @else
             @foreach($pendingRestaurants as $item)

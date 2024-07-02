@@ -385,7 +385,8 @@ class RestaurantController extends Controller
     
         // Get query parameters
         $query = $request->input('query');
-        $date = $request->input('date');
+        $startDate = $request->input('start_date');
+        $endDate = $request->input('end_date');
         $sort = $request->input('sort', 'asc'); // Default sort order is ascending
     
         // Build the query
@@ -408,9 +409,13 @@ class RestaurantController extends Controller
             });
         }
     
-        // Apply date filter if date is provided
-        if ($date) {
-            $reservationsQuery->whereDate('date', $date);
+        // Apply date range filter if start_date and/or end_date is provided
+        if ($startDate && $endDate) {
+            $reservationsQuery->whereBetween('date', [$startDate, $endDate]);
+        } elseif ($startDate) {
+            $reservationsQuery->where('date', '>=', $startDate);
+        } elseif ($endDate) {
+            $reservationsQuery->where('date', '<=', $endDate);
         }
     
         // Apply sorting
@@ -437,28 +442,29 @@ class RestaurantController extends Controller
         // For regular HTTP requests, return the view with data
         return view('restaurant.approved_reservation', compact('approvedReservations'));
     }
-    
+     
     public function showDoneReservations(Request $request)
     {
         // Get the authenticated restaurant
         $restaurant = Auth::guard('restaurant')->user();
         $restaurantId = $restaurant->id;
-    
+
         // Define the base query to fetch completed reservations
         $doneReservationsQuery = Reservation::where('status', 'Approved')
                                             ->where('completeness', 'Done')
                                             ->where('restaurant_id', $restaurantId);
-    
+
         // Retrieve request parameters for sorting
         $sortField = $request->input('sort_by', 'date');
         $sortOrder = $request->input('sort_order', 'asc');
-    
+
         // Retrieve the search query parameter
         $searchQuery = $request->input('query');
-    
-        // Retrieve the date query parameter
-        $dateQuery = $request->input('date');
-    
+
+        // Retrieve the date range query parameters
+        $start_date = $request->input('start_date');
+        $end_date = $request->input('end_date');
+
         // Apply search filter if a query is provided
         if ($searchQuery) {
             $doneReservationsQuery->where(function ($query) use ($searchQuery) {
@@ -473,23 +479,23 @@ class RestaurantController extends Controller
                 ->orWhere('remark', 'LIKE', '%' . $searchQuery . '%');
             });
         }
-    
-        // Apply date filter if a date is provided
-        if ($dateQuery) {
-            $doneReservationsQuery->whereDate('date', $dateQuery);
+
+        // Apply date range filter if start_date and end_date are provided
+        if ($start_date && $end_date) {
+            $doneReservationsQuery->whereBetween('date', [$start_date, $end_date]);
         }
-    
+
         // Apply sorting
         $doneReservationsQuery->orderBy($sortField, $sortOrder);
-    
+
         // Get the filtered and sorted reservations
         $doneReservations = $doneReservationsQuery->get();
-    
+
         // Pass the reservations to the view
         return view('restaurant.complete_reservation', compact('doneReservations'));
     }
-    
 
+    
     public function approveReservation($id)
     {
         // Find the reservation by ID
@@ -537,7 +543,8 @@ class RestaurantController extends Controller
     
         // Retrieve rejected reservations for the current restaurant
         $query = $request->input('query');
-        $date = $request->input('date');
+        $start_date = $request->input('start_date');
+        $end_date = $request->input('end_date');
         $sort = $request->input('sort', 'asc');
     
         $rejectedReservationsQuery = Reservation::where([
@@ -557,9 +564,9 @@ class RestaurantController extends Controller
             });
         }
     
-        // Apply date filter if date is provided
-        if ($date) {
-            $rejectedReservationsQuery->whereDate('date', $date);
+        // Apply date range filter if start_date and end_date are provided
+        if ($start_date && $end_date) {
+            $rejectedReservationsQuery->whereBetween('date', [$start_date, $end_date]);
         }
     
         // Apply sorting
@@ -570,6 +577,7 @@ class RestaurantController extends Controller
         // Pass the rejected reservation records to the view
         return view('restaurant.rejected_reservation', compact('rejectedReservations'));
     }
+    
     
     public function checkEmail(Request $request)
     {
@@ -687,14 +695,16 @@ class RestaurantController extends Controller
         // Get the authenticated restaurant
         $restaurant = Auth::guard('restaurant')->user();
     
-        // Retrieve rejected reservations for the current restaurant
+        // Retrieve request parameters
         $query = $request->input('query');
-        $date = $request->input('date');
+        $start_date = $request->input('start_date');
+        $end_date = $request->input('end_date');
         $sort = $request->input('sort', 'asc');
     
+        // Build query for approved reservations with completeness as 'Confirmed Absent'
         $ReservationsQuery = Reservation::where([
             ['status', 'Approved'],
-            ['completeness','Confirmed Absent'],
+            ['completeness', 'Confirmed Absent'],
             ['restaurant_id', $restaurant->id]
         ]);
     
@@ -710,19 +720,20 @@ class RestaurantController extends Controller
             });
         }
     
-        // Apply date filter if date is provided
-        if ($date) {
-            $ReservationsQuery->whereDate('date', $date);
+        // Apply date range filter if start_date and end_date are provided
+        if ($start_date && $end_date) {
+            $ReservationsQuery->whereBetween('date', [$start_date, $end_date]);
         }
     
         // Apply sorting
         $ReservationsQuery->orderBy('date', $sort);
     
+        // Get the filtered and sorted reservations
         $Reservations = $ReservationsQuery->get();
     
-        // Pass the rejected reservation records to the view
+        // Pass the filtered reservation records to the view
         return view('restaurant.absent_reservation', compact('Reservations'));
-    }
+    }    
 
     public function CanceledReservations(Request $request)
     {
@@ -747,14 +758,15 @@ class RestaurantController extends Controller
             });
         }
     
-        // Apply date filter if date is provided
-        $date = $request->input('date');
-        if ($date) {
-            $canceledReservationsQuery->whereDate('date', $date);
+        // Apply date range filter if start_date and end_date are provided
+        $start_date = $request->input('start_date');
+        $end_date = $request->input('end_date');
+        if ($start_date && $end_date) {
+            $canceledReservationsQuery->whereBetween('date', [$start_date, $end_date]);
         }
     
         // Apply sorting
-        $sort = $request->input('sort_order', 'asc');
+        $sort = $request->input('sort', 'asc');
         $canceledReservationsQuery->orderBy('date', $sort);
     
         // Paginate the results
@@ -764,5 +776,6 @@ class RestaurantController extends Controller
         // Return the view with the paginated canceled reservations
         return view('restaurant.restaurant_cancel_reservation', compact('canceledReservations'));
     }
+    
     
 }

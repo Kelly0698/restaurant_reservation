@@ -7,10 +7,11 @@
         <br>
         <div class="row">   
             <div class="col-12">
-                <button type="button" class="col-2 btn btn-default btn-lg yellow" data-toggle="modal" data-target="#addModal">
+                <!-- <button type="button" class="col-2 btn btn-default btn-lg yellow" data-toggle="modal" data-target="#addModal">
                     Add Role
-                </button>
-                <br><br>
+                </button> -->
+                <h2 style="background-color: #bc601528; padding:10px; padding-left: 20px;">Role List</h2><br>
+                <br>
 
                 <div class="card">
                     <div class="card-header">
@@ -35,7 +36,7 @@
                                     <th>Role</th>
                                     <th>Level</th>
                                     <th>Status</th>
-                                    <th>Action</th>
+                                    <!-- <th>Action</th> -->
                                 </tr>
                             </thead>
                             <tbody id="roleTableBody">
@@ -46,14 +47,14 @@
                                     <td>{{$item->level}}</td>
                                     <td>{{$item->status}}</td>
                     
-                                    <td>
+                                    <!-- <td>
                                         <a class="btn yellow show_role" href="#" data-role-id="{{ $item->id }}">
                                             <span class="fas fa-eye"></span>
                                         </a>
                                         <button style="font-size:16.5px;" type="button" data-id="{{$item->id}}" class="btn blue delete-btn">
                                             <i class="fas fa-trash-alt"></i>
                                         </button>
-                                    </td>
+                                    </td> -->
                                 </tr>
                             @endforeach
                             </tbody>
@@ -66,7 +67,7 @@
 </div>
 
 <!-- Add Role Modal -->
-<div class="modal fade" id="addModal" tabindex="-1" role="dialog" aria-labelledby="addModalTitle" aria-hidden="true">
+<!-- <div class="modal fade" id="addModal" tabindex="-1" role="dialog" aria-labelledby="addModalTitle" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
@@ -107,7 +108,7 @@
             </div>
         </div> 
     </div>
-</div>     
+</div>      -->
 <!-- End Add Role Modal -->
 
 
@@ -150,12 +151,12 @@
                     </select>
                 </div>
 
-                <div class="d-flex justify-content-end mt-4">
+                <!-- <div class="d-flex justify-content-end mt-4">
                     <a href="/role" type="button" name="button" class="btn blue m-0">Back</a>
                     &nbsp
                     <button type="button" name="button" class="btn yellow m-0 ms-2" id="edit-btn">Edit</button>
                     <button type="submit" name="button" class="btn yellow m-0 ms-2" id="save-btn" style="display: none;">Save</button>
-                </div>
+                </div> -->
             </form>
             </div>
         </div> 

@@ -21,6 +21,12 @@
             background-color: #ff9800d7;
             border-radius: 20px !important;
         }
+        .card-custom {
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
     </style>
     <!-- Include SweetAlert CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
@@ -30,22 +36,37 @@
     <h2 style="background-color: #bc601528; padding:10px; padding-left: 20px;">Approved Reservation Record</h2><br>
         <div class="row">
             <div class="col-12">
-                <div class="search-bar">
-                    <form action="{{ route('approve_page') }}" method="GET">
+                <form action="{{ route('approve_page') }}" method="GET">
+                    <div class="card p-3" style="background-color: #fff6ea;">
                         <div class="input-group mb-3">
-                            <input type="text" class="form-control rounded-pill" placeholder="Search Record (User Name, Time, Party Size, Remark)" name="query" style="width: 50%;" value="{{ request('query') }}">
-                            <input type="date" class="form-control rounded-pill" name="date" style="width: 20%;" value="{{ request('date') }}">
-                            <select class="form-control rounded-pill" name="sort" style="width: 10%;">
-                                <option value="asc" {{ request('sort') == 'asc' ? 'selected' : '' }}>Asc</option>
-                                <option value="desc" {{ request('sort') == 'desc' ? 'selected' : '' }}>Desc</option>
-                            </select>
-                            <div class="input-group-append">
-                                <button class="btn btn-outline-secondary yellow rounded-pill" type="submit" style="width: 100%;">Search</button>
-                                <a href="{{ route('approve_page') }}" class="btn btn-outline-secondary yellow rounded-pill" style="width: 50%;"><i class="fas fa-undo"></i></a>
+                            <div class="row w-100">
+                                <div class="col-md-4">
+                                    <label for="query">Search Record</label>
+                                    <input type="text" class="form-control rounded-pill" id="query" placeholder="Search Record (User Name, Time, Party Size, Remark)" name="query" value="{{ request('query') }}">
+                                </div>
+                                <div class="col-md-2">
+                                    <label for="start_date">Start Date</label>
+                                    <input type="date" class="form-control rounded-pill" id="start_date" name="start_date" value="{{ request('start_date') }}">
+                                </div>
+                                <div class="col-md-2">
+                                    <label for="end_date">End Date</label>
+                                    <input type="date" class="form-control rounded-pill" id="end_date" name="end_date" value="{{ request('end_date') }}">
+                                </div>
+                                <div class="col-md-2">
+                                    <label for="sort">Sort Order</label>
+                                    <select class="form-control rounded-pill" id="sort" name="sort">
+                                        <option value="asc" {{ request('sort') == 'asc' ? 'selected' : '' }}>Earliest</option>
+                                        <option value="desc" {{ request('sort') == 'desc' ? 'selected' : '' }}>Latest</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-2 justify-content-between">
+                                    <button class="btn btn-outline-secondary yellow" type="submit" style="border-radius:20px; width: 120px; margin-top: 30px;">Search</button>
+                                    <a href="{{ route('approve_page') }}" class="btn btn-outline-secondary yellow" style="border-radius:20px; width: 40px; margin-top: 30px;"><i class="fas fa-undo"></i></a>
+                                </div>
                             </div>
                         </div>
-                    </form>
-                </div>
+                    </div><br>
+                </form>
             </div>
         </div>
         <div class="row">
@@ -77,9 +98,11 @@
                                         <button class="btn btn-complete">Approved</button>
                                     @endif
                                 </div> 
-                                <h2 class="lead"><b>Reservation for: {{$reservation->restaurant->name}}</b></h2><br>
+                                <!-- <h2 class="lead"><b>Reservation for: {{$reservation->restaurant->name}}</b></h2><br> -->
+                                <strong>
                                 <p>User Name: &nbsp{{ $reservation->user->name }}</p>
                                 <p>Phone Number: &nbsp{{$reservation->user->phone_num}}</p>
+                                </strong>
                                 <p>Reservation Date: &nbsp{{ $reservation->date }}</p>
                                 <p>Time: &nbsp{{ $reservation->time }}</p>
                                 <p>Party Size: &nbsp{{ $reservation->party_size }}</p>
@@ -194,4 +217,5 @@ function markAsEating(reservationId) {
 }
 
 </script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 @endsection

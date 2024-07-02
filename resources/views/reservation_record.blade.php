@@ -33,11 +33,11 @@
                             <div class="form-row">
                                 <div class="form-group col-md-4">
                                     <label for="start_date">Start Date</label>
-                                    <input type="date" class="form-control" id="start_date" name="start_date" value="{{ request('start_date') }}">
+                                    <input type="date" class="form-control" id="start_date" name="start_date" value="{{ request('start_date') }}" required>
                                 </div>
                                 <div class="form-group col-md-4">
                                     <label for="end_date">End Date</label>
-                                    <input type="date" class="form-control" id="end_date" name="end_date" value="{{ request('end_date') }}">
+                                    <input type="date" class="form-control" id="end_date" name="end_date" value="{{ request('end_date') }}" required>
                                 </div>
                                 <div class="form-group col-md-4 align-self-end d-flex justify-content-between">
                                     <button type="submit" class="btn blue btn-block" style="border-radius:20px; width: 150px;">Choose Date</button>
@@ -75,9 +75,7 @@
                     <div class="col-12 mb-3 reservation-card" data-status="{{ strtolower($reservation->status) }}" data-completeness="{{ strtolower($reservation->completeness) }}">
                         <div class="card bg-light">
                             <div class="card-body">
-                                <h2 class="lead"><b>Reservation for: {{$reservation->restaurant->name}}</b></h2>
-                                <p>User Name: &nbsp{{ $reservation->user->name }}</p>
-                                <p>Phone Number: &nbsp{{$reservation->user->phone_num}}</p>
+                                <h2 class="lead"><b>Reservation for: {{$reservation->restaurant->name}}</b></h2><br>
                                 <p>Reservation Date: &nbsp{{ $reservation->date }}</p>
                                 <p>Time: &nbsp{{ $reservation->time }}</p>
                                 <p>Party Size: &nbsp{{ $reservation->party_size }}</p>
@@ -137,41 +135,50 @@
                         </div>
                     </div>
                     @elseif(Auth::guard('restaurant')->check())
-                    <div class="col-12 mb-3">
-                        <div class="card bg-light">
-                            <div class="card-body">
-                                <h2 class="lead"><b>Reservation for: {{$reservation->restaurant->name}}</b></h2>
-                                <p>User Name: &nbsp{{ $reservation->user->name }}</p>
-                                <p>Phone Number: &nbsp{{$reservation->user->phone_num}}</p>
-                                <p>Reservation Date: &nbsp{{ $reservation->date }}</p>
-                                <p>Time: &nbsp{{ $reservation->time }}</p>
-                                <p>Party Size: &nbsp{{ $reservation->party_size }}</p>
-                                <p>Table: &nbsp{{ $reservation->table_num ?? 'None' }}</p>
-                                <p>Remark: &nbsp{{ $reservation->remark ?? 'None' }}</p>
-                                <p>Status:
-                                    @if($reservation->status === 'Approved')
-                                        <button class="btn btn-sm" style="background-color:#36d2a3d7; border-radius: 20px !important;">Approved</button>
-                                    @elseif($reservation->status === 'Rejected')
-                                        <button class="btn btn-sm" style="background-color:#ff8274de; border-radius: 20px !important;">Rejected</button>
-                                    @else
-                                        <span style="color: red;">Pending...</span>
-                                    @endif
-                                </p>
-                            </div>
-                            <div class="card-footer">
-                                <div class="text-right">
-                                    @if(Auth::guard('restaurant')->check())
-                                        <a href="#" class="btn btn-md yellow" onclick="approveReservation('{{ $reservation->id }}', '{{ $reservation->user->name }}', '{{ $reservation->user->phone_num }}', '{{ $reservation->user->message_type }}', '{{ $reservation->restaurant->name }}', '{{ $reservation->time }}', '{{ $reservation->date }}')">
-                                            Approve
-                                        </a>
-                                        <a href="#" class="btn btn-md blue" onclick="rejectReservation('{{ $reservation->id }}', '{{ $reservation->user->name }}', '{{ $reservation->user->phone_num }}', '{{ $reservation->user->message_type }}', '{{ $reservation->restaurant->name }}', '{{ $reservation->time }}', '{{ $reservation->date }}')">
-                                            Reject
-                                        </a>
-                                    @endif
+                        <div class="col-12 mb-3">
+                            <div class="card bg-light">
+                                <div class="card-body" style="font-size:17px;">
+                                    @php
+                                        $currentDate = \Carbon\Carbon::now();
+                                        $reservationDate = \Carbon\Carbon::parse($reservation->date);
+                                        if ($reservation->status === 'Pending' && $reservationDate->isPast()) {
+                                            $reservation->status = 'Rejected';
+                                            $reservation->save();
+                                        }
+                                    @endphp
+                                    <strong>
+                                        <p>User Name: &nbsp{{ $reservation->user->name }}</p>
+                                        <p>Phone Number: &nbsp{{$reservation->user->phone_num}}</p>
+                                    </strong>
+                                    <p>Reservation Date: &nbsp{{ $reservation->date }}</p>
+                                    <p>Time: &nbsp{{ $reservation->time }}</p>
+                                    <p>Party Size: &nbsp{{ $reservation->party_size }}</p>
+                                    <p>Table: &nbsp{{ $reservation->table_num ?? 'None' }}</p>
+                                    <p>Remark: &nbsp{{ $reservation->remark ?? 'None' }}</p>
+                                    <p>Status:
+                                        @if($reservation->status === 'Approved')
+                                            <button class="btn btn-sm" style="background-color:#36d2a3d7; border-radius: 20px !important;">Approved</button>
+                                        @elseif($reservation->status === 'Rejected')
+                                            <button class="btn btn-sm" style="background-color:#ff8274de; border-radius: 20px !important;">Rejected</button>
+                                        @else
+                                            <span style="color: red;">Pending...</span>
+                                        @endif
+                                    </p>
+                                </div>
+                                <div class="card-footer">
+                                    <div class="text-right">
+                                        @if(Auth::guard('restaurant')->check() && $reservation->status === 'Pending')
+                                            <a href="#" class="btn btn-md yellow" onclick="approveReservation('{{ $reservation->id }}', '{{ $reservation->user->name }}', '{{ $reservation->user->phone_num }}', '{{ $reservation->user->message_type }}', '{{ $reservation->restaurant->name }}', '{{ $reservation->time }}', '{{ $reservation->date }}')">
+                                                Approve
+                                            </a>
+                                            <a href="#" class="btn btn-md blue" onclick="rejectReservation('{{ $reservation->id }}', '{{ $reservation->user->name }}', '{{ $reservation->user->phone_num }}', '{{ $reservation->user->message_type }}', '{{ $reservation->restaurant->name }}', '{{ $reservation->time }}', '{{ $reservation->date }}')">
+                                                Reject
+                                            </a>
+                                        @endif
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
                     @endif
                     @endforeach
                     @endif

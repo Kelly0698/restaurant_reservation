@@ -92,9 +92,12 @@
                         </div>
                         <div class="form-group">
                             <label for="operation_time" style="font-size: 1em;">Operation Time</label>
-                            <p id="operation_time-text" style="display:block">&nbsp{{ Auth::guard('restaurant')->user()->operation_time }}</p>
-                            <input style="display:none" type="text" class="form-control" name="operation_time" id="operation_time-input" value="{{ Auth::guard('restaurant')->user()->operation_time }}" >
+                            <p id="operation_time-text" style="display: block; margin-bottom: 0;">
+                                {!! Auth::guard('restaurant')->user()->operation_time !!}
+                            </p>
+                            <textarea class="form-control" style="display: none;" name="operation_time" id="operation_time-input">{{ Auth::guard('restaurant')->user()->operation_time }}</textarea>      
                         </div>
+
                         <div class="form-group">
                             <label for="availability" style="font-size: 1em;">Availability</label>
                             <p id="availability-text" style="display: block;">&nbsp;{{ Auth::guard('restaurant')->user()->availability }}</p>
@@ -341,33 +344,36 @@
 $(function(){
     // Attach click event to edit button
     $('#edit-btn').on('click', function() {
-        // Show input fields and hide text fields
-        document.getElementById('name-text').style.display = "none";
-        document.getElementById('email-text').style.display = "none";
-        document.getElementById('phone-num-text').style.display = "none";
-        document.getElementById('address-text').style.display = "none";
-        document.getElementById('license_pdf-text').style.display = "none";
-        document.getElementById('operation_time-text').style.display = "none";
-        document.getElementById('availability-text').style.display = "none";
-        document.getElementById('description-text').style.display = "none";
+    // Show input fields and hide text fields
+    document.getElementById('name-text').style.display = "none";
+    document.getElementById('email-text').style.display = "none";
+    document.getElementById('phone-num-text').style.display = "none";
+    document.getElementById('address-text').style.display = "none";
+    document.getElementById('license_pdf-text').style.display = "none";
+    document.getElementById('operation_time-text').style.display = "none";
+    document.getElementById('availability-text').style.display = "none";
+    document.getElementById('description-text').style.display = "none";
 
-        document.getElementById('name-input').style.display = "block";
-        document.getElementById('email-input').style.display = "block";
-        document.getElementById('phone-num-input').style.display = "block";
-        document.getElementById('address-input').style.display = "block";
-        document.getElementById('license_pdf-input').style.display = "block";
-        document.getElementById('logo_pic-input').style.display = "block";
-        document.getElementById('operation_time-input').style.display = "block";
-        document.getElementById('availability-input').style.display = "block";
-        document.getElementById('description-input').style.display = "block";
+    document.getElementById('name-input').style.display = "block";
+    document.getElementById('email-input').style.display = "block";
+    document.getElementById('phone-num-input').style.display = "block";
+    document.getElementById('address-input').style.display = "block";
+    document.getElementById('license_pdf-input').style.display = "block";
+    document.getElementById('logo_pic-input').style.display = "block";
+    document.getElementById('operation_time-input').style.display = "block";
+    document.getElementById('availability-input').style.display = "block";
+    document.getElementById('description-input').style.display = "block";
 
-        // Hide edit button and show save button
-        document.getElementById('edit-btn').style.display = "none";
-        document.getElementById('save-btn').style.display = "block";
-
-        toggleEditViewMode();
-        enableInputFields();
+    // Initialize Summernote for operation time input
+    $('#operation_time-input').summernote({
+        height: 150 // Set the height of the editor
     });
+
+    // Hide edit button and show save button
+    document.getElementById('edit-btn').style.display = "none";
+    document.getElementById('save-btn').style.display = "block";
+});
+
 
     // Attach submit event to form
     $('#edit-restaurant-form').on('submit', function(event) {

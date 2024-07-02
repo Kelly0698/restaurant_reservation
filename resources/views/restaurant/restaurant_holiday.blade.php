@@ -33,6 +33,12 @@ $(document).ready(function() {
         selectable: true,
         events: SITEURL + "/holidays?restaurant_id=" + restaurantId,
         select: function(start, end) {
+            // Check if selected start date is before today
+            if (start.isBefore(moment(), 'day')) {
+                alert("Cannot add holidays for past dates.");
+                return;
+            }
+            
             var holidayName = prompt("Enter holiday name:");
             if (holidayName) {
                 // Send data to server using AJAX
@@ -62,11 +68,13 @@ $(document).ready(function() {
         eventColor: '#355876',
         displayEventTime: false,
         eventRender: function(event, element, view) {
-            if (event.allDay === 'true') {
-                event.allDay = true;
-            } else {
-                event.allDay = false;
+            // Disable click actions and drag/resize for past events
+            if (moment(event.start).isBefore(moment(), 'day')) {
+                element.addClass('past-event');
+                element.find('.fc-content').css('pointer-events', 'none');
             }
+
+            // Tooltip and click event handling
             element.mouseover(function(e) {
                 var content = '<div class="tooltip">' + event.title + '</div>';
                 $(this).append(content);
@@ -80,15 +88,24 @@ $(document).ready(function() {
                 tooltip.css('background-color', '#FFF8DC');
             }).mouseout(function() {
                 $(this).find('.tooltip').remove();
-            });
-            element.click(function() {
-                alert('Event details: ' + event.title);
+            }).click(function() {
+                if (!element.hasClass('past-event')) {
+                    alert('Event details: ' + event.title);
+                }
             });
         },
         eventDrop: function(event, delta, revertFunc) {
             if (isEditable) {
-                var start = $.fullCalendar.formatDate(event.start, "Y-MM-DD");
-                var end = $.fullCalendar.formatDate(event.end, "Y-MM-DD");
+                var start = event.start.format('Y-MM-DD');
+                var end = (event.end == null) ? start : event.end.format('Y-MM-DD');
+                
+                // Check if the start date is before today
+                if (moment(start).isBefore(moment(), 'day')) {
+                    alert("Cannot move holidays to a date before today.");
+                    revertFunc();
+                    return;
+                }
+                
                 $.ajax({
                     url: SITEURL + '/update/holidays/' + event.id,
                     data: {
@@ -109,12 +126,21 @@ $(document).ready(function() {
                 });
             } else {
                 alert("You do not have permission to update holidays.");
+                revertFunc();
             }
         },
         eventResize: function(event, delta, revertFunc) {
             if (isEditable) {
-                var start = $.fullCalendar.formatDate(event.start, "Y-MM-DD");
-                var end = $.fullCalendar.formatDate(event.end, "Y-MM-DD");
+                var start = event.start.format('Y-MM-DD');
+                var end = event.end.format('Y-MM-DD');
+                
+                // Check if the start date is before today
+                if (moment(start).isBefore(moment(), 'day')) {
+                    alert("Cannot resize holidays to a date before today.");
+                    revertFunc();
+                    return;
+                }
+                
                 $.ajax({
                     url: SITEURL + '/update/holidays/' + event.id,
                     data: {
@@ -135,6 +161,7 @@ $(document).ready(function() {
                 });
             } else {
                 alert("You do not have permission to update holidays.");
+                revertFunc();
             }
         },
         eventClick: function(event) {
@@ -160,7 +187,6 @@ $(document).ready(function() {
                             error: function(xhr, status, error) {
                                 console.error("XHR Status:", status);
                                 console.error("XHR Error:", error);
-                                revertFunc();
                                 displayMessage("Error Deleting Holiday", 'error');
                             }
                         });
@@ -179,4 +205,9 @@ $(document).ready(function() {
     }
 });
 </script>
+<style>
+    .past-event {
+        opacity: 0.7; /* Example: Reduce opacity for past events */
+    }
+</style>
 @endsection

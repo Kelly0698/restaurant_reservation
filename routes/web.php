@@ -24,8 +24,9 @@ use App\Http\Controllers\LikeController;
 // });
 
 Route::get('/', function () {
-    return view('welcome');
+    return redirect('/login');
 });
+
 
 Route::get('/dashboard', [UserController::class, 'adminDashboard'])->name('dashboard');
 Route::get('/home',[UserController::class, 'userDashboard'])->name('home')->middleware('auth');
@@ -80,7 +81,7 @@ Route::get('/restaurant',[RestaurantController::class, 'index'])->name('restaura
 Route::get('/search-restaurant-list', [RestaurantController::class, 'restaurant_search'])->name('restaurants.search')->middleware('auth');
 Route::post('/add/restaurant',[RestaurantController::class, 'adminCreate'])->name('add_restaurant')->middleware('auth');
 Route::get('/show/restaurant/{id}',[RestaurantController::class, 'show'])->name('show_restaurant')->middleware('auth');
-Route::post('/edit/restaurant/{restaurant}',[RestaurantController::class, 'edit'])->name('edit_restaurant')->middleware('auth');
+Route::post('/edit/restaurant/{restaurant}',[RestaurantController::class, 'edit'])->name('edit_restaurant')->middleware('auth:restaurant');
 Route::delete('/delete/restaurant/{restaurant}',[RestaurantController::class, 'destroy'])->name('destroy_restaurant')->middleware('auth');
 Route::get('/request',[RestaurantController::class, 'index_req'])->name('restaurant_req_list')->middleware('auth');
 Route::post('/update-status/{id}',[RestaurantController::class, 'updateStatus'])->name('update_status')->middleware('auth');

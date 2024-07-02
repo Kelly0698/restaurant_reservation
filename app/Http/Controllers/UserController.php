@@ -583,7 +583,6 @@ class UserController extends Controller
         ]);
     }
     
-    
     public function reservationRecord(Request $request)
     {
         // Check authentication and role
@@ -636,8 +635,6 @@ class UserController extends Controller
         return view('reservation_record', compact('reservations'));
     }
     
-    
-
     public function cancelReservation($id)
     {
         // Retrieve the reservation by its ID
@@ -661,11 +658,11 @@ class UserController extends Controller
     {
         // Retrieve the authenticated user's ID
         $userId = auth()->user()->id;
-    
+
         // Query canceled reservations for the authenticated user
         $canceledReservationsQuery = Reservation::where('user_id', $userId)
-                                                 ->where('status', 'Cancel');
-    
+                                                ->where('status', 'Cancel');
+
         // Apply search filter if query is provided
         $query = $request->input('query');
         if ($query) {
@@ -678,26 +675,26 @@ class UserController extends Controller
                 ->orWhere('remark', 'LIKE', "%{$query}%");
             });
         }
-    
+
         // Apply date range filter if dates are provided
         $startDate = $request->input('start_date');
         $endDate = $request->input('end_date');
         if ($startDate && $endDate) {
             $canceledReservationsQuery->whereBetween('date', [$startDate, $endDate]);
         }
-    
+
         // Apply sorting
-        $sort = $request->input('sort_order', 'asc');
+        $sort = $request->input('sort', 'asc');
         $canceledReservationsQuery->orderBy('date', $sort);
-    
+
         // Paginate the results
         $perPage = 5; // Number of records per page
         $canceledReservations = $canceledReservationsQuery->paginate($perPage);
-    
+
         // Return the view with the paginated canceled reservations
         return view('user.cancel_reservation', compact('canceledReservations'));
     }
-       
+
     public function pendingReservation(Request $request)
     {
         // Retrieve the authenticated user's ID
@@ -705,7 +702,7 @@ class UserController extends Controller
     
         // Query pending reservations for the authenticated user
         $pendingReservationsQuery = Reservation::where('user_id', $userId)
-            ->where('status', 'Pending'); // Adjust status check to 'Pending'
+                                               ->where('status', 'Pending');
     
         // Apply search filter if query is provided
         $query = $request->input('query');
@@ -738,6 +735,7 @@ class UserController extends Controller
         // Return the paginated pending reservations to the user_reservation_req view
         return view('user.user_reservation_req', compact('pendingReservations'));
     }
+    
        
     public function showUserResetForm()
     {

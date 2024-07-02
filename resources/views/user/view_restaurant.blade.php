@@ -135,7 +135,7 @@
                         <p class="text-muted">{{ $restaurant->phone_num }}</p>
                         <hr>
                         <strong><i class="fas fa-clock mr-1"></i>Operation Time</strong>
-                        <p class="text-muted">{{ $restaurant->operation_time }}</p>
+                        <p class="text-muted">{!! $restaurant->operation_time !!}</p>
                         <hr>
                         @if($restaurant->description)
                             <strong><i class="fas fa-info-circle mr-1"></i>Description</strong>
