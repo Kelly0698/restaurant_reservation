@@ -268,7 +268,7 @@ document.addEventListener('DOMContentLoaded', function () {
 function approveReservation(reservationId, userName, userPhone, messageType, restaurantName, reservationTime, reservationDate) {
     Swal.fire({
         title: 'Are you sure?',
-        text: 'Do you want to approve the reservation for user ' + userName + '?',
+        text: `Do you want to approve the reservation for user ${userName}?`,
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#3085d6',
@@ -287,14 +287,23 @@ function approveReservation(reservationId, userName, userPhone, messageType, res
                     status: 'Approved'
                 },
                 success: function(response) {
+                    // Convert reservationTime to 12-hour format
+                    let timeParts = reservationTime.split(':');
+                    let hours = parseInt(timeParts[0], 10);
+                    let minutes = timeParts[1];
+                    let period = hours >= 12 ? 'PM' : 'AM';
+                    hours = hours % 12;
+                    hours = hours ? hours : 12; // Handle midnight (0 hours) as 12 AM
+                    let formattedTime = `${hours}:${minutes} ${period}`;
+
                     Swal.fire({
                         title: 'Approved!',
-                        text: 'The reservation for user ' + userName + ' has been approved.',
+                        text: `The reservation for user ${userName} at ${restaurantName} has been approved. Details: ${formattedTime}, ${reservationDate}.`,
                         icon: 'success',
                         confirmButtonText: 'OK'
-                    }).then((result) => {
+                    }).then(() => {
                         if (messageType === '["WhatsApp","Email"]' || messageType === '["WhatsApp"]') {
-                            let message = `Hi, ${userName}, your reservation at ${restaurantName} has been approved. Details: ${reservationTime}, ${reservationDate}.`;
+                            let message = `Hi, ${userName}, your reservation at ${restaurantName} has been approved. Details: ${formattedTime}, ${reservationDate}.`;
                             window.open(`https://web.whatsapp.com/send?phone=${userPhone}&text=${encodeURIComponent(message)}`);
                             window.location.reload();
                         } else {
@@ -316,6 +325,7 @@ function approveReservation(reservationId, userName, userPhone, messageType, res
         }
     });
 }
+
 
 function rejectReservation(reservationId, userName, userPhone, messageType, restaurantName, reservationTime, reservationDate) {
     Swal.fire({

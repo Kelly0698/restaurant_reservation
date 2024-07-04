@@ -121,11 +121,16 @@
                         Current Table Arrangement
                     </div>
                     <div class="card-body">
-                        <img id="current-arrangement" class="img-fluid" src="{{ asset('storage/' . Auth::guard('restaurant')->user()->table_arrange_pic) }}" alt="Current Table Arrangement">
+                        @if(Auth::guard('restaurant')->user()->table_arrange_pic)
+                            <img id="current-arrangement" class="img-fluid" src="{{ asset('storage/' . Auth::guard('restaurant')->user()->table_arrange_pic) }}" alt="Current Table Arrangement">
+                        @else
+                            None
+                        @endif
                     </div>
                 </div>
             </div>
             <!-- End of Current Table Arrangement Card -->
+
         </div>
     </div>
 </div>

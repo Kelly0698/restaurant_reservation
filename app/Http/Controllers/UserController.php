@@ -405,7 +405,7 @@ class UserController extends Controller
         $user->phone_num = $req->input('phone_num');
     
         if ($loggedInUserRole == 1) {
-            $user->role_id = $req->input('role_id');
+            $user->role_id = 1;
         } elseif ($loggedInUserRole == 2) {
             $user->role_id = 2;
         }

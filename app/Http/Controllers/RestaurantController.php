@@ -21,6 +21,8 @@ use App\Mail\RestaurantRegistrationRejected;
 use App\Mail\ReservationApprovalNotification;
 use App\Mail\ForgotPassword;
 use Carbon\Carbon;
+use Barryvdh\DomPDF\Facade\Pdf;
+
 
 class RestaurantController extends Controller
 {
@@ -495,7 +497,62 @@ class RestaurantController extends Controller
         return view('restaurant.complete_reservation', compact('doneReservations'));
     }
 
-    
+    public function exportDoneReservationsPdf(Request $request)
+    {
+        // Get the authenticated restaurant
+        $restaurant = Auth::guard('restaurant')->user();
+        $restaurantId = $restaurant->id;
+
+        // Define the base query to fetch completed reservations
+        $doneReservationsQuery = Reservation::where('status', 'Approved')
+                                            ->where('completeness', 'Done')
+                                            ->where('restaurant_id', $restaurantId);
+
+        // Retrieve request parameters for sorting
+        $sortField = $request->input('sort_by', 'date');
+        $sortOrder = $request->input('sort_order', 'asc');
+
+        // Retrieve the search query parameter
+        $searchQuery = $request->input('query');
+
+        // Retrieve the date range query parameters
+        $start_date = $request->input('start_date');
+        $end_date = $request->input('end_date');
+
+        // Apply search filter if a query is provided
+        if ($searchQuery) {
+            $doneReservationsQuery->where(function ($query) use ($searchQuery) {
+                $query->whereHas('user', function ($userQuery) use ($searchQuery) {
+                    $userQuery->where('name', 'LIKE', '%' . $searchQuery . '%');
+                })
+                ->orWhereHas('restaurant', function ($restaurantQuery) use ($searchQuery) {
+                    $restaurantQuery->where('name', 'LIKE', '%' . $searchQuery . '%');
+                })
+                ->orWhere('time', 'LIKE', '%' . $searchQuery . '%')
+                ->orWhere('party_size', 'LIKE', '%' . $searchQuery . '%')
+                ->orWhere('remark', 'LIKE', '%' . $searchQuery . '%');
+            });
+        }
+
+        // Apply date range filter if start_date and end_date are provided
+        if ($start_date && $end_date) {
+            $doneReservationsQuery->whereBetween('date', [$start_date, $end_date]);
+        }
+
+        // Apply sorting
+        $doneReservationsQuery->orderBy($sortField, $sortOrder);
+
+        // Get the filtered and sorted reservations
+        $doneReservations = $doneReservationsQuery->get();
+
+        // Generate PDF
+        $pdf = PDF::loadView('restaurant.complete_reservation_pdf', compact('doneReservations'));
+
+        // Return the generated PDF
+        return $pdf->download('completed_reservations.pdf');
+    }
+
+
     public function approveReservation($id)
     {
         // Find the reservation by ID

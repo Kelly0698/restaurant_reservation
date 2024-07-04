@@ -9,31 +9,32 @@
                 <div class="search-bar">
                 <form action="{{ route('done_reservations') }}" method="GET">
                         <div class="card p-3" style="background-color: #fff6ea;">
-                        <div class="input-group mb-3">
-                            <div class="col-md-4">
-                                <label for="query">Search Record</label>
-                                <input type="text" class="form-control rounded-pill" id="query" placeholder="Search Record (User Name, Time, Party Size, Remark)" name="query" value="{{ request('query') }}">
+                            <div class="input-group mb-3">
+                                <div class="col-md-3">
+                                    <label for="query">Search Record</label>
+                                    <input type="text" class="form-control rounded-pill" id="query" placeholder="User Name, Time, Party Size, Remark" name="query" value="{{ request('query') }}">
+                                </div>
+                                <div class="col-md-2">
+                                    <label for="start_date">Start Date</label>
+                                    <input type="date" class="form-control rounded-pill" id="start_date" name="start_date" value="{{ request('start_date') }}">
+                                </div>
+                                <div class="col-md-2">
+                                    <label for="end_date">End Date</label>
+                                    <input type="date" class="form-control rounded-pill" id="end_date" name="end_date" value="{{ request('end_date') }}">
+                                </div>
+                                <div class="col-md-2">
+                                    <label for="sort">Sort Order</label>
+                                    <select class="form-control rounded-pill" id="sort" name="sort">
+                                        <option value="asc" {{ request('sort') == 'asc' ? 'selected' : '' }}>Earliest</option>
+                                        <option value="desc" {{ request('sort') == 'desc' ? 'selected' : '' }}>Latest</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3 justify-content-between">
+                                    <button class="btn btn-outline-secondary yellow" type="submit" style="border-radius:20px; width: 120px; margin-top: 30px;">Search</button>
+                                    <a href="{{ route('done_reservations') }}" class="btn btn-outline-secondary yellow" style="border-radius:20px; width: 40px; margin-top: 30px;"><i class="fas fa-undo"></i></a>
+                                    <a href="{{ route('export_done_reservations_pdf', request()->all()) }}" class="btn btn-outline-secondary blue" style="border-radius:20px; width: 120px; margin-top: 30px;">Export PDF</a>
+                                </div><br>
                             </div>
-                            <div class="col-md-2">
-                                <label for="start_date">Start Date</label>
-                                <input type="date" class="form-control rounded-pill" id="start_date" name="start_date" value="{{ request('start_date') }}">
-                            </div>
-                            <div class="col-md-2">
-                                <label for="end_date">End Date</label>
-                                <input type="date" class="form-control rounded-pill" id="end_date" name="end_date" value="{{ request('end_date') }}">
-                            </div>
-                            <div class="col-md-2">
-                                <label for="sort">Sort Order</label>
-                                <select class="form-control rounded-pill" id="sort" name="sort">
-                                    <option value="asc" {{ request('sort') == 'asc' ? 'selected' : '' }}>Earliest</option>
-                                    <option value="desc" {{ request('sort') == 'desc' ? 'selected' : '' }}>Latest</option>
-                                </select>
-                            </div>
-                            <div class="col-md-2 justify-content-between">
-                                <button class="btn btn-outline-secondary yellow" type="submit" style="border-radius:20px; width: 120px; margin-top: 30px;">Search</button>
-                                <a href="{{ route('done_reservations') }}" class="btn btn-outline-secondary yellow" style="border-radius:20px; width: 40px; margin-top: 30px;"><i class="fas fa-undo"></i></a>
-                            </div>
-                        </div>
                         </div><br>
                     </form>
                 </div>

@@ -62,8 +62,8 @@ Route::post('/restaurant-password', [RestaurantController::class, 'ForgetPasswor
 Route::get('/user',[UserController::class, 'index'])->name('user_list')->middleware('auth');
 Route::get('/search-users', [UserController::class, 'user_search'])->name('users.search')->middleware('auth');
 Route::post('/add/user',[UserController::class, 'adminCreate'])->name('add_user')->middleware('auth');
-Route::post('/register/user',[UserController::class, 'create'])->name('register_user')->middleware('auth');
-Route::post('/check/user', [UserController::class, 'validateUserForm'])->name('check_user')->middleware('auth');
+Route::post('/register/user',[UserController::class, 'create'])->name('register_user');
+Route::post('/check/user', [UserController::class, 'validateUserForm'])->name('check_user');
 Route::delete('/delete/user/{user}',[UserController::class, 'destroy'])->name('destroy_user')->middleware('auth');
 Route::get('/show/user/{id}',[UserController::class, 'show'])->name('show_user')->middleware('auth');
 Route::get('get/user/{id}', [UserController::class,'getUser'])->name('get_user')->middleware('auth');
@@ -81,7 +81,7 @@ Route::get('/restaurant',[RestaurantController::class, 'index'])->name('restaura
 Route::get('/search-restaurant-list', [RestaurantController::class, 'restaurant_search'])->name('restaurants.search')->middleware('auth');
 Route::post('/add/restaurant',[RestaurantController::class, 'adminCreate'])->name('add_restaurant')->middleware('auth');
 Route::get('/show/restaurant/{id}',[RestaurantController::class, 'show'])->name('show_restaurant')->middleware('auth');
-Route::post('/edit/restaurant/{restaurant}',[RestaurantController::class, 'edit'])->name('edit_restaurant')->middleware('auth:restaurant');
+Route::post('/edit/restaurant/{restaurant}',[RestaurantController::class, 'edit'])->name('edit_restaurant');
 Route::delete('/delete/restaurant/{restaurant}',[RestaurantController::class, 'destroy'])->name('destroy_restaurant')->middleware('auth');
 Route::get('/request',[RestaurantController::class, 'index_req'])->name('restaurant_req_list')->middleware('auth');
 Route::post('/update-status/{id}',[RestaurantController::class, 'updateStatus'])->name('update_status')->middleware('auth');
@@ -103,6 +103,8 @@ Route::post('/approve-reservation/{id}', [RestaurantController::class, 'approveR
 Route::get('/reserve/approve', [RestaurantController::class, 'approveResPage'])->name('approve_page')->middleware('auth:restaurant');
 Route::post('/update-completeness/{id}', [RestaurantController::class, 'updateCompleteness'])->name('update_completeness')->middleware('auth:restaurant');
 Route::get('/done-reservations', [RestaurantController::class, 'showDoneReservations'])->name('done_reservations')->middleware('auth:restaurant');
+Route::get('/done_reservations/export-pdf', [RestaurantController::class, 'exportDoneReservationsPdf'])->name('export_done_reservations_pdf');
+
 Route::post('/reject-reservation/{id}',[RestaurantController::class, 'rejectReservation'])->name('reject_reservation')->middleware('auth:restaurant');
 Route::get('/reserve/reject', [RestaurantController::class, 'rejectResPage'])->name('reject_page')->middleware('auth:restaurant');
 Route::post('/cancel-reservation/{id}', [UserController::class, 'cancelReservation'])->name('cancel_reservation')->middleware('auth');
