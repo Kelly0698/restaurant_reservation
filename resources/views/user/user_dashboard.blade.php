@@ -20,7 +20,7 @@
         .restaurant-card {
             display: inline-block;
             vertical-align: top;
-            width: calc(100% / 3 - 40px); /* Adjust the width to fit 3 cards in the view */
+            width: calc(100% / 1 - 40px); /* Adjust the width to fit 3 cards in the view */
             margin: 0 20px;
             margin-top: 10px;
             border: 1px solid #ccc;
@@ -115,6 +115,14 @@
             font-size: 24px;
             color: #052d64;
         }
+        .no-restaurant-placeholder {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 400px; /* Adjust this height as needed */
+            width: 100%;
+        }
+      
     </style>
 </head>
 <div class="content-wrapper">
@@ -135,6 +143,14 @@
         <br><br>
         <!-- Recommended Restaurants -->
             <h4 style="text-align: center; font-weight: bold; border-radius: 15px;">Recommended Restaurants</h4><hr>
+            @if($restaurants->isEmpty())
+
+                <div class="recommended-restaurants">
+                    <div class="no-restaurant-placeholder">
+                        <img src="{{ asset('assets/dist/img/reservation.png') }}" alt="No restaurants found">
+                    </div>
+                </div>
+            @else
             <div class="recommended-restaurants">
             <div class="restaurants-container" id="restaurants-container">
             @foreach($restaurants->take(15) as $restaurant)
@@ -178,6 +194,7 @@
             @endforeach
             </div>
         </div>
+        @endif
     </div>
 </div>
 @endsection
