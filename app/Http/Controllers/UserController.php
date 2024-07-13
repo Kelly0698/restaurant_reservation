@@ -476,6 +476,14 @@ class UserController extends Controller
             'table_num' => 'nullable|integer',
         ]);
     
+        // Combine date and time to create a Carbon instance
+        $reservationDateTime = Carbon::createFromFormat('Y-m-d H:i', $request->input('date') . ' ' . $request->input('time'));
+    
+        // Check if the reservation datetime is in the past
+        if ($reservationDateTime->isPast()) {
+            return response()->json(['status' => 'error', 'errors' => ['time' => 'The selected time has already passed']], 422);
+        }
+    
         // Check if validation fails
         if ($validator->fails()) {
             return response()->json(['status' => 'error', 'errors' => $validator->errors()], 422);
@@ -493,9 +501,6 @@ class UserController extends Controller
             if ($tableNum < 1 || $tableNum > $restaurant->table_num) {
                 return response()->json(['status' => 'error', 'errors' => ['table_num' => 'Invalid table number']], 422);
             }
-    
-            // Parse the reservation date and time
-            $reservationDateTime = Carbon::createFromFormat('Y-m-d H:i', $request->input('date') . ' ' . $request->input('time'));
     
             // Calculate the start and end time for the unavailable period
             $unavailableStart = $reservationDateTime->copy()->subHour();
@@ -545,6 +550,8 @@ class UserController extends Controller
     
         return response()->json(['status' => 'success', 'message' => 'Reservation successfully made'], 200);
     }
+    
+    
     
     public function getAvailableTables(Request $request)
     {
